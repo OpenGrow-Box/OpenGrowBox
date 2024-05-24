@@ -44,7 +44,7 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 - **Temperature:** 
     - SHT31
     - DHT 11 / DHT 22
-    - MLX90640 (Infrared temperature sensor for plants)
+    - MLX90640 (Infrared temperature sensor that can pointed to Plantsleafs)
 - **Humidity:** SHT31, DHT 11, DHT 22
 - **CO2:** MH-Z19B
 - **Air Pressure**
