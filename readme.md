@@ -35,6 +35,11 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 ---
 
+## EC FAN Setup
+For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repository](https://github.com/OpenGrowBox/Ruck_EC_API).
+
+---
+
 ## Sensors
 ### Operating System
 - Tasmota: [Getting Started with Tasmota](https://tasmota.github.io/docs/Getting-Started/)
@@ -79,9 +84,6 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
         - FAN Pin 4: Set it to a D3/D0/D2 Pin on ESP
 - **Optional Sensors:** SHT31, DHT11, etc.
 ---
-## EC FAN Setup
-For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repository](https://github.com/OpenGrowBox/Ruck_EC_API).
 
----
 
 Feel free to customize the setup and add additional sensors as per your requirements. You can scale this in big ranges. If you need help, just don't hesitate to contact me. Enjoy automating your grow tents with OpenGrowBox!
