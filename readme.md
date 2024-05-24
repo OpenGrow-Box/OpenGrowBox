@@ -4,16 +4,16 @@
 Transform your growing environment with the OpenGrowBox, an open-source project designed to automate and optimize your grow tents. This setup uses a Raspberry Pi 4 and a variety of sensors to monitor and control your growing conditions.
 
 ### FlowerTent Look
-![FlowerTent](https://github.com/0xW3bJun6l3/OpenGrowBox/assets/108980612/803715a0-da1a-40d6-8ee7-5d7d6b8eac17)
+![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/393d5455-c261-4486-840c-ca828be5f1bb)
 
 ### VegiTent Look
-![VegiTent](https://github.com/0xW3bJun6l3/OpenGrowBox/assets/108980612/c1809b09-86c2-4e4f-af38-7e8a08e12721)
+![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/62b956f6-da6d-4ebf-a5f7-c2c93d48ac8c)
 
 ### DryingTent Look
-![DryingTent](https://github.com/0xW3bJun6l3/OpenGrowBox/assets/108980612/c3b92365-bc0f-4241-8a89-a86ba9cb5662)
+![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/ec607466-ae51-45f9-9b51-d8630cc2b5a7)
 
 ### OverAll Look 
-![Overall](https://github.com/0xW3bJun6l3/OpenGrowBox/assets/108980612/6d331854-f92f-4826-95a3-4e07768e0f24)
+![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/566cee62-e29a-4804-8368-2697865b830b)
 
 ---
 
@@ -68,7 +68,7 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
     - Use the connection part below.
     - Set the inputs on the pins in Tasmota.
     - Add MQTT server and credentials.
-- **Base Board for NodeMCU V3**
+- **Base Board for NodeMCU V1**
 - **Power Supply:** Based on the NodeMCU Base Board requirements
 - **Arctic P12/P14 PWM Fan:**
     - **Pinout:**
