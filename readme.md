@@ -89,7 +89,10 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
 - **Optional Sensors:** SHT31, DHT11, etc.
 ---
 
---
+
+---
+NEWS:
+---
 ## Module Industrial 
 Industrial Version:
 
@@ -100,10 +103,8 @@ Python
 Grafana
 Influxdb or other db
 
-
-
 FREE - Public Version for Cannabis Social Clubs and industrial/medical Production is avaiable soon.
---
+---
 
 
 Feel free to customize the setup and add additional sensors as per your requirements. You can scale this in big ranges. If you need help, just don't hesitate to contact me. Enjoy automating your grow tents with OpenGrowBox!
