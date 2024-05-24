@@ -56,11 +56,6 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 ---
 
-## EC FAN Setup
-For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repository](https://github.com/OpenGrowBox/Ruck_EC_API).
-
----
-
 ## Ventilation Setup with PC Fans
 ### Required Devices
 - **NodeMCUv3 (ESP 8266):**
@@ -83,6 +78,9 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
         - FAN Pin 3: Can be ignored or read data from it
         - FAN Pin 4: Set it to a D3/D0/D2 Pin on ESP
 - **Optional Sensors:** SHT31, DHT11, etc.
+---
+## EC FAN Setup
+For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repository](https://github.com/OpenGrowBox/Ruck_EC_API).
 
 ---
 
