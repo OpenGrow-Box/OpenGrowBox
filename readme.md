@@ -5,8 +5,8 @@
 Transform your growing environment with the OpenGrowBox, an open-source project designed to automate and optimize your grow tents. This setup uses a Raspberry Pi 4 and a variety of sensors to monitor and control your growing conditions.
 
 --
-## Module Industrial Without HA comming SOON!!!!
---
+## FOR NEWS SCROLL DOWN
+-- 
 
 ### FlowerTent Look
 ![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/393d5455-c261-4486-840c-ca828be5f1bb)
@@ -88,6 +88,22 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
         - FAN Pin 4: Set it to a D3/D0/D2 Pin on ESP
 - **Optional Sensors:** SHT31, DHT11, etc.
 ---
+
+--
+## Module Industrial 
+Industrial Version:
+
+Pi4 or Linux Vm/Linux-Computer
+Sensors
+NodeRed
+Python
+Grafana
+Influxdb or other db
+
+
+
+FREE - Public Version for Cannabis Social Clubs and industrial/medical Production is avaiable soon.
+--
 
 
 Feel free to customize the setup and add additional sensors as per your requirements. You can scale this in big ranges. If you need help, just don't hesitate to contact me. Enjoy automating your grow tents with OpenGrowBox!
