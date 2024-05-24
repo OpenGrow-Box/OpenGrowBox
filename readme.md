@@ -15,7 +15,7 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 ![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/62b956f6-da6d-4ebf-a5f7-c2c93d48ac8c)
 
 ### DryingTent Look
-![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/ec607466-ae51-45f9-9b51-d8630cc2b5a7)
+![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/b67ef7eb-e3ed-47b8-bb17-eea7d23c8cf4)
 
 ### OverAll Look 
 ![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/566cee62-e29a-4804-8368-2697865b830b)
