@@ -1,0 +1,72 @@
+OpenGrowBox for Everyone!!!
+Overview
+Transform your growing environment with the OpenGrowBox, an open-source project designed to automate and optimize your grow tents. This setup uses a Raspberry Pi 4 and a variety of sensors to monitor and control your growing conditions.
+
+FlowerTent Look
+FlowerTent
+
+VegiTent Look
+VegiTent
+
+DryingTent Look
+DryingTent
+
+OverAll Look
+Overall
+
+Base / Heart / Call it How You Like
+Raspberry Pi 4 Setup and Installation
+Set up Raspberry Pi 4 with an external SSD (search online for guides).
+Install Mosquitto MQTT on your Raspberry Pi 4.
+Install Home Assistant Supervised:
+Home Assistant Supervised Installation Guide
+Set up Home Assistant:
+Install MQTT and start the server.
+Install MQTT Broker.
+Install the File Editor.
+Install HACS (Home Assistant Community Store).
+Install Node-RED:
+Node-RED Setup Guide
+Sensors
+Operating System
+Tasmota: Getting Started with Tasmota
+Sensor Types
+Light: TSL259 Light Sensor
+Temperature:
+SHT31
+DHT 11 / DHT 22
+MLX90640 (Infrared temperature sensor for plants)
+Humidity: SHT31, DHT 11, DHT 22
+CO2: MH-Z19B
+Air Pressure
+VPD (Vapor Pressure Deficit): Created with a Node-RED function
+Xiaomi Plant Sensor:
+Electrical Conductivity (EC)
+Light Intensity (LX, converted with a light conversion rate of 0.0185 for Sanlight)
+Temperature
+EC FAN Setup
+For detailed instructions on setting up the EC fan, visit the Ruck_EC_API repository.
+
+Ventilation Setup with PC Fans
+Required Devices
+NodeMCUv3 (ESP 8266):
+Flash it with the latest Tasmota version.
+Set the module type to Generic 18.
+Use the connection part below.
+Set the inputs on the pins in Tasmota.
+Add MQTT server and credentials.
+Base Board for NodeMCU V3
+Power Supply: Based on the NodeMCU Base Board requirements
+Arctic P12/P14 PWM Fan:
+Pinout:
+1: Ground
+2: VCC (5-12V)
+3: Signal
+4: PWM
+Connection on ESP:
+FAN Pin 1 to Ground Pin on ESP
+FAN Pin 2 to 5-12V input Pin
+FAN Pin 3: Can be ignored or read data from it
+FAN Pin 4: Set it to a D3/D0/D2 Pin on ESP
+Optional Sensors: SHT31, DHT11, etc.
+Feel free to customize the setup and add additional sensors as per your requirements. Enjoy automating your grow tents with OpenGrowBox!
