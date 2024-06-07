@@ -4,6 +4,8 @@
 ## Overview
 Transform your growing environment with the OpenGrowBox, an open-source project designed to automate and optimize your grow tents. This setup uses a Raspberry Pi 4 and a variety of sensors to monitor and control your growing conditions.
 
+### [WIKI](https://wiki.opengrowbox.net)
+
 --
 ## For NEWS Scroll to the Bottom Please
 -- 
@@ -53,7 +55,7 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
 - **Temperature:** 
     - SHT31
     - DHT 11 / DHT 22
-    - MLX90640 (Infrared temperature sensor that can pointed to Plantsleafs)
+    - MLX90640 (Infrared temperature sensor that can be pointed to plant leaves)
 - **Humidity:** SHT31, DHT 11, DHT 22
 - **CO2:** MH-Z19B
 - **Air Pressure**
@@ -87,24 +89,22 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
         - FAN Pin 3: Can be ignored or read data from it
         - FAN Pin 4: Set it to a D3/D0/D2 Pin on ESP
 - **Optional Sensors:** SHT31, DHT11, etc.
----
-
 
 ---
-NEWS:
----
-## Module Industrial 
+
+## NEWS:
+### Module Industrial - Node-RED ONLY
 Industrial Version:
 
 Pi4 or Linux Vm/Linux-Computer
 Sensors
-NodeRed
+Node-RED
 Python
 Grafana
 Influxdb or other db
 
-FREE - Public Version for Cannabis Social Clubs and industrial/medical Production is avaiable soon.
----
+FREE - Public Version for Cannabis Social Clubs and industrial/medical production is available soon.
 
+---
 
 Feel free to customize the setup and add additional sensors as per your requirements. You can scale this in big ranges. If you need help, just don't hesitate to contact me. Enjoy automating your grow tents with OpenGrowBox!
