@@ -10,17 +10,21 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 ## For NEWS Scroll to the Bottom Please
 -- 
 
-### FlowerTent Look
-![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/393d5455-c261-4486-840c-ca828be5f1bb)
+### Overview All 
+![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/267dbb79-1b8c-4dc2-a649-04cf3610edaa)
 
-### VegiTent Look
-![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/62b956f6-da6d-4ebf-a5f7-c2c93d48ac8c)
+### FlowerTent
+![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/c5670545-744b-4e4d-84a6-fe41d10df02e)
 
-### DryingTent Look
-![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/b67ef7eb-e3ed-47b8-bb17-eea7d23c8cf4)
+### VegiTent
+![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/9b527087-e0a2-477a-9f8a-f566a462c044)
 
-### OverAll Look 
-![image](https://github.com/OpenGrowBox/OpenGrowBox/assets/170749418/566cee62-e29a-4804-8368-2697865b830b)
+## GrowRoom 
+![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/7a651e0f-90b7-4124-94a4-e7ac24c6427b)
+
+# Globals 
+![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/d6ce0c8a-5bb4-4811-aae0-707a2d543cfd)
+
 
 ---
 
