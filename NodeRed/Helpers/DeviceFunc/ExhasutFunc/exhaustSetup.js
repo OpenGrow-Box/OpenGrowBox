@@ -19,7 +19,7 @@ const findDutyCycle = (exhaustArray) => {
 let outputs = [null, null, null, null]; // Array für vier Ausgänge
 
 // Zustand der Abluft und Geschwindigkeit aus der Payload extrahieren
-const exhaustSpeed = msg.payload.exhaustSpeed.value; // Anpassung hier
+const exhaustSpeed = msg.payload.exhaustSet.value || 0; // Anpassung hier: falls kein Wert vorhanden ist, setze auf 0
 let exhaustState = 'off'; // Standardwert setzen, falls kein Zustand gefunden wird
 if (msg.payload.Exhaust && msg.payload.Exhaust.length > 0) {
     const exhaustSwitch = msg.payload.Exhaust.find(e => e.entity_id && e.entity_id.toLowerCase().includes("switch"));
@@ -28,14 +28,9 @@ if (msg.payload.Exhaust && msg.payload.Exhaust.length > 0) {
     }
 }
 
-const dutyCycle = findDutyCycle(msg.payload.Exhaust);
+const dutyCycle = findDutyCycle(msg.payload.Exhaust) || 0; // Anpassung hier: falls kein Wert vorhanden ist, setze auf 50
 
-// Prüfen, ob ein dutyCycle vorhanden ist
-if (dutyCycle === null) {
-    return outputs; // Kein dutyCycle gefunden, keine Aktion erforderlich
-}
-
-const percentDifference = parseFloat(msg.payload.exhaustSpeed.percentDifference);
+const percentDifference = parseFloat(msg.payload.exhaustSet.percentDifference) || 0; // Anpassung hier: falls kein Wert vorhanden ist, setze auf 0
 let newDutyCycle = dutyCycle;
 
 // Berechnung des neuen Duty Cycle basierend auf der prozentualen Abweichung
@@ -81,7 +76,7 @@ if (exhaustSpeed === "reduced" && exhaustState === "off") {
 
 // Nichts tun, wenn keine Änderung erforderlich ist
 if (exhaustSpeed === "unchanged") {
-    outputs[3] = { payload: "PERFEKTION: Abluft unverändert, keine Aktion erforderlich", topic: "Nothing" };
+    outputs[3] = { payload: "Abluft unverändert, keine Aktion erforderlich", topic: "Nothing" };
     return outputs;
 }
 
