@@ -14,7 +14,7 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 ![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/267dbb79-1b8c-4dc2-a649-04cf3610edaa)
 
 ### FlowerTent
-![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/c5670545-744b-4e4d-84a6-fe41d10df02e)
+![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/b8d58f7f-0076-452f-a310-d98dfc729848)
 
 ### VegiTent
 ![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/9b527087-e0a2-477a-9f8a-f566a462c044)
@@ -24,7 +24,7 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 # Globals 
 ![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/d6ce0c8a-5bb4-4811-aae0-707a2d543cfd)
-
+ .. no data there the reason for NaN and the rest
 
 ---
 
