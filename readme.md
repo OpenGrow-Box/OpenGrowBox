@@ -46,7 +46,7 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 ---
 
 ## EC FAN Setup
-For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repository](https://github.com/OpenGrowBox/Ruck_EC_API).
+For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repository](https://github.com/OpenGrow-Box/PWM-Fans.git).
 
 ---
 
