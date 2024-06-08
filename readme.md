@@ -5,10 +5,6 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 ## Check the [WIKI](https://wiki.opengrowbox.net)
 
---
-## For NEWS Scroll to the Bottom Please
--- 
-
 ### Overview All 
 ![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/4ff517f2-3c35-42fd-b7e5-65719d73452c)
 
@@ -25,8 +21,20 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 ![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/d6ce0c8a-5bb4-4811-aae0-707a2d543cfd)
  .. no data there the reason for NaN and the rest
 
+
 ---
 
+## NEWS:
+### Module Industrial - Node-RED ONLY
+Industrial Version:
+
+Pi4 or Linux Vm/Linux-Computer
+Sensors
+Node-RED
+Python
+Grafana
+Influxdb or other db
+---
 ## Base / Heart / Call it How You Like
 
 ### Raspberry Pi 4 Setup and Installation
@@ -93,18 +101,6 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
         - FAN Pin 4: Set it to a D3/D0/D2 Pin on ESP
 - **Optional Sensors:** SHT31, DHT11, etc.
 
----
-
-## NEWS:
-### Module Industrial - Node-RED ONLY
-Industrial Version:
-
-Pi4 or Linux Vm/Linux-Computer
-Sensors
-Node-RED
-Python
-Grafana
-Influxdb or other db
 
 FREE - Public Version for Cannabis Social Clubs and industrial/medical production is available soon.
 
