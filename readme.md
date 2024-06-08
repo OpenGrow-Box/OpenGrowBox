@@ -19,7 +19,7 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 # Globals 
 ![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/d6ce0c8a-5bb4-4811-aae0-707a2d543cfd)
- .. no data there the reason for NaN and the rest
+
 
 
 ---
