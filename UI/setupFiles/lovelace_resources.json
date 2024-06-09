@@ -1,24 +1,24 @@
 {
-    "version": 1,
-    "minor_version": 1,
-    "key": "lovelace_resources",
-    "data": {
-      "items": [
-        {
-          "url": "/hacsfiles/mini-graph-card/mini-graph-card-bundle.js?hacstag=1512800620121",
-          "type": "module",
-          "id": "27f61bd506394879b33d9c4e6612cfeb"
-        },
-        {
-          "id": "8c6599d973d740418e499b827eab38c5",
-          "url": "/hacsfiles/lovelace-mushroom/mushroom.js?hacstag=444350375354",
-          "type": "module"
-        },
-        {
-          "id": "5a7ee633e35d4782b363be9beb19fe34",
-          "url": "/hacsfiles/vpdchart-card/vpdchart-card.js?hacstag=540873855101",
-          "type": "module"
-        }
-      ]
-    }
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace_resources",
+  "data": {
+    "items": [
+      {
+        "id": "4c6f58ef390641bca3486be3aa0ca58e",
+        "url": "/local/mini-graph-card-bundle.js",
+        "type": "module"
+      },
+      {
+        "id": "d3c4045c4873449593881eff56934367",
+        "url": "/local/vpdchart-card.js",
+        "type": "module"
+      },
+      {
+        "id": "924a739776944f1d937d49bafe3f2660",
+        "url": "/local/mushroom.js",
+        "type": "module"
+      }
+    ]
   }
+}
