@@ -938,7 +938,7 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.flowertent",
+                  "entity": "select.flowertentstageselect",
                   "name": "PlatStage"
                 },
                 {
@@ -1530,7 +1530,7 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.vegitent",
+                  "entity": "select.flowertentstageselect",
                   "name": "PlantStage",
                   "icon_color": "primary"
                 },
@@ -2099,7 +2099,7 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.groom",
+                  "entity": "select.flowertentstageselect",
                   "name": "PlantStage",
                   "icon_color": "primary"
                 },
@@ -2678,7 +2678,7 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.flowertent",
+                  "entity": "select.flowertentstageselect",
                   "name": "PlatStage",
                   "layout": "horizontal"
                 }
@@ -2697,7 +2697,7 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.vegitent",
+                  "entity": "select.veggitentstageselect",
                   "name": "PlantStage",
                   "layout": "horizontal",
                   "fill_container": true
@@ -2717,7 +2717,7 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.groom",
+                  "entity": "select.flowertentstageselect",
                   "name": "PlantStage",
                   "layout": "horizontal",
                   "fill_container": true
