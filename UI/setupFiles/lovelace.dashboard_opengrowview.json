@@ -17,7 +17,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.vpdflower",
+                      "entity": "sensor.vpd_flower",
                       "name": "VPD"
                     }
                   ],
@@ -1530,7 +1530,7 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.flowertentstageselect",
+                  "entity": "select.veggitentstageselect",
                   "name": "PlantStage",
                   "icon_color": "primary"
                 },
@@ -2099,7 +2099,7 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.flowertentstageselect",
+                  "entity": "select.groomstageselect",
                   "name": "PlantStage",
                   "icon_color": "primary"
                 },
@@ -2716,7 +2716,7 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.flowertentstageselect",
+                  "entity": "select.groommodes",
                   "name": "PlantStage",
                   "layout": "horizontal",
                   "fill_container": true
