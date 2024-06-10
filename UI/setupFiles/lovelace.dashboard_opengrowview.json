@@ -207,7 +207,7 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.abluft_dutycycle_vegi",
+                  "entity": "sensor.flowerexhaustdutycycle",
                   "name": "Exhaust",
                   "icon": "mdi:fan",
                   "vertical": true,
@@ -871,7 +871,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.vpdflower",
+                      "entity": "sensor.vpd_flower",
                       "name": "VPD"
                     }
                   ],
@@ -943,7 +943,7 @@
                 },
                 {
                   "type": "custom:mushroom-number-card",
-                  "entity": "number.flowertentwish_vpd",
+                  "entity": "number.flowertarget_vpd",
                   "fill_container": true,
                   "name": "VPD-Target",
                   "icon": "mdi:thermometer",
@@ -952,7 +952,7 @@
                 },
                 {
                   "type": "custom:mushroom-number-card",
-                  "entity": "number.airctrflower",
+                  "entity": "number.airctrlflower",
                   "name": "Exhaust",
                   "icon": "mdi:fan",
                   "icon_color": "deep-orange",
@@ -1024,7 +1024,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.light_energy_power",
+                      "entity": "sensor.flowerpowerconsume",
                       "name": "Flower Light Watt"
                     }
                   ],
@@ -1339,7 +1339,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.abluft_dutycycle_vegi",
+                      "entity": "sensor.veggiexhaustduty",
                       "name": "Exhaust"
                     }
                   ],
@@ -1536,7 +1536,7 @@
                 },
                 {
                   "type": "custom:mushroom-number-card",
-                  "entity": "number.vegitentwish_vpd",
+                  "entity": "number.veggitarget_vpd",
                   "fill_container": true,
                   "name": "VPD-Target",
                   "icon": "mdi:thermometer",
@@ -1603,7 +1603,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.light_energy_power_2",
+                      "entity": "sensor.veggipowerconsume",
                       "name": "Vegi Light Watt"
                     }
                   ],
@@ -1910,7 +1910,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.abluft_dutycycle_vegi",
+                      "entity": "sensor.groomexhaustdutycycle",
                       "name": "Exhaust"
                     }
                   ],
@@ -2034,7 +2034,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.ventvegi_bmp280_pressure",
+                      "entity": "sensor.groompressure",
                       "name": "Air-Pressure"
                     }
                   ],
@@ -2104,14 +2104,13 @@
                   "icon_color": "primary"
                 },
                 {
-                  "type": "custom:mushroom-entity-card",
-                  "icon": "mdi:led-on",
+                  "type": "custom:mushroom-number-card",
+                  "entity": "number.groom_target_vpd",
                   "fill_container": true,
-                  "double_tap_action": {
-                    "action": "toggle"
-                  },
-                  "layout": "vertical",
-                  "name": "GRoom Light"
+                  "name": "VPD-Target",
+                  "icon": "mdi:thermometer",
+                  "icon_color": "pink",
+                  "layout": "horizontal"
                 }
               ]
             }
