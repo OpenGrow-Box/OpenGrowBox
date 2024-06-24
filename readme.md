@@ -5,7 +5,7 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 ## Check the [WIKI](https://wiki.opengrowbox.net)
 
-## U can use the [InstallScript](https://github.com/OpenGrow-Box/OpenGrowBox/blob/main/install.sh) for installation or du it manual: 
+## U can use the [InstallScript](https://github.com/OpenGrow-Box/OpenGrowBox/blob/main/install.sh) for installation or do it manual: 
 
 
 ### Overview All 
