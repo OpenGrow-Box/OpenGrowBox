@@ -5,6 +5,9 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 ## Check the [WIKI](https://wiki.opengrowbox.net)
 
+## U can use the [InstallScript](https://github.com/OpenGrow-Box/OpenGrowBox/blob/main/install.sh) for installation or du it manual: 
+
+
 ### Overview All 
 ![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/4ff517f2-3c35-42fd-b7e5-65719d73452c)
 
@@ -36,6 +39,8 @@ Grafana
 Influxdb or other db
 ---
 ## Base / Heart / Call it How You Like
+
+
 
 ### Raspberry Pi 4 Setup and Installation
 1. Set up Raspberry Pi 4 with an external SSD (search online for guides).
