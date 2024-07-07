@@ -1,0 +1,17 @@
+{
+    "theme": "default",
+    "http_node": {
+      "username": "",
+      "password": ""
+    },
+    "http_static": {
+      "username": "",
+      "password": ""
+    },
+    "ssl": false,
+    "certfile": "fullchain.pem",
+    "keyfile": "privkey.pem",
+    "system_packages": [],
+    "npm_packages": [],
+    "init_commands": []
+  }

@@ -46,6 +46,10 @@ ROOMS="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupF
 
 MAINCONF="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/configuration.yaml"
 ADDONS="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/addons.json"
+NODEREDCONF=""
+EDITORCONF=""
+
+
 ALLFLOWS="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/NodeRed/Core/All/All-Flows.json"
 ## UI 
 OPG_DASHBOARD="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/lovelace_dashboards.json"
@@ -138,7 +142,11 @@ function OpenGrowBoxSetup() {
     ha addons start core_configurator
     sleep 5
     sudo wget -O /usr/share/hassio/addon_configs/a0d7b954_nodered/flows.json "$ALLFLOWS"
+
     sudo wget -O /usr/share/hassio/addons.json "$ADDONS"
+    sudo wget -O /usr/share/hassio/addons/data/a0d7b954_nodered/options.json "$NODEREDCONF"
+
+
     sudo wget -O /usr/share/hassio/homeassistant/airCtrlSensor.yaml  "$RUCKEHACCONF"
     sudo wget -O /usr/share/hassio/homeassistant/configuration.yaml "$MAINCONF"
     sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace.dashboard_opengrowview "$DASHBOARDVIEW"
