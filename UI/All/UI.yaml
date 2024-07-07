@@ -7,7 +7,7 @@ views:
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.vpdflower
+              - entity: sensor.vpd_flower
                 name: VPD
             show:
               name: true
@@ -132,7 +132,7 @@ views:
               - last-changed
             color: blue
           - type: tile
-            entity: sensor.abluft_dutycycle_vegi
+            entity: sensor.flowerexhaustdutycycle
             name: Exhaust
             icon: mdi:fan
             vertical: true
@@ -583,7 +583,7 @@ views:
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.vpdflower
+              - entity: sensor.vpd_flower
                 name: VPD
             show:
               name: true
@@ -623,17 +623,17 @@ views:
             entity: select.flowertentmodes
             name: Mode
           - type: custom:mushroom-select-card
-            entity: select.flowertent
+            entity: select.flowerplantstageselect
             name: PlatStage
           - type: custom:mushroom-number-card
-            entity: number.flowertentwish_vpd
+            entity: number.flowertarget_vpd
             fill_container: true
             name: VPD-Target
             icon: mdi:thermometer
             icon_color: pink
             layout: horizontal
           - type: custom:mushroom-number-card
-            entity: number.airctrflower
+            entity: number.airctrlflower
             name: Exhaust
             icon: mdi:fan
             icon_color: deep-orange
@@ -691,7 +691,7 @@ views:
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.light_energy_power
+              - entity: sensor.flowerpowerconsume
                 name: Flower Light Watt
             show:
               name: true
@@ -894,7 +894,7 @@ views:
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.abluft_dutycycle_vegi
+              - entity: sensor.veggiexhaustduty
                 name: Exhaust
             show:
               name: true
@@ -1005,11 +1005,11 @@ views:
             entity: select.vegitentmodes
             name: Mode
           - type: custom:mushroom-select-card
-            entity: select.vegitent
+            entity: select.veggiplantstageselect
             name: PlantStage
             icon_color: primary
           - type: custom:mushroom-number-card
-            entity: number.vegitentwish_vpd
+            entity: number.veggitarget_vpd
             fill_container: true
             name: VPD-Target
             icon: mdi:thermometer
@@ -1062,7 +1062,7 @@ views:
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.light_energy_power_2
+              - entity: sensor.veggipowerconsume
                 name: Vegi Light Watt
             show:
               name: true
@@ -1250,7 +1250,7 @@ views:
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.abluft_dutycycle_vegi
+              - entity: sensor.groomexhaustdutycycle
                 name: Exhaust
             show:
               name: true
@@ -1323,7 +1323,7 @@ views:
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.ventvegi_bmp280_pressure
+              - entity: sensor.groompressure
                 name: Air-Pressure
             show:
               name: true
@@ -1359,16 +1359,16 @@ views:
             entity: select.groommodes
             name: Mode
           - type: custom:mushroom-select-card
-            entity: select.groom
+            entity: select.groomplantstageselect
             name: PlantStage
             icon_color: primary
-          - type: custom:mushroom-entity-card
-            icon: mdi:led-on
+          - type: custom:mushroom-number-card
+            entity: number.groom_target_vpd
             fill_container: true
-            double_tap_action:
-              action: toggle
-            layout: vertical
-            name: GRoom Light
+            name: VPD-Target
+            icon: mdi:thermometer
+            icon_color: pink
+            layout: horizontal
   - title: Dry
     path: drying-tent
     type: sections
@@ -1743,7 +1743,7 @@ views:
             name: Modes
             layout: horizontal
           - type: custom:mushroom-select-card
-            entity: select.flowertent
+            entity: select.flowerplantstageselect
             name: PlatStage
             layout: horizontal
         title: Flower Modes
@@ -1755,7 +1755,7 @@ views:
             layout: horizontal
             name: Modes
           - type: custom:mushroom-select-card
-            entity: select.vegitent
+            entity: select.veggiplantstageselect
             name: PlantStage
             layout: horizontal
             fill_container: true
@@ -1768,7 +1768,7 @@ views:
             icon_color: primary
             layout: horizontal
           - type: custom:mushroom-select-card
-            entity: select.groom
+            entity: select.groommodes
             name: PlantStage
             layout: horizontal
             fill_container: true
