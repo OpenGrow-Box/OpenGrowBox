@@ -172,6 +172,8 @@ function OpenGrowBoxSetup() {
 function appArmorBootConf(){
     if grep -q "$PARAMS" "$CMDLINE_FILE"; then
         echo "Die Parameter sind bereits vorhanden."
+        clearSetup
+        sudo reboot
     else
         # Parameter hinzufügen
         sudo sed -i "s/$/ $PARAMS/" "$CMDLINE_FILE"
