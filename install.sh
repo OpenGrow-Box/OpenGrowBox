@@ -112,7 +112,7 @@ function homeassistantSetup() {
     echo "Waiting 3 Min for internal Home Assistant setup"
     ## Add support For SD-CARD setup time needed!
     echo "Do not Stop or Interrupt this step !!!!"
-    sleep 180
+    sleep 300
 }
 
 function HACSsetup(){
@@ -141,9 +141,9 @@ function OpenGrowBoxSetup() {
     sudo wget -O /usr/share/hassio/addons.json "$ADDONS"
     sudo wget -O /usr/share/hassio/homeassistant/airCtrlSensor.yaml  "$RUCKEHACCONF"
     sudo wget -O /usr/share/hassio/homeassistant/configuration.yaml "$MAINCONF"
-    sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace_dashboards "$OPG_DASHBOARD" 
     sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace.dashboard_opengrowview "$DASHBOARDVIEW"
-
+    sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace_dashboards "$OPG_DASHBOARD" 
+    
     # Node-Red-Companion-Setup
     echo "Setup Node-Red-Companion-Integration"
     cd /usr/share/hassio/homeassistant/custom_components && sudo mkdir nodered && cd nodered
