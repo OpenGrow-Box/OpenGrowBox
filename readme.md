@@ -106,6 +106,11 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
         - FAN Pin 4: Set it to a D3/D0/D2 Pin on ESP
 - **Optional Sensors:** SHT31, DHT11, etc.
 
+## Sponsors
+
+- [Chili Welten](chiliwelten.de)
+
+---
 
 FREE - Public Version for Cannabis Social Clubs and industrial/medical production is available soon.
 
