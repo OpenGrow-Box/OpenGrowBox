@@ -46,8 +46,8 @@ ROOMS="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupF
 
 MAINCONF="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/configuration.yaml"
 ADDONS="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/addons.json"
-NODEREDCONF=""
-EDITORCONF=""
+NODEREDCONF="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/n-r-options.json"
+EDITORCONF="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/editor-options.json"
 
 
 ALLFLOWS="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/NodeRed/Core/All/All-Flows.json"
@@ -63,7 +63,6 @@ NRCOMPANION="https://github.com/zachowj/hass-node-red/archive/refs/heads/main.zi
 MINIGRAPH="https://github.com/kalkih/mini-graph-card/releases/download/v0.12.1/mini-graph-card-bundle.js"
 VPDCHART="https://raw.githubusercontent.com/OpenGrow-Box/vpdchart-card/master/vpdchart-card.js"
 MUSHROOM="https://github.com/piitaya/lovelace-mushroom/releases/download/v3.6.2/mushroom.js"
-
 LLRESSOURCE="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/lovelace_resources.json"
 
 function systemPrep() {
@@ -113,10 +112,12 @@ function homeassistantSetup() {
     sudo dpkg -i ./os-agent.deb
     sudo apt install -y ./homeassistant-supervised.deb
     sudo rm os-agent.deb homeassistant-supervised.deb
-    echo "Waiting 3 Min for internal Home Assistant setup"
+    echo "Waiting 5 Min for internal Home Assistant setup"
     ## Add support For SD-CARD setup time needed!
     echo "Do not Stop or Interrupt this step !!!!"
     sleep 300
+    sudo systemctl restart hassio-supervisor.service
+    sleep 30
 }
 
 function HACSsetup(){
@@ -145,7 +146,7 @@ function OpenGrowBoxSetup() {
 
     sudo wget -O /usr/share/hassio/addons.json "$ADDONS"
     sudo wget -O /usr/share/hassio/addons/data/a0d7b954_nodered/options.json "$NODEREDCONF"
-
+    sudo wget -O /usr/share/hassio/addons/data/core_configurator/options.json "$EDITORCONF"
 
     sudo wget -O /usr/share/hassio/homeassistant/airCtrlSensor.yaml  "$RUCKEHACCONF"
     sudo wget -O /usr/share/hassio/homeassistant/configuration.yaml "$MAINCONF"
