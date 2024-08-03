@@ -110,7 +110,7 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
 
 ## Sponsors
 
-- [Chili Welten](chiliwelten.de)
+- [Chili Welten](httpss://chiliwelten.de)
 - [cresience](https://cre.science/)
 ---
 
