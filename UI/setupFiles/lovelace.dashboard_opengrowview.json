@@ -101,17 +101,17 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "light.vent",
+                  "entity": "light.vent_vent",
                   "icon": "mdi:wind-power-outline",
-                  "vertical": false,
-                  "show_entity_picture": false,
                   "color": "deep-orange",
                   "name": "Ventis-Top"
                 },
                 {
                   "type": "tile",
-                  "entity": "light.vent_vent",
+                  "entity": "light.vent",
                   "icon": "mdi:wind-power-outline",
+                  "vertical": false,
+                  "show_entity_picture": false,
                   "color": "deep-orange",
                   "name": "Ventis-Down"
                 },
@@ -207,7 +207,16 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.flowerexhaustdutycycle",
+                  "entity": "light.ventsvegi",
+                  "icon": "mdi:wind-power-outline",
+                  "vertical": true,
+                  "show_entity_picture": false,
+                  "color": "deep-orange",
+                  "name": "Ventilation"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.abluft_dutycycle_vegi",
                   "name": "Exhaust",
                   "icon": "mdi:fan",
                   "vertical": true,
@@ -217,15 +226,6 @@
                     "state",
                     "last-changed"
                   ]
-                },
-                {
-                  "type": "tile",
-                  "entity": "light.ventsvegi",
-                  "icon": "mdi:wind-power-outline",
-                  "vertical": true,
-                  "show_entity_picture": false,
-                  "color": "deep-orange",
-                  "name": "Ventilation"
                 },
                 {
                   "type": "custom:vpdchart-card",
@@ -248,7 +248,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.vpd_groom",
+                      "entity": "sensor.vpd_drying_tent_dewpoint",
                       "name": "VPD"
                     }
                   ],
@@ -288,28 +288,86 @@
                       "color": "#F80707"
                     }
                   ],
-                  "name": "GRoom-VPD",
+                  "name": "Drying-VaporPressure",
                   "hours_to_show": 24,
-                  "points_per_hour": 30,
+                  "points_per_hour": 12,
                   "group_by": "minute"
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.avgtemp_groom",
-                  "name": "Temp-AVG",
-                  "show_entity_picture": true,
+                  "entity": "sensor.dryingavgdewpoint",
+                  "name": "DewPoint-AVG",
+                  "color": "teal",
                   "vertical": true,
-                  "state_content": "state",
-                  "color": "green"
+                  "show_entity_picture": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.avghum_groom",
-                  "name": "Humidity-AVG",
+                  "entity": "sensor.vaporpressure_actual",
+                  "name": "VaporPressure",
+                  "icon": "mdi:car-brake-low-pressure",
+                  "color": "cyan",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
+                  "hide_state": false,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.dryingavgdewpoint",
+                  "vertical": true,
+                  "show_entity_picture": true,
+                  "color": "green",
+                  "name": "Temp-AVG",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.dryingavghum",
+                  "name": "Humidity-AVG",
+                  "vertical": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "color": "blue"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.vaporpressure_saturation",
+                  "name": "VP-Saturation",
+                  "color": "purple",
+                  "show_entity_picture": true,
+                  "vertical": true,
+                  "hide_state": false,
+                  "icon": "mdi:car-brake-low-pressure",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.wateractivitytent",
+                  "name": "WaterActivity",
+                  "icon": "mdi:thermometer-water",
+                  "color": "cyan",
+                  "show_entity_picture": true,
+                  "vertical": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
@@ -323,27 +381,9 @@
                     "state",
                     "last-changed"
                   ]
-                },
-                {
-                  "type": "tile",
-                  "entity": "light.ventsvegi",
-                  "icon": "mdi:wind-power-outline",
-                  "vertical": true,
-                  "show_entity_picture": false,
-                  "color": "deep-orange",
-                  "name": "Ventilation"
-                },
-                {
-                  "type": "custom:vpdchart-card",
-                  "title": "GrowRoom-VDP",
-                  "crop": "Cannabis",
-                  "air_rh": "sensor.avghum_groom",
-                  "air_temp": "sensor.avgtemp_groom",
-                  "leaf_temp": "sensor.avgtemp_groom",
-                  "leaf_temp_offset": -2
                 }
               ],
-              "title": "GrowRoom"
+              "title": "Drying-Tent"
             },
             {
               "type": "grid",
@@ -486,6 +526,35 @@
                   "show_color_temp_control": false,
                   "show_color_control": false,
                   "collapsible_controls": true
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.ecruckdryer",
+                  "name": "Exhaust Drying",
+                  "color": "deep-orange",
+                  "icon": "mdi:fan",
+                  "vertical": true,
+                  "hide_state": false,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "show_entity_picture": true,
+                  "tap_action": {
+                    "action": "toggle"
+                  }
+                },
+                {
+                  "type": "custom:mushroom-number-card",
+                  "entity": "number.airctrldryer",
+                  "icon": "mdi:fan",
+                  "icon_color": "deep-orange",
+                  "icon_type": "entity-picture",
+                  "display_mode": "slider",
+                  "layout": "horizontal",
+                  "primary_info": "name",
+                  "secondary_info": "state",
+                  "name": "Exhaust Drying"
                 }
               ],
               "title": "Devices"
@@ -511,7 +580,11 @@
                   "name": "VPD",
                   "color": "pink",
                   "vertical": true,
-                  "show_entity_picture": true
+                  "show_entity_picture": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
@@ -519,7 +592,10 @@
                   "name": "CO2",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "color": "blue"
                 },
                 {
@@ -529,7 +605,10 @@
                   "show_entity_picture": true,
                   "vertical": true,
                   "color": "green",
-                  "state_content": "state"
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
@@ -537,17 +616,11 @@
                   "name": "Humidity-AVG",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "color": "blue"
-                },
-                {
-                  "type": "tile",
-                  "entity": "sensor.floweravgdewpoint",
-                  "name": "Dewpoint-AVG",
-                  "show_entity_picture": true,
-                  "vertical": true,
-                  "state_content": "state",
-                  "color": "teal"
                 },
                 {
                   "type": "tile",
@@ -556,7 +629,36 @@
                   "color": "light-green",
                   "vertical": true,
                   "show_entity_picture": true,
-                  "icon": "mdi:heart-flash"
+                  "icon": "mdi:heart-flash",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.flowerpressure",
+                  "name": " Pressure",
+                  "icon": "",
+                  "show_entity_picture": true,
+                  "vertical": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "purple"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.floweravgdewpoint",
+                  "name": "Dewpoint-AVG",
+                  "show_entity_picture": true,
+                  "vertical": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "teal"
                 },
                 {
                   "type": "tile",
@@ -565,7 +667,8 @@
                   "color": "light-green",
                   "vertical": true,
                   "show_entity_picture": true,
-                  "icon": "mdi:heart-flash"
+                  "icon": "mdi:heart-flash",
+                  "state_content": "last-changed"
                 },
                 {
                   "type": "tile",
@@ -574,7 +677,11 @@
                   "color": "light-green",
                   "vertical": false,
                   "show_entity_picture": true,
-                  "icon": "mdi:battery-charging"
+                  "icon": "mdi:battery-charging",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
@@ -583,17 +690,24 @@
                   "color": "amber",
                   "vertical": false,
                   "show_entity_picture": true,
-                  "icon": "mdi:lightbulb-cfl"
+                  "icon": "mdi:lightbulb-cfl",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
+                  "entity": "sensor.light_energy_power",
                   "name": "Light Power",
                   "icon": "",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
-                  "color": "yellow",
-                  "entity": "sensor.flowerpowerconsume"
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "yellow"
                 },
                 {
                   "type": "tile",
@@ -602,7 +716,11 @@
                   "vertical": false,
                   "show_entity_picture": true,
                   "icon": "mdi:lightbulb-cfl",
-                  "name": "Flower DLI"
+                  "name": "Flower DLI",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
@@ -611,7 +729,11 @@
                   "color": "amber",
                   "vertical": false,
                   "show_entity_picture": true,
-                  "icon": "mdi:heart-flash"
+                  "icon": "mdi:heart-flash",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 }
               ],
               "title": "Flower Enviorment"
@@ -806,7 +928,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.flowerexhaustdutycycle",
+                      "entity": "number.airctrlflower",
                       "name": "Exhaust"
                     }
                   ],
@@ -933,7 +1055,7 @@
               "cards": [
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.flowertentmodes",
+                  "entity": "select.flowerplantstageselect",
                   "name": "Mode"
                 },
                 {
@@ -943,7 +1065,7 @@
                 },
                 {
                   "type": "custom:mushroom-number-card",
-                  "entity": "number.flowertarget_vpd",
+                  "entity": "number.flowertentwish_vpd",
                   "fill_container": true,
                   "name": "VPD-Target",
                   "icon": "mdi:thermometer",
@@ -952,7 +1074,7 @@
                 },
                 {
                   "type": "custom:mushroom-number-card",
-                  "entity": "number.airctrlflower",
+                  "entity": "number.airctrflower",
                   "name": "Exhaust",
                   "icon": "mdi:fan",
                   "icon_color": "deep-orange",
@@ -1003,7 +1125,7 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "switch.abluftan",
+                  "entity": "switch.ecruckflower",
                   "name": "Exhaust",
                   "color": "deep-orange",
                   "icon": "mdi:fan",
@@ -1024,7 +1146,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.flowerpowerconsume",
+                      "entity": "number.airctrlflower",
                       "name": "Flower Light Watt"
                     }
                   ],
@@ -1084,6 +1206,53 @@
                   "hours_to_show": 24,
                   "points_per_hour": 30,
                   "group_by": "minute"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.nextpumpingaction",
+                  "name": "Next Wattering",
+                  "icon": "mdi:water-pump",
+                  "show_entity_picture": true,
+                  "hide_state": false,
+                  "vertical": true,
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.autorun",
+                  "name": "Auto Run Mode",
+                  "color": "blue"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.pumpon",
+                  "name": "Start Watering",
+                  "color": "blue"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.pumpinglefttime",
+                  "vertical": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "number.pumpinghours",
+                  "name": "PumpIntervall",
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "number.watteringduration",
+                  "name": "Watering Duration",
+                  "vertical": false,
+                  "hide_state": false,
+                  "icon": "mdi:water",
+                  "color": "indigo"
                 }
               ],
               "title": "Controllers"
@@ -1106,7 +1275,23 @@
                   "name": "VPD",
                   "color": "pink",
                   "vertical": true,
-                  "show_entity_picture": true
+                  "show_entity_picture": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.veggico2",
+                  "name": "CO2",
+                  "show_entity_picture": true,
+                  "vertical": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "blue"
                 },
                 {
                   "type": "tile",
@@ -1123,8 +1308,24 @@
                   "name": "HumidityAVG",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "color": "blue"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.veggimoisture",
+                  "name": "Soil Moisture ",
+                  "color": "light-green",
+                  "vertical": true,
+                  "show_entity_picture": true,
+                  "icon": "mdi:heart-flash",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
@@ -1133,17 +1334,11 @@
                   "icon": "",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "color": "purple"
-                },
-                {
-                  "type": "tile",
-                  "entity": "sensor.veggimoisture",
-                  "name": "Boden Feuchtigkeit",
-                  "color": "light-green",
-                  "vertical": true,
-                  "show_entity_picture": true,
-                  "icon": "mdi:heart-flash"
                 },
                 {
                   "type": "tile",
@@ -1151,7 +1346,10 @@
                   "name": "Dewpoint-AVG",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "color": "teal"
                 },
                 {
@@ -1161,7 +1359,11 @@
                   "color": "light-green",
                   "vertical": true,
                   "show_entity_picture": true,
-                  "icon": "mdi:heart-flash"
+                  "icon": "mdi:heart-flash",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
@@ -1170,7 +1372,11 @@
                   "color": "light-green",
                   "vertical": false,
                   "show_entity_picture": true,
-                  "icon": "mdi:heart-flash"
+                  "icon": "mdi:heart-flash",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
@@ -1179,16 +1385,23 @@
                   "color": "amber",
                   "vertical": false,
                   "show_entity_picture": true,
-                  "icon": "mdi:heart-flash"
+                  "icon": "mdi:heart-flash",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.veggipowerconsume",
+                  "entity": "sensor.light_energy_power_2",
                   "name": "Light Power",
                   "icon": "",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "color": "yellow"
                 },
                 {
@@ -1198,7 +1411,11 @@
                   "vertical": false,
                   "show_entity_picture": true,
                   "icon": "mdi:lightbulb-cfl",
-                  "name": "Veggi DLI"
+                  "name": "Veggi DLI",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
@@ -1207,7 +1424,11 @@
                   "color": "amber",
                   "vertical": false,
                   "show_entity_picture": true,
-                  "icon": "mdi:heart-flash"
+                  "icon": "mdi:heart-flash",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 }
               ],
               "title": "Vegitaion Enviorment"
@@ -1339,7 +1560,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.veggiexhaustduty",
+                      "entity": "sensor.abluft_dutycycle_vegi",
                       "name": "Exhaust"
                     }
                   ],
@@ -1536,7 +1757,7 @@
                 },
                 {
                   "type": "custom:mushroom-number-card",
-                  "entity": "number.veggitarget_vpd",
+                  "entity": "number.vegitentwish_vpd",
                   "fill_container": true,
                   "name": "VPD-Target",
                   "icon": "mdi:thermometer",
@@ -1603,7 +1824,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.veggipowerconsume",
+                      "entity": "sensor.light_energy_power_2",
                       "name": "Vegi Light Watt"
                     }
                   ],
@@ -1643,6 +1864,53 @@
                   "hours_to_show": 24,
                   "points_per_hour": 30,
                   "group_by": "minute"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.nextpumpingaction",
+                  "name": "Next Wattering",
+                  "icon": "mdi:water-pump",
+                  "show_entity_picture": true,
+                  "hide_state": false,
+                  "vertical": true,
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.autorun",
+                  "name": "Auto Run Mode",
+                  "color": "blue"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.pumpon",
+                  "name": "Start Watering",
+                  "color": "blue"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.pumpinglefttime",
+                  "vertical": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "number.pumpinghours",
+                  "name": "PumpIntervall",
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "number.watteringduration",
+                  "name": "Watering Duration",
+                  "vertical": false,
+                  "hide_state": false,
+                  "icon": "mdi:water",
+                  "color": "indigo"
                 }
               ],
               "title": "Controllers"
@@ -1652,9 +1920,8 @@
           "cards": []
         },
         {
-          "title": "GrowRoom",
-          "path": "growroom",
-          "cards": [],
+          "title": "Dry",
+          "path": "drying-tent",
           "type": "sections",
           "sections": [
             {
@@ -1662,59 +1929,89 @@
               "cards": [
                 {
                   "type": "tile",
-                  "entity": "sensor.vpd_groom",
-                  "name": "VPD",
-                  "color": "pink",
-                  "vertical": true,
-                  "show_entity_picture": true
-                },
-                {
-                  "type": "tile",
-                  "entity": "sensor.groomco2",
-                  "name": "CO2",
+                  "entity": "sensor.dryingavgdewpoint",
+                  "name": "Dewpoint",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
-                  "color": "blue"
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "teal"
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.avgtemp_groom",
-                  "name": "TempAVG",
-                  "show_entity_picture": true,
-                  "vertical": true,
-                  "state_content": "state",
-                  "color": "green"
-                },
-                {
-                  "type": "tile",
-                  "entity": "sensor.avghum_groom",
+                  "entity": "sensor.dryingavghum",
                   "name": "HumidityAVG",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "color": "blue"
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.groompressure",
-                  "name": " Pressure",
-                  "icon": "",
-                  "show_entity_picture": true,
+                  "entity": "sensor.vaporpressure_actual",
+                  "name": "VaporPressure-Actual",
                   "vertical": true,
-                  "state_content": "state",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "color": "purple"
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.groomavgdewpoint",
-                  "name": "Dewpoint",
+                  "entity": "sensor.wateractivitytent",
+                  "name": "WaterActivity",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
-                  "color": "blue"
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "light-blue",
+                  "icon": "mdi:water"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.vpd_drying_tent_dewpoint",
+                  "name": "VPD",
+                  "color": "pink",
+                  "vertical": true,
+                  "show_entity_picture": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "name": "Temp-AVG",
+                  "show_entity_picture": true,
+                  "vertical": true,
+                  "color": "green",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "entity": "sensor.dryingavgtemp"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.vaporpressure_saturation",
+                  "vertical": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "purple",
+                  "name": "VP-Saturation"
                 }
-              ]
+              ],
+              "title": "Tent Data"
             },
             {
               "type": "grid",
@@ -1725,75 +2022,8 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.flowerco2",
-                      "name": "CO2"
-                    }
-                  ],
-                  "show": {
-                    "name": true,
-                    "legend": true,
-                    "icon": false,
-                    "labels": true
-                  },
-                  "color_thresholds": [
-                    {
-                      "value": 400,
-                      "color": "#99ffbb"
-                    },
-                    {
-                      "value": 500,
-                      "color": "#adebad"
-                    },
-                    {
-                      "value": 600,
-                      "color": "#99ff99"
-                    },
-                    {
-                      "value": 700,
-                      "color": "#ccffcc"
-                    },
-                    {
-                      "value": 800,
-                      "color": "#e6ffe6"
-                    },
-                    {
-                      "value": 900,
-                      "color": "#80ffd4"
-                    },
-                    {
-                      "value": 1000,
-                      "color": "#66ffff"
-                    },
-                    {
-                      "value": 1200,
-                      "color": "#4dc3ff"
-                    },
-                    {
-                      "value": 1500,
-                      "color": "#b366ff"
-                    },
-                    {
-                      "value": 2000,
-                      "color": "#ff1a8c"
-                    },
-                    {
-                      "value": 2500,
-                      "color": "#ff3300"
-                    }
-                  ],
-                  "name": "CO2",
-                  "hours_to_show": 24,
-                  "points_per_hour": 30,
-                  "group_by": "minute"
-                },
-                {
-                  "type": "custom:mini-graph-card",
-                  "align_header": "center",
-                  "align_state": "center",
-                  "entities": [
-                    {
-                      "entity": "sensor.avgtemp_groom",
-                      "name": "AVG"
+                      "entity": "sensor.vaporpressure_actual",
+                      "name": "Unten"
                     }
                   ],
                   "show": {
@@ -1836,73 +2066,10 @@
                       "color": "#ff0000"
                     }
                   ],
-                  "name": "Temp",
+                  "name": "VP-Actual",
                   "hours_to_show": 24,
                   "points_per_hour": 30,
                   "group_by": "minute"
-                },
-                {
-                  "type": "custom:mini-graph-card",
-                  "entities": [
-                    {
-                      "entity": "sensor.avghum_groom",
-                      "name": "AVG"
-                    }
-                  ],
-                  "show": {
-                    "name": true,
-                    "legend": true,
-                    "icon": false,
-                    "labels": true
-                  },
-                  "color_thresholds": [
-                    {
-                      "value": 35,
-                      "color": "#b3ffff"
-                    },
-                    {
-                      "value": 40,
-                      "color": "#b3ffff"
-                    },
-                    {
-                      "value": 45,
-                      "color": "#80ffd4"
-                    },
-                    {
-                      "value": 50,
-                      "color": "#80ffd4"
-                    },
-                    {
-                      "value": 55,
-                      "color": "#66ff99"
-                    },
-                    {
-                      "value": 60,
-                      "color": "#66ff99"
-                    },
-                    {
-                      "value": 65,
-                      "color": "#cc33ff"
-                    },
-                    {
-                      "value": 70,
-                      "color": "#cc33ff"
-                    },
-                    {
-                      "value": 75,
-                      "color": "#ff0000"
-                    },
-                    {
-                      "value": 80,
-                      "color": "#ff0000"
-                    }
-                  ],
-                  "name": "Humidity",
-                  "hours_to_show": 24,
-                  "points_per_hour": 30,
-                  "group_by": "minute",
-                  "align_header": "center",
-                  "align_state": "center"
                 },
                 {
                   "type": "custom:mini-graph-card",
@@ -1910,8 +2077,8 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.groomexhaustdutycycle",
-                      "name": "Exhaust"
+                      "entity": "sensor.dryingavgdewpoint",
+                      "name": "DewPoint"
                     }
                   ],
                   "show": {
@@ -1921,284 +2088,48 @@
                     "labels": true
                   },
                   "color_thresholds": [
-                    {
-                      "value": 4,
-                      "color": "#00b3b3"
-                    },
                     {
                       "value": 10,
-                      "color": "#1affff"
-                    },
-                    {
-                      "value": 15,
-                      "color": "#00e600"
-                    },
-                    {
-                      "value": 20,
-                      "color": "#1aff1a"
-                    },
-                    {
-                      "value": 25,
-                      "color": "#33cc33"
-                    },
-                    {
-                      "value": 30,
-                      "color": "#33ff33"
-                    },
-                    {
-                      "value": 35,
-                      "color": "#ff9933"
-                    },
-                    {
-                      "value": 40,
-                      "color": "#ff3300"
-                    },
-                    {
-                      "value": 50,
-                      "color": "#ff3300"
-                    }
-                  ],
-                  "name": "Exhaust",
-                  "hours_to_show": 24,
-                  "points_per_hour": 12,
-                  "group_by": "minute"
-                }
-              ]
-            },
-            {
-              "type": "grid",
-              "cards": [
-                {
-                  "type": "custom:mini-graph-card",
-                  "align_header": "center",
-                  "align_state": "center",
-                  "entities": [
-                    {
-                      "entity": "sensor.vpd_groom",
-                      "name": "VPD"
-                    }
-                  ],
-                  "show": {
-                    "name": true,
-                    "legend": true,
-                    "icon": false,
-                    "labels": true
-                  },
-                  "color_thresholds": [
-                    {
-                      "value": 0,
                       "color": "#0007DC"
                     },
                     {
-                      "value": 0.4,
+                      "value": 11,
                       "color": "#10BCDF"
                     },
                     {
-                      "value": 0.8,
+                      "value": 12,
                       "color": "#22CF9D"
                     },
                     {
-                      "value": 1,
+                      "value": 13,
                       "color": "#29DF10"
                     },
                     {
-                      "value": 1.25,
+                      "value": 14,
                       "color": "#C3DF10"
-                    },
-                    {
-                      "value": 1.5,
-                      "color": "#DB8800"
-                    },
-                    {
-                      "value": 1.61,
-                      "color": "#F80707"
-                    }
-                  ],
-                  "name": "GRoom-VPD",
-                  "hours_to_show": 24,
-                  "points_per_hour": 30,
-                  "group_by": "minute"
-                },
-                {
-                  "type": "custom:vpdchart-card",
-                  "title": "Vegi-VDP",
-                  "crop": "Cannabis",
-                  "air_rh": "sensor.avghum_groom",
-                  "air_temp": "sensor.avgtemp_groom",
-                  "leaf_temp": "sensor.vegiavgtemp",
-                  "leaf_temp_offset": -2
-                },
-                {
-                  "type": "custom:mini-graph-card",
-                  "align_header": "center",
-                  "align_state": "center",
-                  "entities": [
-                    {
-                      "entity": "sensor.groompressure",
-                      "name": "Air-Pressure"
-                    }
-                  ],
-                  "show": {
-                    "name": true,
-                    "legend": true,
-                    "icon": false,
-                    "labels": true
-                  },
-                  "color_thresholds": [
-                    {
-                      "value": 4,
-                      "color": "#00b3b3"
-                    },
-                    {
-                      "value": 10,
-                      "color": "#1affff"
                     },
                     {
                       "value": 15,
-                      "color": "#00e600"
+                      "color": "#DB8800"
                     },
                     {
-                      "value": 20,
-                      "color": "#1aff1a"
-                    },
-                    {
-                      "value": 25,
-                      "color": "#33cc33"
-                    },
-                    {
-                      "value": 30,
-                      "color": "#33ff33"
-                    },
-                    {
-                      "value": 35,
-                      "color": "#ff9933"
-                    },
-                    {
-                      "value": 40,
-                      "color": "#ff3300"
-                    },
-                    {
-                      "value": 50,
-                      "color": "#ff3300"
+                      "value": 16,
+                      "color": "#F80707"
                     }
                   ],
-                  "name": "Air-Pressure",
+                  "name": "Dew-Point",
                   "hours_to_show": 24,
-                  "points_per_hour": 30,
+                  "points_per_hour": 12,
                   "group_by": "minute"
-                }
-              ]
-            },
-            {
-              "type": "grid",
-              "cards": [
-                {
-                  "type": "custom:mushroom-select-card",
-                  "entity": "select.groommodes",
-                  "name": "Mode"
                 },
-                {
-                  "type": "custom:mushroom-select-card",
-                  "entity": "select.groomplantstageselect",
-                  "name": "PlantStage",
-                  "icon_color": "primary"
-                },
-                {
-                  "type": "custom:mushroom-number-card",
-                  "entity": "number.groom_target_vpd",
-                  "fill_container": true,
-                  "name": "VPD-Target",
-                  "icon": "mdi:thermometer",
-                  "icon_color": "pink",
-                  "layout": "horizontal"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "Dry",
-          "path": "drying-tent",
-          "type": "sections",
-          "sections": [
-            {
-              "type": "grid",
-              "cards": [
-                {
-                  "type": "tile",
-                  "entity": "sensor.vpddrying",
-                  "name": "VPD",
-                  "color": "pink",
-                  "vertical": true,
-                  "show_entity_picture": true
-                },
-                {
-                  "type": "tile",
-                  "entity": "sensor.dryingavgdewpoint",
-                  "name": "Dewpoint",
-                  "show_entity_picture": true,
-                  "vertical": true,
-                  "state_content": "state",
-                  "color": "teal"
-                },
-                {
-                  "type": "tile",
-                  "entity": "sensor.dryingavghum",
-                  "name": "HumidityAVG",
-                  "show_entity_picture": true,
-                  "vertical": true,
-                  "state_content": "state",
-                  "color": "blue"
-                },
-                {
-                  "type": "tile",
-                  "name": "Temp-AVG",
-                  "show_entity_picture": true,
-                  "vertical": true,
-                  "color": "green",
-                  "state_content": "state",
-                  "entity": "sensor.nodered_3d8fcaa3c219fa0c"
-                },
-                {
-                  "type": "tile",
-                  "entity": "sensor.wateractivitytent",
-                  "name": "WaterActivity",
-                  "show_entity_picture": true,
-                  "vertical": true,
-                  "state_content": "state",
-                  "color": "light-blue",
-                  "icon": "mdi:water"
-                },
-                {
-                  "type": "tile",
-                  "entity": "sensor.vaporpressure_actual",
-                  "name": "VaporPressure-Actual",
-                  "vertical": true,
-                  "state_content": "state",
-                  "color": "purple"
-                },
-                {
-                  "type": "tile",
-                  "entity": "sensor.vaporpressure_saturation",
-                  "vertical": true,
-                  "state_content": "state",
-                  "color": "purple",
-                  "name": "VP-Saturation"
-                }
-              ],
-              "title": "Tent Data"
-            },
-            {
-              "type": "grid",
-              "cards": [
                 {
                   "type": "custom:mini-graph-card",
                   "align_header": "center",
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "sensor.dewpointt_vpd_dryer",
-                      "name": "Luftdruck"
+                      "entity": "sensor.dryingavgtemp",
+                      "name": "Unten"
                     }
                   ],
                   "show": {
@@ -2209,37 +2140,41 @@
                   },
                   "color_thresholds": [
                     {
-                      "value": 0,
-                      "color": "#0007DC"
+                      "value": 5,
+                      "color": "#66ffff"
                     },
                     {
-                      "value": 0.4,
-                      "color": "#10BCDF"
+                      "value": 18,
+                      "color": "#66ffff"
                     },
                     {
-                      "value": 0.8,
-                      "color": "#22CF9D"
+                      "value": 19,
+                      "color": "#80ffaa"
                     },
                     {
-                      "value": 1,
-                      "color": "#29DF10"
+                      "value": 23,
+                      "color": "#80ffaa"
                     },
                     {
-                      "value": 1.25,
-                      "color": "#C3DF10"
+                      "value": 24,
+                      "color": "#00ff55"
                     },
                     {
-                      "value": 1.5,
-                      "color": "#DB8800"
+                      "value": 28,
+                      "color": "#00ff55"
                     },
                     {
-                      "value": 1.61,
-                      "color": "#F80707"
+                      "value": 29,
+                      "color": "#ff0000"
+                    },
+                    {
+                      "value": 32,
+                      "color": "#ff0000"
                     }
                   ],
-                  "name": "VPD Drying Tent",
+                  "name": "Drying-Temp",
                   "hours_to_show": 24,
-                  "points_per_hour": 12,
+                  "points_per_hour": 30,
                   "group_by": "minute"
                 },
                 {
@@ -2304,116 +2239,6 @@
                   "group_by": "minute",
                   "align_header": "center",
                   "align_state": "center"
-                },
-                {
-                  "type": "custom:mini-graph-card",
-                  "align_header": "center",
-                  "align_state": "center",
-                  "entities": [
-                    {
-                      "entity": "sensor.dryingavgdewpoint",
-                      "name": "Unten"
-                    }
-                  ],
-                  "show": {
-                    "name": true,
-                    "legend": true,
-                    "icon": false,
-                    "labels": true
-                  },
-                  "color_thresholds": [
-                    {
-                      "value": 5,
-                      "color": "#66ffff"
-                    },
-                    {
-                      "value": 18,
-                      "color": "#66ffff"
-                    },
-                    {
-                      "value": 19,
-                      "color": "#80ffaa"
-                    },
-                    {
-                      "value": 23,
-                      "color": "#80ffaa"
-                    },
-                    {
-                      "value": 24,
-                      "color": "#00ff55"
-                    },
-                    {
-                      "value": 28,
-                      "color": "#00ff55"
-                    },
-                    {
-                      "value": 29,
-                      "color": "#ff0000"
-                    },
-                    {
-                      "value": 32,
-                      "color": "#ff0000"
-                    }
-                  ],
-                  "name": "Drying-DewPoint",
-                  "hours_to_show": 24,
-                  "points_per_hour": 30,
-                  "group_by": "minute"
-                },
-                {
-                  "type": "custom:mini-graph-card",
-                  "align_header": "center",
-                  "align_state": "center",
-                  "entities": [
-                    {
-                      "entity": "sensor.nodered_3d8fcaa3c219fa0c",
-                      "name": "Unten"
-                    }
-                  ],
-                  "show": {
-                    "name": true,
-                    "legend": true,
-                    "icon": false,
-                    "labels": true
-                  },
-                  "color_thresholds": [
-                    {
-                      "value": 5,
-                      "color": "#66ffff"
-                    },
-                    {
-                      "value": 18,
-                      "color": "#66ffff"
-                    },
-                    {
-                      "value": 19,
-                      "color": "#80ffaa"
-                    },
-                    {
-                      "value": 23,
-                      "color": "#80ffaa"
-                    },
-                    {
-                      "value": 24,
-                      "color": "#00ff55"
-                    },
-                    {
-                      "value": 28,
-                      "color": "#00ff55"
-                    },
-                    {
-                      "value": 29,
-                      "color": "#ff0000"
-                    },
-                    {
-                      "value": 32,
-                      "color": "#ff0000"
-                    }
-                  ],
-                  "name": "Drying-Temp",
-                  "hours_to_show": 24,
-                  "points_per_hour": 30,
-                  "group_by": "minute"
                 }
               ],
               "title": "Chart-Data"
@@ -2423,12 +2248,15 @@
               "cards": [
                 {
                   "type": "tile",
-                  "entity": "number.drytentdewpoint",
+                  "name": "Temp-AVG",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "color": "teal",
-                  "icon": "mdi:weather-rainy",
-                  "name": "DewPoint Target"
+                  "color": "green",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "entity": "number.drytenttemp"
                 },
                 {
                   "type": "tile",
@@ -2437,17 +2265,21 @@
                   "color": "blue",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "name": "Humidity Target"
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.vpd_wish_drytent",
-                  "name": "VPD-Dreytent",
-                  "icon": "mdi:car-brake-low-pressure",
-                  "vertical": true,
+                  "entity": "number.drytentdewpoint",
                   "show_entity_picture": true,
-                  "color": "pink"
+                  "vertical": true,
+                  "color": "teal",
+                  "icon": "mdi:weather-rainy",
+                  "name": "DewPoint Target",
+                  "state_content": "last-changed"
                 },
                 {
                   "type": "tile",
@@ -2455,9 +2287,25 @@
                   "name": "WaterActivity Target",
                   "show_entity_picture": true,
                   "vertical": true,
-                  "state_content": "state",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
                   "color": "light-blue",
                   "icon": "mdi:water"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.vpd_drying_wish_saturation",
+                  "vertical": true,
+                  "show_entity_picture": true,
+                  "color": "purple",
+                  "icon": "mdi:car-brake-low-pressure",
+                  "name": "VP-Saturation Target",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
@@ -2466,19 +2314,27 @@
                   "color": "purple",
                   "name": "VP-Actual Target",
                   "vertical": true,
-                  "show_entity_picture": true
+                  "show_entity_picture": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.vaporpressurewish_drying_actual",
+                  "entity": "sensor.vpd_wish_drytent",
+                  "name": "VPD-Dreytent",
+                  "icon": "mdi:car-brake-low-pressure",
                   "vertical": true,
                   "show_entity_picture": true,
-                  "color": "purple",
-                  "icon": "mdi:car-brake-low-pressure",
-                  "name": "VP-Saturation Target"
+                  "color": "pink",
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ]
                 }
               ],
-              "title": "Wish Data"
+              "title": "Target Data"
             },
             {
               "type": "grid",
@@ -2493,21 +2349,21 @@
                 },
                 {
                   "type": "custom:mushroom-number-card",
-                  "entity": "number.drytenttemp",
-                  "fill_container": true,
-                  "layout": "horizontal",
-                  "name": "Temp Target",
-                  "icon": "mdi:thermometer",
-                  "icon_color": "green"
-                },
-                {
-                  "type": "custom:mushroom-number-card",
                   "entity": "number.drytentdewpoint",
                   "fill_container": true,
                   "layout": "horizontal",
                   "name": "DewPoint Target",
                   "icon_color": "teal",
                   "icon": "mdi:water-thermometer-outline"
+                },
+                {
+                  "type": "custom:mushroom-number-card",
+                  "entity": "number.drytenttemp",
+                  "fill_container": true,
+                  "layout": "horizontal",
+                  "name": "Temp Target",
+                  "icon": "mdi:thermometer",
+                  "icon_color": "green"
                 },
                 {
                   "type": "custom:mushroom-number-card",
@@ -2525,6 +2381,92 @@
                   "type": "tile",
                   "entity": "humidifier.befeuchter",
                   "vertical": true
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.ecruckdry",
+                  "name": "Exhaust",
+                  "color": "deep-orange",
+                  "icon": "mdi:fan",
+                  "vertical": true,
+                  "hide_state": false,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "show_entity_picture": true,
+                  "tap_action": {
+                    "action": "toggle"
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "climate.klima",
+                  "vertical": true,
+                  "show_entity_picture": true,
+                  "state_content": [
+                    "state",
+                    "current_temperature"
+                  ]
+                },
+                {
+                  "type": "custom:mini-graph-card",
+                  "align_header": "center",
+                  "align_state": "center",
+                  "entities": [
+                    {
+                      "entity": "number.airctrldryer",
+                      "name": "Exhaust"
+                    }
+                  ],
+                  "show": {
+                    "name": true,
+                    "legend": true,
+                    "icon": false,
+                    "labels": true
+                  },
+                  "color_thresholds": [
+                    {
+                      "value": 4,
+                      "color": "#00b3b3"
+                    },
+                    {
+                      "value": 10,
+                      "color": "#1affff"
+                    },
+                    {
+                      "value": 15,
+                      "color": "#00e600"
+                    },
+                    {
+                      "value": 20,
+                      "color": "#1aff1a"
+                    },
+                    {
+                      "value": 25,
+                      "color": "#33cc33"
+                    },
+                    {
+                      "value": 30,
+                      "color": "#33ff33"
+                    },
+                    {
+                      "value": 35,
+                      "color": "#ff9933"
+                    },
+                    {
+                      "value": 40,
+                      "color": "#ff3300"
+                    },
+                    {
+                      "value": 50,
+                      "color": "#ff3300"
+                    }
+                  ],
+                  "name": "Exhaust",
+                  "hours_to_show": 24,
+                  "points_per_hour": 12,
+                  "group_by": "minute"
                 }
               ],
               "title": "Modes"
@@ -2614,30 +2556,6 @@
               "type": "grid",
               "cards": [
                 {
-                  "type": "custom:mushroom-number-card",
-                  "entity": "number.groomleaftemp",
-                  "fill_container": true,
-                  "layout": "horizontal",
-                  "name": "LeafTempOffset",
-                  "icon": "mdi:thermometer",
-                  "icon_color": "green"
-                },
-                {
-                  "type": "custom:mushroom-number-card",
-                  "entity": "number.groom_target_vpd",
-                  "fill_container": true,
-                  "name": "VPD-Target",
-                  "icon": "mdi:thermometer",
-                  "icon_color": "pink",
-                  "layout": "horizontal"
-                }
-              ],
-              "title": "Growroom"
-            },
-            {
-              "type": "grid",
-              "cards": [
-                {
                   "type": "custom:mushroom-select-card",
                   "entity": "select.drytentcana",
                   "name": "MasterDry",
@@ -2670,6 +2588,16 @@
               "type": "grid",
               "cards": [
                 {
+                  "type": "tile",
+                  "entity": "sensor.tempoutdoor"
+                }
+              ],
+              "title": "Klima Outdoor"
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
                   "type": "custom:mushroom-select-card",
                   "entity": "select.flowertentmodes",
                   "name": "Modes",
@@ -2690,14 +2618,14 @@
                 {
                   "type": "custom:mushroom-select-card",
                   "entity": "select.vegitentmodes",
+                  "name": "PlantStages",
                   "icon_color": "primary",
-                  "layout": "horizontal",
-                  "name": "Modes"
+                  "layout": "horizontal"
                 },
                 {
                   "type": "custom:mushroom-select-card",
                   "entity": "select.veggiplantstageselect",
-                  "name": "PlantStage",
+                  "name": "Modes",
                   "layout": "horizontal",
                   "fill_container": true
                 }
@@ -2706,23 +2634,121 @@
             },
             {
               "type": "grid",
+              "cards": []
+            },
+            {
+              "type": "grid",
+              "cards": []
+            },
+            {
+              "type": "grid",
               "cards": [
                 {
-                  "type": "custom:mushroom-select-card",
-                  "entity": "select.groommodes",
-                  "name": "Modes",
-                  "icon_color": "primary",
-                  "layout": "horizontal"
+                  "type": "tile",
+                  "entity": "sensor.nextpumpingaction",
+                  "name": "Next Wattering",
+                  "icon": "mdi:water-pump",
+                  "show_entity_picture": true,
+                  "hide_state": false,
+                  "vertical": true,
+                  "color": "indigo"
                 },
                 {
-                  "type": "custom:mushroom-select-card",
-                  "entity": "select.groommodes",
-                  "name": "PlantStage",
-                  "layout": "horizontal",
-                  "fill_container": true
+                  "type": "tile",
+                  "entity": "switch.autorun",
+                  "name": "Auto Run Mode",
+                  "color": "blue"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.pumpon",
+                  "name": "Start Watering",
+                  "color": "blue"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.pumpinglefttime",
+                  "vertical": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "number.pumpinghours",
+                  "name": "PumpIntervall",
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "number.watteringduration",
+                  "name": "Watering Duration",
+                  "vertical": false,
+                  "hide_state": false,
+                  "icon": "mdi:water",
+                  "color": "indigo"
                 }
               ],
-              "title": "GRoom Modes"
+              "title": "Wattering"
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "tile",
+                  "entity": "sensor.nextpumpingaction",
+                  "name": "Next Wattering",
+                  "icon": "mdi:water-pump",
+                  "show_entity_picture": true,
+                  "hide_state": false,
+                  "vertical": true,
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.autorun",
+                  "name": "Auto Run Mode",
+                  "color": "blue"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.pumpon",
+                  "name": "Start Watering",
+                  "color": "blue"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.pumpinglefttime",
+                  "vertical": true,
+                  "state_content": [
+                    "state",
+                    "last-changed"
+                  ],
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "number.pumpinghours",
+                  "name": "PumpIntervall",
+                  "color": "indigo"
+                },
+                {
+                  "type": "tile",
+                  "entity": "number.watteringduration",
+                  "name": "Watering Duration",
+                  "vertical": false,
+                  "hide_state": false,
+                  "icon": "mdi:water",
+                  "color": "indigo"
+                }
+              ],
+              "title": "Wattering"
+            },
+            {
+              "type": "grid",
+              "cards": []
             }
           ],
           "cards": []
