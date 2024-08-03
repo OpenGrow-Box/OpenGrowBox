@@ -1055,7 +1055,7 @@
               "cards": [
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.flowerplantstageselect",
+                  "entity": "select.flowertentmodes",
                   "name": "Mode"
                 },
                 {
@@ -1065,7 +1065,7 @@
                 },
                 {
                   "type": "custom:mushroom-number-card",
-                  "entity": "number.flowertentwish_vpd",
+                  "entity": "number.flowertarget_vpd",
                   "fill_container": true,
                   "name": "VPD-Target",
                   "icon": "mdi:thermometer",
@@ -1757,7 +1757,7 @@
                 },
                 {
                   "type": "custom:mushroom-number-card",
-                  "entity": "number.vegitentwish_vpd",
+                  "entity": "number.veggitarget_vpd",
                   "fill_container": true,
                   "name": "VPD-Target",
                   "icon": "mdi:thermometer",
@@ -2384,7 +2384,7 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "switch.ecruckdry",
+                  "entity": "switch.ecruckdryer",
                   "name": "Exhaust",
                   "color": "deep-orange",
                   "icon": "mdi:fan",
