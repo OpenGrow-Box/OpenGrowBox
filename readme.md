@@ -12,16 +12,18 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 ![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/4ff517f2-3c35-42fd-b7e5-65719d73452c)
 
 ### FlowerTent
-![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/6fb76404-54f1-42c6-8fae-62173da65cb8)
+![image](https://github.com/user-attachments/assets/a6e11259-1f06-4aa9-95a3-d93e1dcd42d4)
 
 ### VegiTent
-![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/6d6a9fe7-95de-4f5f-9497-4690f4c99a8b)
+![image](https://github.com/user-attachments/assets/886c04c5-29e3-4860-a549-1936efa7dd3b)
 
-## GrowRoom 
-![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/68609873-e14c-46ad-810e-8195b8ab13a9)
+### DryTent
+![image](https://github.com/user-attachments/assets/0f5aabe9-8453-4b49-818d-35d724edaccc)
+
 
 # Globals 
-![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/d6ce0c8a-5bb4-4811-aae0-707a2d543cfd)
+![image](https://github.com/user-attachments/assets/2e8ff5a2-cde3-4239-a893-3066b210bceb)
+
 
 
 
