@@ -110,8 +110,8 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
 
 ## Sponsors
 
-- [Chili Welten](httpss://chiliwelten.de)
-- [cresience](https://cre.science/)
+- [Chili Welten](https://chiliwelten.de)
+- [cre.sience](https://cre.science/)
 ---
 
 FREE - Public Version for Cannabis Social Clubs and industrial/medical production is available soon.
