@@ -698,7 +698,7 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.light_energy_power",
+                  "entity": "sensor.flowerpowerconsume",
                   "name": "Light Power",
                   "icon": "",
                   "show_entity_picture": true,
@@ -1053,7 +1053,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "number.airctrlflower",
+                      "entity": "sensor.flowerpowerconsume",
                       "name": "Flower Light Watt"
                     }
                   ],
@@ -1206,6 +1206,12 @@
                   "tap_action": {
                     "action": "toggle"
                   }
+                },
+                {
+                  "type": "custom:mushroom-select-card",
+                  "entity": "select.flowerwatteringmode",
+                  "name": "Wattering-Mode",
+                  "layout": "horizontal"
                 },
                 {
                   "type": "tile",
@@ -1398,7 +1404,7 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "sensor.light_energy_power_2",
+                  "entity": "sensor.veggipowerconsume",
                   "name": "Light Power",
                   "icon": "",
                   "show_entity_picture": true,
@@ -1749,7 +1755,7 @@
                   "align_state": "center",
                   "entities": [
                     {
-                      "entity": "number.airctrlflower",
+                      "entity": "sensor.veggipowerconsume",
                       "name": "Flower Light Watt"
                     }
                   ],
@@ -1889,6 +1895,12 @@
                   "tap_action": {
                     "action": "toggle"
                   }
+                },
+                {
+                  "type": "custom:mushroom-select-card",
+                  "entity": "select.veggiwatteringmode",
+                  "name": "Watering-Mode",
+                  "layout": "horizontal"
                 },
                 {
                   "type": "tile",
@@ -2673,6 +2685,12 @@
               "type": "grid",
               "cards": [
                 {
+                  "type": "custom:mushroom-select-card",
+                  "entity": "select.flowerwatteringmode",
+                  "name": "Wattering-Mode",
+                  "layout": "horizontal"
+                },
+                {
                   "type": "tile",
                   "entity": "number.flowerwateringintervall",
                   "name": "Next Wattering",
@@ -2730,6 +2748,12 @@
             {
               "type": "grid",
               "cards": [
+                {
+                  "type": "custom:mushroom-select-card",
+                  "entity": "select.veggiwatteringmode",
+                  "name": "Watering-Mode",
+                  "layout": "horizontal"
+                },
                 {
                   "type": "tile",
                   "entity": "text.vegginextpumpingintervall",
