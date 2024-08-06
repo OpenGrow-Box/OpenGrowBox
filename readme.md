@@ -30,15 +30,9 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 ---
 
 ## NEWS:
-### Module Industrial - Node-RED ONLY
-Industrial Version:
 
-Pi4 or Linux Vm/Linux-Computer
-Sensors
-Node-RED
-Python
-Grafana
-Influxdb or other db
+#### Autowatering is Completed
+### Next Step is LIGHT!!!
 ---
 ## Base / Heart / Call it How You Like
 
@@ -114,7 +108,8 @@ For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repos
 - [cre.sience](https://cre.science/)
 ---
 
-FREE - Public Version for Cannabis Social Clubs and industrial/medical production is available soon.
+FREE - Public Version for Cannabis Social Clubs and industrial/medical production is available soon. 
+       But you can use this as well. 
 
 ---
 

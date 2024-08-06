@@ -1209,14 +1209,14 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.flowerwatteringmode",
-                  "name": "Wattering-Mode",
+                  "entity": "select.flowerwateringmode",
+                  "name": "Watering-Mode",
                   "layout": "horizontal"
                 },
                 {
                   "type": "tile",
                   "entity": "number.flowerwateringintervall",
-                  "name": "Next Wattering",
+                  "name": "Next Watering",
                   "icon": "mdi:water-pump",
                   "show_entity_picture": true,
                   "hide_state": false,
@@ -1898,14 +1898,14 @@
                 },
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.veggiwatteringmode",
+                  "entity": "select.veggiwateringmode",
                   "name": "Watering-Mode",
                   "layout": "horizontal"
                 },
                 {
                   "type": "tile",
                   "entity": "text.vegginextpumpingintervall",
-                  "name": "Next Wattering",
+                  "name": "Next Watering",
                   "icon": "mdi:water-pump",
                   "show_entity_picture": true,
                   "hide_state": false,
@@ -2686,14 +2686,14 @@
               "cards": [
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.flowerwatteringmode",
-                  "name": "Wattering-Mode",
+                  "entity": "select.flowerwateringmode",
+                  "name": "Watering-Mode",
                   "layout": "horizontal"
                 },
                 {
                   "type": "tile",
                   "entity": "number.flowerwateringintervall",
-                  "name": "Next Wattering",
+                  "name": "Next Watering",
                   "icon": "mdi:water-pump",
                   "show_entity_picture": true,
                   "hide_state": false,
@@ -2743,21 +2743,21 @@
                   "color": "indigo"
                 }
               ],
-              "title": "Wattering"
+              "title": "Watering"
             },
             {
               "type": "grid",
               "cards": [
                 {
                   "type": "custom:mushroom-select-card",
-                  "entity": "select.veggiwatteringmode",
+                  "entity": "select.veggiwateringmode",
                   "name": "Watering-Mode",
                   "layout": "horizontal"
                 },
                 {
                   "type": "tile",
                   "entity": "text.vegginextpumpingintervall",
-                  "name": "Next Wattering",
+                  "name": "Next Watering",
                   "icon": "mdi:water-pump",
                   "show_entity_picture": true,
                   "hide_state": false,
@@ -2807,7 +2807,7 @@
                   "color": "indigo"
                 }
               ],
-              "title": "Wattering"
+              "title": "Watering"
             },
             {
               "type": "grid",
