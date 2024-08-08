@@ -13,7 +13,6 @@ The Master Flow polls different rooms from Home Assistant.
 If the room name is:
 - veggitent
 - flowertent
-- growroom
 - dryingtent
 
 All entities and devices will be clustered together and pushed out to the Tent Flow via Link-OUT/LINK-IN nodes.

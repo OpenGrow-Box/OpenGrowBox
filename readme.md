@@ -7,6 +7,13 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 ## U can use the [InstallScript](https://github.com/OpenGrow-Box/OpenGrowBox/blob/main/install.sh) for installation or do it manual: 
 
+## Or use this One-Liner with `sudo`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/install.sh | sudo bash
+
+wget -qO- https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/install.sh | sudo bash
+
 
 ### Overview All 
 ![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/4ff517f2-3c35-42fd-b7e5-65719d73452c)
