@@ -11,7 +11,9 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/install.sh | sudo bash
-
+```
+OR
+```bash
 wget -qO- https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/install.sh | sudo bash
 ```
 
