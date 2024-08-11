@@ -9,11 +9,11 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 ## Or use this One-Liner with `sudo`:
 
-``bash
+```bash
 curl -fsSL https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/install.sh | sudo bash
 
 wget -qO- https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/install.sh | sudo bash
-
+```
 
 ### Overview All 
 ![image](https://github.com/user-attachments/assets/9d7a9a9f-e604-45fd-8ac4-a356f580f0fe)
