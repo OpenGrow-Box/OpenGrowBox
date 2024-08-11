@@ -16,22 +16,19 @@ wget -qO- https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/instal
 
 
 ### Overview All 
-![image](https://github.com/OpenGrow-Box/OpenGrowBox/assets/170749418/4ff517f2-3c35-42fd-b7e5-65719d73452c)
+![image](https://github.com/user-attachments/assets/9d7a9a9f-e604-45fd-8ac4-a356f580f0fe)
 
 ### FlowerTent
-![image](https://github.com/user-attachments/assets/a6e11259-1f06-4aa9-95a3-d93e1dcd42d4)
+![image](https://github.com/user-attachments/assets/786b8f0a-43cb-4c22-a96c-78dbe2865512)
 
 ### VegiTent
-![image](https://github.com/user-attachments/assets/886c04c5-29e3-4860-a549-1936efa7dd3b)
+![image](https://github.com/user-attachments/assets/1b9bab87-5398-43dc-95a6-061b46b9bc22)
 
 ### DryTent
-![image](https://github.com/user-attachments/assets/0f5aabe9-8453-4b49-818d-35d724edaccc)
-
+![image](https://github.com/user-attachments/assets/8280be3d-a77d-49c6-af0c-fb8ca3347fd4)
 
 # Globals 
-![image](https://github.com/user-attachments/assets/2e8ff5a2-cde3-4239-a893-3066b210bceb)
-
-
+![image](https://github.com/user-attachments/assets/cddcb73a-e7a1-46b0-ba40-9900e91acc0e)
 
 
 ---
