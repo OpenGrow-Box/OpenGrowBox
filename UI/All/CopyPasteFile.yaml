@@ -280,7 +280,7 @@ views:
               action: toggle
             layout: vertical
           - type: tile
-            entity: switch.abluftan
+            entity: switch.ecruckflower
             name: Exhaust Flower
             color: deep-orange
             icon: mdi:fan
@@ -476,7 +476,9 @@ views:
             vertical: true
             show_entity_picture: true
             icon: mdi:heart-flash
-            state_content: last-changed
+            state_content:
+              - state
+              - last_changed
           - type: tile
             entity: sensor.flowerbatteriedevices
             name: Battery-Plant
@@ -498,7 +500,7 @@ views:
               - state
               - last-changed
           - type: tile
-            entity: sensor.light_energy_power
+            entity: sensor.flowerpowerconsume
             name: Light Power
             icon: ''
             show_entity_picture: true
@@ -708,82 +710,11 @@ views:
             air_temp: sensor.floweravgtemp
             leaf_temp: sensor.floweravgtemp
             leaf_temp_offset: -2
-        title: VPD-Data
-      - type: grid
-        cards:
-          - type: custom:mushroom-select-card
-            entity: select.flowerplantstageselect
-            name: Mode
-          - type: custom:mushroom-select-card
-            entity: select.flowerplantstageselect
-            name: PlatStage
-          - type: custom:mushroom-number-card
-            entity: number.flowertentwish_vpd
-            fill_container: true
-            name: VPD-Target
-            icon: mdi:thermometer
-            icon_color: pink
-            layout: horizontal
-          - type: custom:mushroom-number-card
-            entity: number.airctrflower
-            name: Exhaust
-            icon: mdi:fan
-            icon_color: deep-orange
-            icon_type: entity-picture
-            display_mode: slider
-            layout: horizontal
-            primary_info: name
-            secondary_info: state
-          - type: custom:mushroom-light-card
-            entity: light.vent_vent
-            name: VentsTop
-            icon: mdi:wind-power-outline
-            fill_container: true
-            layout: horizontal
-            icon_color: deep-orange
-            use_light_color: true
-            show_brightness_control: true
-            show_color_temp_control: false
-            show_color_control: false
-            collapsible_controls: true
-          - type: custom:mushroom-light-card
-            entity: light.vent
-            name: Vents Down
-            icon: mdi:wind-power-outline
-            fill_container: true
-            layout: horizontal
-            icon_color: deep-orange
-            use_light_color: true
-            show_brightness_control: true
-            show_color_temp_control: false
-            show_color_control: false
-            collapsible_controls: true
-          - type: custom:mushroom-entity-card
-            entity: switch.light
-            name: Flower Light
-            icon: mdi:led-on
-            fill_container: true
-            double_tap_action:
-              action: toggle
-            layout: vertical
-          - type: tile
-            entity: switch.ecruckflower
-            name: Exhaust
-            color: deep-orange
-            icon: mdi:fan
-            vertical: true
-            hide_state: false
-            state_content:
-              - state
-              - last-changed
-            show_entity_picture: true
-            tap_action:
-              action: toggle
           - type: custom:mini-graph-card
             align_header: center
             align_state: center
             entities:
-              - entity: number.airctrlflower
+              - entity: sensor.flowerpowerconsume
                 name: Flower Light Watt
             show:
               name: true
@@ -817,39 +748,107 @@ views:
             hours_to_show: 24
             points_per_hour: 30
             group_by: minute
+        title: VPD-Data
+      - type: grid
+        cards:
+          - type: custom:mushroom-select-card
+            entity: select.flowertentmodes
+            name: Mode
+          - type: custom:mushroom-select-card
+            entity: select.flowerplantstageselect
+            name: PlatStage
+          - type: custom:mushroom-number-card
+            entity: number.flowertarget_vpd
+            fill_container: true
+            name: VPD-Target
+            icon: mdi:thermometer
+            icon_color: pink
+            layout: horizontal
+          - type: custom:mushroom-number-card
+            entity: number.airctrlflower
+            name: Exhaust
+            icon: mdi:fan
+            icon_color: deep-orange
+            icon_type: entity-picture
+            display_mode: slider
+            layout: horizontal
+            primary_info: name
+            secondary_info: state
+          - type: custom:mushroom-light-card
+            entity: light.vent_vent
+            name: VentsTop
+            icon: mdi:wind-power-outline
+            fill_container: true
+            layout: horizontal
+            icon_color: deep-orange
+            use_light_color: true
+            show_brightness_control: true
+            show_color_temp_control: false
+            show_color_control: false
+            collapsible_controls: true
+          - type: custom:mushroom-entity-card
+            entity: switch.light
+            name: Flower Light
+            icon: mdi:led-on
+            fill_container: true
+            double_tap_action:
+              action: toggle
+            layout: vertical
           - type: tile
-            entity: sensor.nextpumpingaction
-            name: Next Wattering
+            entity: switch.ecruckflower
+            name: Exhaust
+            color: deep-orange
+            icon: mdi:fan
+            vertical: true
+            hide_state: false
+            state_content:
+              - state
+              - last-changed
+            show_entity_picture: true
+            tap_action:
+              action: toggle
+          - type: custom:mushroom-select-card
+            entity: select.flowerwateringmode
+            name: Watering-Mode
+            layout: horizontal
+          - type: tile
+            entity: number.flowerwateringintervall
+            name: Next Watering
             icon: mdi:water-pump
             show_entity_picture: true
             hide_state: false
             vertical: true
             color: indigo
           - type: tile
-            entity: switch.autorun
+            entity: switch.flowerautopump
             name: Auto Run Mode
             color: blue
+            icon: mdi:water-plus
           - type: tile
-            entity: switch.pumpon
+            entity: switch.flowerpumpon
             name: Start Watering
             color: blue
+            icon: mdi:watering-can
           - type: tile
-            entity: sensor.pumpinglefttime
+            entity: text.flowerpumpingduration
             vertical: true
             state_content:
               - state
               - last-changed
             color: indigo
+            name: WateringTime
+            icon: mdi:thermometer-water
           - type: tile
-            entity: number.pumpinghours
+            entity: number.flowerwateringintervall
             name: PumpIntervall
             color: indigo
+            icon: mdi:clock-time-eight
           - type: tile
-            entity: number.watteringduration
+            entity: number.flowerwateringduration
             name: Watering Duration
             vertical: false
             hide_state: false
-            icon: mdi:water
+            icon: mdi:clock-time-eleven
             color: indigo
         title: Controllers
     cards: []
@@ -954,7 +953,7 @@ views:
               - state
               - last-changed
           - type: tile
-            entity: sensor.light_energy_power_2
+            entity: sensor.veggipowerconsume
             name: Light Power
             icon: ''
             show_entity_picture: true
@@ -1162,6 +1161,44 @@ views:
             air_temp: sensor.vegiavgtemp
             leaf_temp: sensor.vegiavgtemp
             leaf_temp_offset: -2
+          - type: custom:mini-graph-card
+            align_header: center
+            align_state: center
+            entities:
+              - entity: sensor.veggipowerconsume
+                name: Flower Light Watt
+            show:
+              name: true
+              legend: true
+              icon: false
+              labels: true
+            color_thresholds:
+              - value: 0
+                color: '#99ffbb'
+              - value: 50
+                color: '#adebad'
+              - value: 100
+                color: '#99ff99'
+              - value: 125
+                color: '#ccffcc'
+              - value: 150
+                color: '#e6ffe6'
+              - value: 175
+                color: '#80ffd4'
+              - value: 200
+                color: '#66ffff'
+              - value: 250
+                color: '#4dc3ff'
+              - value: 300
+                color: '#b366ff'
+              - value: 350
+                color: '#ff1a8c'
+              - value: 400
+                color: '#ff3300'
+            name: Flower Light Watt
+            hours_to_show: 24
+            points_per_hour: 30
+            group_by: minute
         title: VPD-Data
       - type: grid
         cards:
@@ -1173,7 +1210,7 @@ views:
             name: PlantStage
             icon_color: primary
           - type: custom:mushroom-number-card
-            entity: number.vegitentwish_vpd
+            entity: number.veggitarget_vpd
             fill_container: true
             name: VPD-Target
             icon: mdi:thermometer
@@ -1222,63 +1259,43 @@ views:
             show_entity_picture: true
             tap_action:
               action: toggle
-          - type: custom:mini-graph-card
-            align_header: center
-            align_state: center
-            entities:
-              - entity: sensor.light_energy_power_2
-                name: Vegi Light Watt
-            show:
-              name: true
-              legend: true
-              icon: false
-              labels: true
-            color_thresholds:
-              - value: 0
-                color: '#99ffbb'
-              - value: 50
-                color: '#adebad'
-              - value: 100
-                color: '#995f99'
-              - value: 125
-                color: '#b366ff'
-              - value: 150
-                color: '#ff1a8c'
-              - value: 175
-                color: '#ff3300'
-            name: Vegi Light Watt
-            hours_to_show: 24
-            points_per_hour: 30
-            group_by: minute
+          - type: custom:mushroom-select-card
+            entity: select.veggiwateringmode
+            name: Watering-Mode
+            layout: horizontal
           - type: tile
-            entity: sensor.nextpumpingaction
-            name: Next Wattering
+            entity: text.vegginextpumpingintervall
+            name: Next Watering
             icon: mdi:water-pump
             show_entity_picture: true
             hide_state: false
             vertical: true
             color: indigo
           - type: tile
-            entity: switch.autorun
+            entity: switch.veggiautopump
             name: Auto Run Mode
             color: blue
+            icon: mdi:water-plus
           - type: tile
-            entity: switch.pumpon
+            entity: switch.veggipumpon
             name: Start Watering
             color: blue
+            icon: mdi:watering-can
           - type: tile
-            entity: sensor.pumpinglefttime
+            entity: text.veggipumpingduration
             vertical: true
             state_content:
               - state
               - last-changed
             color: indigo
+            icon: mdi:thermometer-water
+            name: WateringTime
           - type: tile
-            entity: number.pumpinghours
+            entity: number.veggiwateringintervall
             name: PumpIntervall
             color: indigo
           - type: tile
-            entity: number.watteringduration
+            entity: number.veggiwateringduration
             name: Watering Duration
             vertical: false
             hide_state: false
@@ -1595,7 +1612,7 @@ views:
             entity: humidifier.befeuchter
             vertical: true
           - type: tile
-            entity: switch.ecruckdry
+            entity: switch.ecruckdryer
             name: Exhaust
             color: deep-orange
             icon: mdi:fan
@@ -1764,78 +1781,96 @@ views:
         cards: []
       - type: grid
         cards:
+          - type: custom:mushroom-select-card
+            entity: select.flowerwateringmode
+            name: Watering-Mode
+            layout: horizontal
           - type: tile
-            entity: sensor.nextpumpingaction
-            name: Next Wattering
+            entity: number.flowerwateringintervall
+            name: Next Watering
             icon: mdi:water-pump
             show_entity_picture: true
             hide_state: false
             vertical: true
             color: indigo
           - type: tile
-            entity: switch.autorun
+            entity: switch.flowerautopump
             name: Auto Run Mode
             color: blue
+            icon: mdi:water-plus
           - type: tile
-            entity: switch.pumpon
+            entity: switch.flowerpumpon
             name: Start Watering
             color: blue
+            icon: mdi:watering-can
           - type: tile
-            entity: sensor.pumpinglefttime
+            entity: text.flowerpumpingduration
             vertical: true
             state_content:
               - state
               - last-changed
             color: indigo
+            name: WateringTime
+            icon: mdi:thermometer-water
           - type: tile
-            entity: number.pumpinghours
+            entity: number.flowerwateringintervall
             name: PumpIntervall
             color: indigo
+            icon: mdi:clock-time-eight
           - type: tile
-            entity: number.watteringduration
+            entity: number.flowerwateringduration
             name: Watering Duration
             vertical: false
             hide_state: false
-            icon: mdi:water
+            icon: mdi:clock-time-eleven
             color: indigo
-        title: Wattering
+        title: Watering
       - type: grid
         cards:
+          - type: custom:mushroom-select-card
+            entity: select.veggiwateringmode
+            name: Watering-Mode
+            layout: horizontal
           - type: tile
-            entity: sensor.nextpumpingaction
-            name: Next Wattering
+            entity: text.vegginextpumpingintervall
+            name: Next Watering
             icon: mdi:water-pump
             show_entity_picture: true
             hide_state: false
             vertical: true
             color: indigo
           - type: tile
-            entity: switch.autorun
+            entity: switch.veggiautopump
             name: Auto Run Mode
             color: blue
+            icon: mdi:water-plus
           - type: tile
-            entity: switch.pumpon
+            entity: switch.veggipumpon
             name: Start Watering
             color: blue
+            icon: mdi:watering-can
           - type: tile
-            entity: sensor.pumpinglefttime
+            entity: text.veggipumpingduration
             vertical: true
             state_content:
               - state
               - last-changed
             color: indigo
+            name: WateringTime
+            icon: mdi:thermometer-water
           - type: tile
-            entity: number.pumpinghours
+            entity: number.veggiwateringintervall
             name: PumpIntervall
             color: indigo
+            icon: mdi:clock-time-eight
           - type: tile
-            entity: number.watteringduration
+            entity: number.veggiwateringduration
             name: Watering Duration
             vertical: false
             hide_state: false
-            icon: mdi:water
+            icon: mdi:clock-time-eleven
             color: indigo
-        title: Wattering
+        title: Watering
       - type: grid
         cards: []
     cards: []
