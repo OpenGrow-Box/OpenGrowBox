@@ -2,27 +2,16 @@
 
 You can copy and paste these Node-Red flows, import them into your system, and have fun with them.
 
+# ATTENTION WE CLEAR GLOBALS!!!! 
+
 # Core Components
-- MasterFlow
-- TargetedDevices
-- Globals
+- Master Flow
+- MasterOut Flow
 
-## YOU ALWAYS NEED THE MASTER FLOW!
-The Master Flow polls different rooms from Home Assistant.
+## YOU ALWAYS NEED BOTH MASTER FLOWS!
+The Master Flow polls different rooms from Home Assistant. Build a instance of the room. 
+with grouped devices. and identify devices by name set a type.
 
-If the room name is:
-- veggitent
-- flowertent
-- dryingtent
+and run actions over the devices.
 
-All entities and devices will be clustered together and pushed out to the Tent Flow via Link-OUT/LINK-IN nodes.
 
-## Globals 
-Here are the values for Target-VPD, PlantStage selectors, and TentModes.
-
-## Targeted Devices 
-This is the only point where you need to make changes in all the flows.
-Set the devices that need to be controlled here.
-
-## Helpers 
-Helpers are parts of the entire Tent Flow.

@@ -3,11 +3,13 @@ views:
   - sections:
       - type: grid
         cards:
+          - type: heading
+            heading: Flower-Tent
           - type: custom:mini-graph-card
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.vpd_flower
+              - entity: sensor.vpdflower
                 name: VPD
             show:
               name: true
@@ -80,9 +82,10 @@ views:
             air_temp: sensor.floweravgtemp
             leaf_temp: sensor.floweravgtemp
             leaf_temp_offset: -2
-        title: Flower-Tent
       - type: grid
         cards:
+          - type: heading
+            heading: Veggi-Tent
           - type: custom:mini-graph-card
             align_header: center
             align_state: center
@@ -155,14 +158,15 @@ views:
             air_temp: sensor.vegiavgtemp
             leaf_temp: sensor.vegiavgtemp
             leaf_temp_offset: -2
-        title: Veggi-Tent
       - type: grid
         cards:
+          - type: heading
+            heading: Drying-Tent
           - type: custom:mini-graph-card
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.vpd_drying_tent_dewpoint
+              - entity: sensor.vpddrying
                 name: VPD
             show:
               name: true
@@ -256,9 +260,10 @@ views:
             state_content:
               - state
               - last-changed
-        title: Drying-Tent
       - type: grid
         cards:
+          - type: heading
+            heading: Devices
           - type: custom:mushroom-humidifier-card
             entity: humidifier.befeuchter
             name: Humidifier
@@ -280,7 +285,7 @@ views:
               action: toggle
             layout: vertical
           - type: tile
-            entity: switch.ecruckflower
+            entity: switch.abluftan
             name: Exhaust Flower
             color: deep-orange
             icon: mdi:fan
@@ -370,7 +375,7 @@ views:
             show_color_control: false
             collapsible_controls: true
           - type: tile
-            entity: switch.ecruckdryer
+            entity: switch.ecruckdry
             name: Exhaust Drying
             color: deep-orange
             icon: mdi:fan
@@ -392,7 +397,6 @@ views:
             primary_info: name
             secondary_info: state
             name: Exhaust Drying
-        title: Devices
     title: OverView
     type: sections
     max_columns: 5
@@ -404,8 +408,10 @@ views:
     sections:
       - type: grid
         cards:
+          - type: heading
+            heading: Flower Enviorment
           - type: tile
-            entity: sensor.vpd_flower
+            entity: sensor.vpdflower
             name: VPD
             color: pink
             vertical: true
@@ -478,7 +484,7 @@ views:
             icon: mdi:heart-flash
             state_content:
               - state
-              - last_changed
+              - last-changed
           - type: tile
             entity: sensor.flowerbatteriedevices
             name: Battery-Plant
@@ -500,7 +506,7 @@ views:
               - state
               - last-changed
           - type: tile
-            entity: sensor.flowerpowerconsume
+            entity: sensor.light_energy_power
             name: Light Power
             icon: ''
             show_entity_picture: true
@@ -529,9 +535,10 @@ views:
             state_content:
               - state
               - last-changed
-        title: Flower Enviorment
       - type: grid
         cards:
+          - type: heading
+            heading: Chart Data
           - type: custom:mini-graph-card
             align_header: center
             align_state: center
@@ -607,7 +614,7 @@ views:
             align_state: center
             entities:
               - entity: sensor.floweravghum
-                name: TauPunkt Plants
+                name: Humidity
             show:
               name: true
               legend: true
@@ -640,7 +647,7 @@ views:
             align_header: center
             align_state: center
             entities:
-              - entity: number.airctrlflower
+              - entity: number.airctrflower
                 name: Exhaust
             show:
               name: true
@@ -670,14 +677,53 @@ views:
             hours_to_show: 24
             points_per_hour: 60
             group_by: minute
-        title: Chart Data
-      - type: grid
-        cards:
           - type: custom:mini-graph-card
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.vpd_flower
+              - entity: sensor.light_energy_power
+                name: Flower Light Watt
+            show:
+              name: true
+              legend: true
+              icon: false
+              labels: true
+            color_thresholds:
+              - value: 0
+                color: '#99ffbb'
+              - value: 50
+                color: '#adebad'
+              - value: 100
+                color: '#99ff99'
+              - value: 125
+                color: '#ccffcc'
+              - value: 150
+                color: '#e6ffe6'
+              - value: 175
+                color: '#80ffd4'
+              - value: 200
+                color: '#66ffff'
+              - value: 250
+                color: '#4dc3ff'
+              - value: 300
+                color: '#b366ff'
+              - value: 350
+                color: '#ff1a8c'
+              - value: 400
+                color: '#ff3300'
+            name: Flower Light Watt
+            hours_to_show: 24
+            points_per_hour: 30
+            group_by: minute
+      - type: grid
+        cards:
+          - type: heading
+            heading: VPD-Data
+          - type: custom:mini-graph-card
+            align_header: center
+            align_state: center
+            entities:
+              - entity: sensor.vpdflower
                 name: VPD
             show:
               name: true
@@ -714,8 +760,8 @@ views:
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.flowerpowerconsume
-                name: Flower Light Watt
+              - entity: text.flowerpumpingduration
+                name: Plant Watering
             show:
               name: true
               legend: true
@@ -744,28 +790,29 @@ views:
                 color: '#ff1a8c'
               - value: 400
                 color: '#ff3300'
-            name: Flower Light Watt
+            name: Flower Plant Watter Intervall
             hours_to_show: 24
             points_per_hour: 30
             group_by: minute
-        title: VPD-Data
       - type: grid
         cards:
+          - type: heading
+            heading: Controllers
           - type: custom:mushroom-select-card
             entity: select.flowertentmodes
             name: Mode
           - type: custom:mushroom-select-card
-            entity: select.flowerplantstageselect
+            entity: select.flowertent
             name: PlatStage
           - type: custom:mushroom-number-card
-            entity: number.flowertarget_vpd
+            entity: number.flowerleaftemp
             fill_container: true
             name: VPD-Target
             icon: mdi:thermometer
             icon_color: pink
             layout: horizontal
           - type: custom:mushroom-number-card
-            entity: number.airctrlflower
+            entity: number.airctrflower
             name: Exhaust
             icon: mdi:fan
             icon_color: deep-orange
@@ -786,6 +833,18 @@ views:
             show_color_temp_control: false
             show_color_control: false
             collapsible_controls: true
+          - type: custom:mushroom-light-card
+            entity: light.vent
+            name: Vents Down
+            icon: mdi:wind-power-outline
+            fill_container: true
+            layout: horizontal
+            icon_color: deep-orange
+            use_light_color: true
+            show_brightness_control: true
+            show_color_temp_control: false
+            show_color_control: false
+            collapsible_controls: true
           - type: custom:mushroom-entity-card
             entity: switch.light
             name: Flower Light
@@ -795,7 +854,7 @@ views:
               action: toggle
             layout: vertical
           - type: tile
-            entity: switch.ecruckflower
+            entity: switch.abluftan
             name: Exhaust
             color: deep-orange
             icon: mdi:fan
@@ -807,13 +866,23 @@ views:
             show_entity_picture: true
             tap_action:
               action: toggle
-          - type: custom:mushroom-select-card
-            entity: select.flowerwateringmode
-            name: Watering-Mode
-            layout: horizontal
           - type: tile
-            entity: number.flowerwateringintervall
-            name: Next Watering
+            entity: humidifier.befeuchter
+            vertical: true
+          - type: tile
+            entity: climate.klima
+            vertical: true
+            show_entity_picture: true
+            state_content:
+              - state
+              - current_temperature
+          - type: custom:mushroom-select-card
+            layout: horizontal
+            name: Flower Wattering Mode
+            entity: select.flowerwatteringmode
+          - type: tile
+            entity: sensor.nextpumpingaction
+            name: Next Wattering
             icon: mdi:water-pump
             show_entity_picture: true
             hide_state: false
@@ -824,6 +893,9 @@ views:
             name: Auto Run Mode
             color: blue
             icon: mdi:water-plus
+            state_content:
+              - state
+              - last-changed
           - type: tile
             entity: switch.flowerpumpon
             name: Start Watering
@@ -850,7 +922,6 @@ views:
             hide_state: false
             icon: mdi:clock-time-eleven
             color: indigo
-        title: Controllers
     cards: []
     subview: false
   - title: Veggi
@@ -859,6 +930,8 @@ views:
     sections:
       - type: grid
         cards:
+          - type: heading
+            heading: Vegitaion Enviorment
           - type: tile
             entity: sensor.vpdvegi
             name: VPD
@@ -982,9 +1055,10 @@ views:
             state_content:
               - state
               - last-changed
-        title: Vegitaion Enviorment
       - type: grid
         cards:
+          - type: heading
+            heading: Chart Data
           - type: custom:mini-graph-card
             align_header: center
             align_state: center
@@ -1121,9 +1195,38 @@ views:
             hours_to_show: 24
             points_per_hour: 30
             group_by: minute
-        title: Chart Data
+          - type: custom:mini-graph-card
+            align_header: center
+            align_state: center
+            entities:
+              - entity: sensor.light_energy_power_2
+                name: Vegi Light Watt
+            show:
+              name: true
+              legend: true
+              icon: false
+              labels: true
+            color_thresholds:
+              - value: 0
+                color: '#99ffbb'
+              - value: 50
+                color: '#adebad'
+              - value: 100
+                color: '#995f99'
+              - value: 125
+                color: '#b366ff'
+              - value: 150
+                color: '#ff1a8c'
+              - value: 175
+                color: '#ff3300'
+            name: Vegi Light Watt
+            hours_to_show: 24
+            points_per_hour: 30
+            group_by: minute
       - type: grid
         cards:
+          - type: heading
+            heading: VPD-Data
           - type: custom:mini-graph-card
             align_header: center
             align_state: center
@@ -1165,8 +1268,8 @@ views:
             align_header: center
             align_state: center
             entities:
-              - entity: sensor.veggipowerconsume
-                name: Flower Light Watt
+              - entity: sensor.pumpinglefttimeveggi
+                name: Watering Veggi
             show:
               name: true
               legend: true
@@ -1178,39 +1281,30 @@ views:
               - value: 50
                 color: '#adebad'
               - value: 100
-                color: '#99ff99'
+                color: '#995f99'
               - value: 125
-                color: '#ccffcc'
-              - value: 150
-                color: '#e6ffe6'
-              - value: 175
-                color: '#80ffd4'
-              - value: 200
-                color: '#66ffff'
-              - value: 250
-                color: '#4dc3ff'
-              - value: 300
                 color: '#b366ff'
-              - value: 350
+              - value: 150
                 color: '#ff1a8c'
-              - value: 400
+              - value: 175
                 color: '#ff3300'
-            name: Flower Light Watt
+            name: Watering Veggi
             hours_to_show: 24
             points_per_hour: 30
             group_by: minute
-        title: VPD-Data
       - type: grid
         cards:
+          - type: heading
+            heading: Controllers
           - type: custom:mushroom-select-card
-            entity: select.vegitentmodes
+            entity: select.nodered_f152b5af3096b1e5
             name: Mode
-          - type: custom:mushroom-select-card
-            entity: select.veggiplantstageselect
-            name: PlantStage
             icon_color: primary
+          - type: custom:mushroom-select-card
+            entity: select.nodered_2b0a7710b4f6a58a
+            name: PlantStage
           - type: custom:mushroom-number-card
-            entity: number.veggitarget_vpd
+            entity: number.vegitentwish_vpd
             fill_container: true
             name: VPD-Target
             icon: mdi:thermometer
@@ -1226,6 +1320,16 @@ views:
             layout: horizontal
             primary_info: name
             secondary_info: state
+          - type: tile
+            entity: humidifier.befeuchter
+            vertical: true
+          - type: tile
+            entity: climate.klima
+            vertical: true
+            show_entity_picture: true
+            state_content:
+              - state
+              - current_temperature
           - type: custom:mushroom-light-card
             entity: light.ventsvegi
             name: Vents
@@ -1239,8 +1343,8 @@ views:
             show_color_control: false
             collapsible_controls: true
           - type: custom:mushroom-entity-card
-            entity: switch.light_veg
-            name: Vegi Light
+            entity: switch.veggilightswitch
+            name: Veggi Light
             icon: mdi:led-on
             fill_container: true
             double_tap_action:
@@ -1260,12 +1364,12 @@ views:
             tap_action:
               action: toggle
           - type: custom:mushroom-select-card
-            entity: select.veggiwateringmode
-            name: Watering-Mode
             layout: horizontal
+            name: Veggi Wattering Mode
+            entity: select.flowerwatteringmode_2
           - type: tile
             entity: text.vegginextpumpingintervall
-            name: Next Watering
+            name: Next Wattering
             icon: mdi:water-pump
             show_entity_picture: true
             hide_state: false
@@ -1301,7 +1405,6 @@ views:
             hide_state: false
             icon: mdi:water
             color: indigo
-        title: Controllers
     max_columns: 4
     cards: []
   - title: Dry
@@ -1310,6 +1413,8 @@ views:
     sections:
       - type: grid
         cards:
+          - type: heading
+            heading: Tent Data
           - type: tile
             entity: sensor.dryingavgdewpoint
             name: Dewpoint
@@ -1319,6 +1424,15 @@ views:
               - state
               - last-changed
             color: teal
+          - type: tile
+            name: Temp-AVG
+            show_entity_picture: true
+            vertical: true
+            color: green
+            state_content:
+              - state
+              - last-changed
+            entity: sensor.dryingavgtemp
           - type: tile
             entity: sensor.dryingavghum
             name: HumidityAVG
@@ -1347,24 +1461,6 @@ views:
             color: light-blue
             icon: mdi:water
           - type: tile
-            entity: sensor.vpd_drying_tent_dewpoint
-            name: VPD
-            color: pink
-            vertical: true
-            show_entity_picture: true
-            state_content:
-              - state
-              - last-changed
-          - type: tile
-            name: Temp-AVG
-            show_entity_picture: true
-            vertical: true
-            color: green
-            state_content:
-              - state
-              - last-changed
-            entity: sensor.dryingavgtemp
-          - type: tile
             entity: sensor.vaporpressure_saturation
             vertical: true
             state_content:
@@ -1372,15 +1468,27 @@ views:
               - last-changed
             color: purple
             name: VP-Saturation
-        title: Tent Data
+          - type: tile
+            entity: sensor.h5179_485d_battery
+          - type: tile
+            entity: sensor.dewpointt_vpd_dryer
+            name: VPD
+            color: pink
+            vertical: true
+            show_entity_picture: true
+            state_content:
+              - state
+              - last-changed
       - type: grid
         cards:
+          - type: heading
+            heading: Chart-Data
           - type: custom:mini-graph-card
             align_header: center
             align_state: center
             entities:
               - entity: sensor.vaporpressure_actual
-                name: Unten
+                name: VP-Actual
             show:
               name: true
               legend: true
@@ -1505,9 +1613,10 @@ views:
             group_by: minute
             align_header: center
             align_state: center
-        title: Chart-Data
       - type: grid
         cards:
+          - type: heading
+            heading: Target Data
           - type: tile
             name: Temp-AVG
             show_entity_picture: true
@@ -1536,7 +1645,7 @@ views:
             name: DewPoint Target
             state_content: last-changed
           - type: tile
-            entity: sensor.wateractivitywish
+            entity: sensor.wateractvity_drytent
             name: WaterActivity Target
             show_entity_picture: true
             vertical: true
@@ -1575,62 +1684,6 @@ views:
             state_content:
               - state
               - last-changed
-        title: Target Data
-      - type: grid
-        cards:
-          - type: custom:mushroom-select-card
-            entity: select.drytentcana
-            name: MasterDry
-            icon: mdi:hair-dryer
-            fill_container: true
-            layout: horizontal
-          - type: custom:mushroom-number-card
-            entity: number.drytentdewpoint
-            fill_container: true
-            layout: horizontal
-            name: DewPoint Target
-            icon_color: teal
-            icon: mdi:water-thermometer-outline
-          - type: custom:mushroom-number-card
-            entity: number.drytenttemp
-            fill_container: true
-            layout: horizontal
-            name: Temp Target
-            icon: mdi:thermometer
-            icon_color: green
-          - type: custom:mushroom-number-card
-            entity: number.airctrldryer
-            name: 'Abluft '
-            icon: mdi:fan
-            icon_color: deep-orange
-            icon_type: entity-picture
-            display_mode: slider
-            layout: horizontal
-            primary_info: name
-            secondary_info: state
-          - type: tile
-            entity: humidifier.befeuchter
-            vertical: true
-          - type: tile
-            entity: switch.ecruckdryer
-            name: Exhaust
-            color: deep-orange
-            icon: mdi:fan
-            vertical: true
-            hide_state: false
-            state_content:
-              - state
-              - last-changed
-            show_entity_picture: true
-            tap_action:
-              action: toggle
-          - type: tile
-            entity: climate.klima
-            vertical: true
-            show_entity_picture: true
-            state_content:
-              - state
-              - current_temperature
           - type: custom:mini-graph-card
             align_header: center
             align_state: center
@@ -1665,7 +1718,63 @@ views:
             hours_to_show: 24
             points_per_hour: 12
             group_by: minute
-        title: Modes
+      - type: grid
+        cards:
+          - type: heading
+            heading: Modes
+          - type: custom:mushroom-select-card
+            entity: select.drytentcana
+            name: MasterDry
+            icon: mdi:hair-dryer
+            fill_container: true
+            layout: horizontal
+          - type: custom:mushroom-number-card
+            entity: number.drytentdewpoint
+            fill_container: true
+            layout: horizontal
+            name: DewPoint Target
+            icon_color: teal
+            icon: mdi:water-thermometer-outline
+          - type: custom:mushroom-number-card
+            entity: number.drytenttemp
+            fill_container: true
+            layout: horizontal
+            name: Temp Target
+            icon: mdi:thermometer
+            icon_color: green
+          - type: custom:mushroom-number-card
+            entity: number.airctrldryer
+            name: 'Abluft '
+            icon: mdi:fan
+            icon_color: deep-orange
+            icon_type: entity-picture
+            display_mode: slider
+            layout: horizontal
+            primary_info: name
+            secondary_info: state
+          - type: tile
+            entity: humidifier.befeuchter
+            vertical: true
+          - type: tile
+            entity: switch.ecruckdry
+            name: Exhaust
+            color: deep-orange
+            icon: mdi:fan
+            vertical: true
+            hide_state: false
+            state_content:
+              - state
+              - last-changed
+            show_entity_picture: true
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: climate.klima
+            vertical: true
+            show_entity_picture: true
+            state_content:
+              - state
+              - current_temperature
     max_columns: 4
     cards: []
   - type: sections
@@ -1675,6 +1784,8 @@ views:
     sections:
       - type: grid
         cards:
+          - type: heading
+            heading: Globals
           - type: custom:mushroom-select-card
             name: LeafOffSetMode
             icon: mdi:hair-dryer
@@ -1688,9 +1799,10 @@ views:
             name: LeafTempOffset
             icon: mdi:thermometer
             icon_color: green
-        title: Globals
       - type: grid
         cards:
+          - type: heading
+            heading: Flower
           - type: custom:mushroom-number-card
             entity: number.flowerleaftemp
             fill_container: true
@@ -1699,15 +1811,16 @@ views:
             icon: mdi:thermometer
             icon_color: green
           - type: custom:mushroom-number-card
-            entity: number.flowertarget_vpd
+            entity: number.flowertentwish_vpd
             fill_container: true
             name: VPD-Target
             icon: mdi:thermometer
             icon_color: pink
             layout: horizontal
-        title: Flower
       - type: grid
         cards:
+          - type: heading
+            heading: Veggi
           - type: custom:mushroom-number-card
             entity: number.veggileaftemp
             fill_container: true
@@ -1716,15 +1829,16 @@ views:
             icon: mdi:thermometer
             icon_color: green
           - type: custom:mushroom-number-card
-            entity: number.veggitarget_vpd
+            entity: number.vegitentwish_vpd
             fill_container: true
             name: VPD-Target
             icon: mdi:thermometer
             icon_color: pink
             layout: horizontal
-        title: Veggi
       - type: grid
         cards:
+          - type: heading
+            heading: DryTent
           - type: custom:mushroom-select-card
             entity: select.drytentcana
             name: MasterDry
@@ -1745,49 +1859,55 @@ views:
             name: DewPoint Target
             icon_color: teal
             icon: mdi:water-thermometer-outline
-        title: DryTent
       - type: grid
         cards:
+          - type: heading
+            heading: Klima Outdoor
           - type: tile
             entity: sensor.tempoutdoor
-        title: Klima Outdoor
+          - type: tile
+            entity: switch.air_2
       - type: grid
         cards:
+          - type: heading
+            heading: Flower Modes
           - type: custom:mushroom-select-card
             entity: select.flowertentmodes
             name: Modes
             layout: horizontal
           - type: custom:mushroom-select-card
-            entity: select.flowerplantstageselect
+            entity: select.flowertent
             name: PlatStage
             layout: horizontal
-        title: Flower Modes
       - type: grid
         cards:
+          - type: heading
+            heading: Veggi Modes
           - type: custom:mushroom-select-card
-            entity: select.vegitentmodes
+            entity: select.nodered_f152b5af3096b1e5
             name: PlantStages
             icon_color: primary
             layout: horizontal
           - type: custom:mushroom-select-card
-            entity: select.veggiplantstageselect
+            entity: select.nodered_2b0a7710b4f6a58a
             name: Modes
             layout: horizontal
             fill_container: true
-        title: Veggi Modes
       - type: grid
         cards: []
       - type: grid
         cards: []
       - type: grid
         cards:
+          - type: heading
+            heading: Wattering
           - type: custom:mushroom-select-card
-            entity: select.flowerwateringmode
-            name: Watering-Mode
             layout: horizontal
+            name: Flower Wattering Mode
+            entity: select.flowerwatteringmode
           - type: tile
             entity: number.flowerwateringintervall
-            name: Next Watering
+            name: Next Wattering
             icon: mdi:water-pump
             show_entity_picture: true
             hide_state: false
@@ -1824,16 +1944,17 @@ views:
             hide_state: false
             icon: mdi:clock-time-eleven
             color: indigo
-        title: Watering
       - type: grid
         cards:
+          - type: heading
+            heading: Wattering
           - type: custom:mushroom-select-card
-            entity: select.veggiwateringmode
-            name: Watering-Mode
             layout: horizontal
+            name: Veggi Wattering Mode
+            entity: select.flowerwatteringmode_2
           - type: tile
             entity: text.vegginextpumpingintervall
-            name: Next Watering
+            name: Next Wattering
             icon: mdi:water-pump
             show_entity_picture: true
             hide_state: false
@@ -1870,7 +1991,43 @@ views:
             hide_state: false
             icon: mdi:clock-time-eleven
             color: indigo
-        title: Watering
       - type: grid
         cards: []
     cards: []
+  - title: Featuers
+    path: featuers
+    cards: []
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Press PSI
+          - type: custom:mushroom-number-card
+            fill_container: true
+            layout: horizontal
+            icon_color: teal
+            icon: mdi:water-thermometer-outline
+            name: Press_Tons
+            entity: number.presstons
+          - type: custom:mushroom-number-card
+            fill_container: true
+            layout: horizontal
+            icon_color: teal
+            icon: mdi:water-thermometer-outline
+            name: TargetPSI
+            entity: number.targetpsi
+          - type: custom:mushroom-number-card
+            fill_container: true
+            layout: horizontal
+            icon_color: teal
+            icon: mdi:water-thermometer-outline
+            name: Pressing Length
+            entity: number.press_height
+          - type: custom:mushroom-number-card
+            fill_container: true
+            layout: horizontal
+            icon_color: teal
+            icon: mdi:water-thermometer-outline
+            name: Pressing Width
+            entity: number.press_heigth
