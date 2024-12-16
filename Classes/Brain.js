@@ -299,7 +299,7 @@ class OpenGrowBox {
             node.warn(`TentMode geändert von ${this.tentMode} auf ${tentMode} in ${this.tentName}`);
             
             // Prüfe, ob der neue Modus nicht "Drying" ist
-            if (tentMode !== "Drying" && this.drying.isRunning) {
+            if (tentMode !== "Drying") {
                 this.drying.isRunning = false;
                 this.drying.isEnabled = false;
                 this.drying.currentDryMode = ""; // Drying-Mode zurücksetzen
@@ -345,7 +345,7 @@ class OpenGrowBox {
             this.plantStage = plantStage; // Stelle sicher, dass plantStage gesetzt wird
             //node.warn(`PlantStage innerhalb der Instanz aktualisiert: ${this.plantStage}`);
         } else {
-            node.warn(`Ungültige PlantStage: ${plantStage}`);
+            //node.warn(`Ungültige PlantStage: ${plantStage}`);
         }
     }
 
@@ -923,6 +923,7 @@ class OpenGrowBox {
     // DRYING ******************************
     // Setze aktuellen DryMode
     setDryingMode(dryMode) {
+        if(this.tentMode !== "Drying")return
         const normalizedMode = Object.keys(this.drying.modes).find(
             mode => mode.toLowerCase() === dryMode.toLowerCase()
         );
@@ -1985,57 +1986,6 @@ class Device {
         return this;
     }
 
-
-
-    prepareAction2(finalActions) {
-        if (finalActions.hasOwnProperty(this.deviceType)) {
-            const actionValue = finalActions[this.deviceType];
-
-            // Sonderfall für "climate" Geräte
-            if (this.deviceType === "light") {
-                this.needChange = true;
-                this.action = actionValue;
-            } else if (this.deviceType === "climate") {
-                const climateActions = finalActions.climate; // Hole die climate-Aktionen
-                if (typeof climateActions === "object") {
-                    // Initialisiere `this.action` als Objekt, falls es aktuell ein String ist
-                    if (typeof this.action === "string") {
-                        this.action = {};
-                    }
-                    node.warn(`HAVOCS: ${climateActions.heat}`);
-                    // Iteriere über die verfügbaren Havoc-Modi
-                    for (const mode in this.havocs) {
-                        if (this.havocs.hasOwnProperty(mode)) {
-                            const mappedMode = mode.toLowerCase(); // Mappe Havoc-Modus (z.B. "Dry") auf Lowercase ("dry")
-                            const action = climateActions[mappedMode]; // Hole die Aktion für den Modus
-                            
-                            if (action) {
-                                if (action !== "unchanged") {
-                                    this.needChange = true;
-                                    this.action[mappedMode] = action; // Speichere Aktionen pro Modus
-                                } else {
-                                    this.action[mappedMode] = action; // Unverändert bleibt erhalten
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                // Standard-Verhalten für andere Gerätetypen
-                if (actionValue === "unchanged") {
-                    this.needChange = false;
-                    this.action = actionValue;
-                } else if (
-                    ["maximum", "reduced", "increased", "minimum","medium","on","off"].includes(actionValue)
-                ) {
-                    this.needChange = true;
-                    this.action = actionValue;
-                }
-            }
-        }
-        return this;
-    }
-  
     evalAction() {
         // Generische Prüfungen für alle Geräte
         if (this.action === "unchanged") {
@@ -2197,69 +2147,41 @@ class ExhaustFan extends Device {
     identifyIfRuckEC() {
         this.isRuckEC = this.name.toLowerCase().includes("ruck");
         if (this.isRuckEC) {
-            node.warn(`${this.name}: Gerät als RuckEC erkannt.`);
-            //this.hasDuty = true
+            this.hasDuty = true
         }
     }
 
     findDutyCycle() {
         if (!this.data) {
-            node.warn(`${this.name}: Keine Gerätedaten gefunden.`);
+            node.warn(`${this.name}: Keine Gerätedaten vorhanden.`);
             this.dutyCycle = this.minDuty;
             this.hasDuty = false;
             return;
         }
 
-        node.warn(`${this.name}: Gerätedaten gefunden: ${JSON.stringify(this.data)}`);
-
-        // Prüfe, ob das Gerät als RuckEC erkannt wurde
-        if (this.isRuckEC) {
-            const dutyCycleKey = Object.keys(this.data).find((key) =>
-                key.toLowerCase().includes("dutycycle") ||
-                key.toLowerCase().includes("duty_cycle") ||
-                key.toLowerCase().includes("fan.") || 
-                key.toLowerCase().includes("light.") // IF FROM TASMOTA
-            );
-
-            if (dutyCycleKey) {
-                const dutyCycleValue = parseInt(this.data[dutyCycleKey], 10);
-                if (!isNaN(dutyCycleValue)) {
-                    this.dutyCycle = this.clampDutyCycle(dutyCycleValue);
-                    this.hasDuty = true;
-                    node.warn(`${this.name}: RuckEC erkannt. Duty Cycle gesetzt auf ${this.dutyCycle}%.`);
-                    return;
-                }
-            }
-
-            // Fallback für RuckEC-Geräte ohne gültigen Duty Cycle
-            this.hasDuty = true;
-            this.dutyCycle = this.minDuty;
-            node.warn(`${this.name}: RuckEC erkannt, aber kein gültiger Duty Cycle. Setze Standardwert: ${this.dutyCycle}%.`);
-            return;
-        }
-
-        // Allgemeine Logik für Nicht-RuckEC-Geräte
+        // Suche nach einem Schlüssel, der dutycycle oder duty_cycle enthält
         const dutyCycleKey = Object.keys(this.data).find((key) =>
-            key.toLowerCase().includes("dutycycle") ||
-            key.toLowerCase().includes("duty_cycle") ||
-            key.toLowerCase().includes("fan.")
+            key.toLowerCase().includes("dutycycle") || key.toLowerCase().includes("duty_cycle")
         );
 
         if (dutyCycleKey) {
+
+            // Parse den Wert des gefundenen dutycycle-Keys
             const dutyCycleValue = parseInt(this.data[dutyCycleKey], 10);
+
             if (!isNaN(dutyCycleValue)) {
                 this.dutyCycle = this.clampDutyCycle(dutyCycleValue);
                 this.hasDuty = true;
-                node.warn(`${this.name}: Duty Cycle erkannt und gesetzt auf ${this.dutyCycle}%.`);
-                return;
+            } else {
+                this.dutyCycle = this.minDuty;
+                this.hasDuty = false;
             }
+        } else {
+            this.dutyCycle = this.minDuty;
+            this.hasDuty = false;
         }
-
-        // Wenn kein Schlüssel gefunden wurde
-        node.warn(`${this.name}: Kein Duty Cycle-Schlüssel gefunden. Setze Standardwert.`);
-        this.dutyCycle = this.minDuty;
-        this.hasDuty = false;
     }
+
 
 
     setDutyCycle(dutyCycle) {
@@ -2274,10 +2196,9 @@ class ExhaustFan extends Device {
 
         if (this.switches?.[0]) {
             const switchId = this.switches[0];
-            node.warn(`${this.name}: Duty Cycle an Switch ${switchId} gesendet.`);
+            node.warn(`${this.name}: Duty Cycle ${this.dutyCycle} an Abluft ${switchId} gesendet.`);
             return { entity_id: switchId, action: "dutycycle", dutycycle: clampedDuty };
         } else {
-            node.warn(`${this.name}: Kein Switch verfügbar.`);
             return { error: "No switch available" };
         }
     }
@@ -2289,7 +2210,6 @@ class ExhaustFan extends Device {
 
         const switchId = this.switches?.[0];
         if (!switchId) {
-            node.warn(`${this.name}: Kein Switch verfügbar.`);
             return { error: "No switch available" };
         }
 
@@ -2359,6 +2279,154 @@ class ExhaustFan extends Device {
 class Ventilation extends Device {
     constructor(name) {
         super(name, "ventilation");
+        this.dutyCycle = 50; // Startwert 50%
+        this.dutyMin = 50;   // Minimalwert
+        this.dutyMax = 100;  // Maximalwert
+        this.hasDuty = true; // Immer Duty Cycle verfügbar
+        this.isTasmota = false;
+        this.isInitialized = false; // Verhindert doppelte Initialisierung
+    }
+
+    setData(data, context) {
+        this.setFromtent(context.tentName);
+        this.identifyIfFromAmbient();
+        this.data = { ...this.data, ...data };
+        this.identifySwitchesAndSensors();
+        this.updateIsRunningState();
+
+        if (!this.isInitialized) {
+            this.initializeDutyCycle();
+            this.isInitialized = true;
+        } else {
+            this.findDutyCycle(); // Nur bei neuen Daten prüfen
+        }
+
+        this.identifyIfTasmota();
+    }
+
+    initializeDutyCycle() {
+        node.warn(`${this.name}: Initialisiere Duty Cycle auf ${this.dutyCycle}%.`);
+        this.dutyCycle = this.dutyMin; // Initialisiere auf 50%
+    }
+
+    identifyIfTasmota() {
+        if (Array.isArray(this.switches)) {
+            this.isTasmota = this.switches.some(
+                (switchDevice) => typeof switchDevice === "string" && switchDevice.startsWith("light.")
+            );
+
+            if (this.isTasmota) {
+                node.warn(`${this.name}: Tasmota-Ventilation erkannt. Arbeite mit Standard-Duty Cycle.`);
+                this.dutyCycle = Math.max(this.dutyCycle, this.dutyMin);
+                this.hasDuty = true;
+            }
+        }
+    }
+
+    findDutyCycle() {
+        if (!this.data) {
+            node.warn(`${this.name}: Keine Gerätedaten gefunden.`);
+            return;
+        }
+
+        const dutyCycleKey = Object.keys(this.data).find((key) =>
+            key.toLowerCase().includes("dutycycle") || key.toLowerCase().includes("duty_cycle")
+        );
+
+        if (dutyCycleKey) {
+            const dutyCycleValue = parseInt(this.data[dutyCycleKey], 10);
+            if (!isNaN(dutyCycleValue)) {
+                this.dutyCycle = this.clampDutyCycle(dutyCycleValue);
+                node.warn(`${this.name}: Duty Cycle gefunden und gesetzt auf ${this.dutyCycle}%.`);
+                return;
+            }
+        }
+
+        node.warn(`${this.name}: Kein gültiger Duty Cycle gefunden. Behalte bisherigen Wert bei.`);
+    }
+
+    clampDutyCycle(dutyCycle) {
+        return Math.max(this.dutyMin, Math.min(this.dutyMax, dutyCycle));
+    }
+
+    setDutyCycle(dutyCycle) {
+        const clampedDuty = this.clampDutyCycle(dutyCycle);
+        this.dutyCycle = clampedDuty;
+        return clampedDuty;
+    }
+
+    changeDuty(switchId, duty) {
+        this.setDutyCycle(duty);
+        return { entity_id: switchId, action: "dutycycle", dutycycle: this.dutyCycle };
+    }
+
+    runAction(action) {
+        if (!this.needChange) return { Ventilation: `${this.switches[0]}`, Action: "NoChangeNeeded" };
+
+        const results = [];
+        const applyActionToSwitches = (actionCallback) => {
+            return this.switches.map((switchId) => {
+                const result = actionCallback(switchId);
+                results.push(result);
+                return result;
+            });
+        };
+
+        switch (this.action) {
+            case "maximum":
+                node.warn(`${this.name}: Duty Cycle auf Maximum (${this.dutyMax}%) gesetzt.`);
+                return applyActionToSwitches((switchId) => this.changeDuty(switchId, this.dutyMax));
+
+            case "minimum":
+                node.warn(`${this.name}: Duty Cycle auf Minimum (${this.dutyMin}%) gesetzt.`);
+                return applyActionToSwitches((switchId) => this.changeDuty(switchId, this.dutyMin));
+
+            case "reduced":
+                const reducedDuty = Math.max(this.dutyCycle - 5, this.dutyMin);
+                node.warn(`${this.name}: Duty Cycle reduziert auf ${reducedDuty}%.`);
+                return applyActionToSwitches((switchId) => this.changeDuty(switchId, reducedDuty));
+
+            case "increased":
+                const increasedDuty = Math.min(this.dutyCycle + 5, this.dutyMax);
+                node.warn(`${this.name}: Duty Cycle erhöht auf ${increasedDuty}%.`);
+                return applyActionToSwitches((switchId) => this.changeDuty(switchId, increasedDuty));
+
+            case "on":
+                return applyActionToSwitches((switchId) => this.turnON(switchId));
+
+            case "off":
+                return applyActionToSwitches((switchId) => this.turnOFF(switchId));
+
+            case "unchanged":
+                node.warn(`${this.name}: Keine Änderung erforderlich.`);
+                return applyActionToSwitches((switchId) => ({ entity_id: switchId, action: "UNCHANGED" }));
+
+            default:
+                node.warn(`${this.name}: Unbekannte Aktion.`);
+                return { Ventilation: `${this.switches[0]}`, Action: "UnknownAction" };
+        }
+    }
+
+    turnOFF(switchId) {
+        if (this.isRunning) {
+            this.isRunning = false;
+            return { entity_id: switchId, action: "off" };
+        }
+        return { entity_id: switchId, action: "Already OFF" };
+    }
+
+    turnON(switchId) {
+        if (!this.isRunning) {
+            this.isRunning = true;
+            return { entity_id: switchId, action: "on" };
+        }
+        return { entity_id: switchId, action: "Already ON" };
+    }
+}
+
+class Ventilation2 extends Device {
+    constructor(name) {
+        super(name, "ventilation");
         this.dutyCycle = 0; // Duty Cycle für Lüftung
         this.dutyMin = 50; // Mindestwert für Duty Cycle
         this.dutyMax = 100; // Maximalwert für Duty Cycle
@@ -2368,32 +2436,18 @@ class Ventilation extends Device {
 
 
 
-   setData(data,context) {
+    setData(data, context) {
         this.setFromtent(context.tentName)
         this.identifyIfFromAmbient()
         this.data = { ...this.data, ...data };
         this.identifySwitchesAndSensors();
         this.updateIsRunningState();
         this.findDutyCycle(); // Duty Cycle initialisieren
-        
-        if (this.dutyCycle < this.dutyMin) {
-            node.warn(`${this.name}: Duty Cycle unter Mindestwert. Setze auf ${this.dutyMin}%.`);
-            this.dutyCycle = this.dutyMin;
-        }
-
         this.identifyIfTasmota();
-    }
-
-
-    init() {
-        this.findDutyCycle(); // Duty Cycle initialisieren
 
         if (this.dutyCycle < this.dutyMin) {
-            node.warn(`${this.name}: Duty Cycle unter Mindestwert. Setze auf ${this.dutyMin}%.`);
             this.dutyCycle = this.dutyMin;
         }
-
-        this.identifyIfTasmota();
     }
 
     identifyIfTasmota() {
@@ -2406,13 +2460,13 @@ class Ventilation extends Device {
                 this.hasDuty = true;
                 if (this.isRunning && this.dutyCycle < this.dutyMin) {
                     this.dutyCycle = this.dutyMin;
-                    node.warn(`Tasmota-Ventilation initialisiert mit ${this.dutyCycle}% DutyCycle.`);
                 }
             }
         } else {
             node.warn(`${this.name}: Keine gültigen Switches gefunden.`);
         }
     }
+
 
     findDutyCycle() {
         if (!this.data) {
@@ -2421,8 +2475,6 @@ class Ventilation extends Device {
             this.hasDuty = false;
             return;
         }
-
-        node.warn(`${this.name}: Gerätedaten gefunden: ${JSON.stringify(this.data)}`);
 
         // Suche nach einem passenden Schlüssel
         const dutyCycleKey = Object.keys(this.data).find((key) =>
@@ -2434,24 +2486,22 @@ class Ventilation extends Device {
 
         if (dutyCycleKey) {
             this.hasDuty = true; // Ein passender Schlüssel wurde gefunden
-            node.warn(`${this.name}: Schlüssel für Duty Cycle gefunden: ${dutyCycleKey}`);
-
             const dutyCycleValue = parseInt(this.data[dutyCycleKey], 10);
             if (!isNaN(dutyCycleValue)) {
                 this.dutyCycle = this.clampDutyCycle(dutyCycleValue);
-                node.warn(`${this.name}: Duty Cycle gesetzt auf ${this.dutyCycle}%.`);
             } else {
-                node.warn(`${this.name}: Kein gültiger Wert für Duty Cycle. Standardwert wird verwendet.`);
                 this.dutyCycle = this.minDuty;
             }
         } else {
-            node.warn(`${this.name}: Kein Duty Cycle-Schlüssel gefunden. Setze Standardwert.`);
             this.dutyCycle = this.minDuty;
             this.hasDuty = false;
         }
     }
 
-
+    clampDutyCycle(dutyCycle) {
+        return Math.max(this.minDuty, Math.min(this.maxDuty, dutyCycle));
+    }
+    
     setDutyCycle(dutyCycle) {
         const clampedDuty = Math.max(this.dutyMin, Math.min(this.dutyMax, dutyCycle));
         this.dutyCycle = clampedDuty;
@@ -2676,7 +2726,7 @@ class Light extends Device {
         }
 
         const dutyCycleKey = Object.keys(this.data).find((key) =>
-            ["dutycycle", "number.", "duty", "light."].some((term) => key.toLowerCase().includes(term))
+            ["dutycycle", "number.", "duty", "sensor."].some((term) => key.toLowerCase().includes(term))
         );
 
         if (dutyCycleKey) {
@@ -2685,14 +2735,11 @@ class Light extends Device {
                 const clampedValue = Math.max(this.minDuty, Math.min(this.maxDuty, dutyCycleValue));
                 this.dutyCycle = clampedValue;
                 this.hasDuty = true;
-                node.warn(`${this.name}: Duty-Cycle gesetzt auf ${this.dutyCycle} (aus Schlüssel '${dutyCycleKey}')`);
             } else {
                 this.hasDuty = false;
-                node.warn(`${this.name}: Ungültiger Duty-Cycle-Wert (${this.data[dutyCycleKey]})`);
             }
         } else {
             this.hasDuty = false;
-            node.warn(`${this.name}: Kein Duty-Cycle-Schlüssel gefunden.`);
         }
     }
 
@@ -3159,6 +3206,134 @@ class Cooler extends Device {
     }
 }
 
+//// UNTIL HERE
+
+class Pump extends Device {
+    constructor(name) {
+        super(name, "pump");
+        this.pumpInterval = 3600; // Mindestintervall zwischen Pumpzyklen (in Sekunden)
+        this.pumpDuration = 10; // Pumpdauer in Sekunden
+        this.isAutoRun = false; // Automatikmodus
+        this.OGBAutoMODE = false; // OpenGrowBox Steuerung
+        this.lastPumpTime = null; // Zeitpunkt des letzten Pumpvorgangs
+        this.soilMoisture = 0; // Bodenfeuchtigkeit
+        this.soilEC = 0; // Elektrische Leitfähigkeit
+        this.minSoilMoisture = 25; // Mindestbodenfeuchte
+        this.maxSoilEC = 2.5; // Maximaler EC-Wert
+    }
+
+    // Gerätedaten setzen und Bodenwerte aktualisieren
+    setData(data, context) {
+        this.setFromtent(context.tentName);
+        this.identifyIfFromAmbient();
+        this.data = { ...this.data, ...data };
+        this.identifySwitchesAndSensors();
+        this.updateIsRunningState();
+        this.evaluateStateFromData();
+        this.identifyIfOGBControlled(context);
+
+        // Aktualisiere Sensorwerte
+        if (data.soilmoisture) this.soilMoisture = parseFloat(data.soilmoisture);
+        if (data.soilec) this.soilEC = parseFloat(data.soilec);
+    }
+
+    // Prüfe OpenGrowBox Steuerung
+    identifyIfOGBControlled(context) {
+        this.OGBAutoMODE = !!context.controls.co2Control;
+    }
+
+    // Status aus Gerätedaten evaluieren
+    evaluateStateFromData() {
+        if (this.data) {
+            const pumpOnKey = Object.keys(this.data).find(key => key.includes("pump_on"));
+            if (pumpOnKey) this.isRunning = this.data[pumpOnKey] === "on";
+
+            const autoRunKey = Object.keys(this.data).find(key => key.includes("pump_autorun"));
+            if (autoRunKey) this.isAutoRun = this.data[autoRunKey] === "on";
+        }
+    }
+
+    // Mindestintervall prüfen
+    canPumpNow() {
+        const now = new Date();
+        const elapsedTime = this.lastPumpTime
+            ? (now.getTime() - this.lastPumpTime.getTime()) / 1000
+            : this.pumpInterval;
+
+        return elapsedTime >= this.pumpInterval;
+    }
+
+    // Prüfe, ob Bewässerung notwendig ist
+    needsWatering() {
+        return this.soilMoisture < this.minSoilMoisture && this.soilEC < this.maxSoilEC;
+    }
+
+    // Geräteaktionen ausführen
+    runAction(context) {
+        // Prüfe ob AutoModus aktiv ist
+        if (this.isAutoRun) {
+            return this.runAutoMode();
+        }
+
+        switch (this.action) {
+            case "on":
+                return this.runPump("on");
+            case "off":
+                return this.runPump("off");
+            case "autorun-on":
+                return this.setAutoMode(true);
+            case "autorun-off":
+                return this.setAutoMode(false);
+            default:
+                node.warn(`${this.name}: Unbekannte Aktion.`);
+                return { entity_id: this.switches[0], action: "UnknownAction" };
+        }
+    }
+
+    // Automatische Steuerung der Pumpe
+    runAutoMode() {
+        if (!this.canPumpNow()) {
+            node.warn(`${this.name}: Intervall nicht erreicht.`);
+            return { entity_id: this.switches[0], action: "wait_interval" };
+        }
+
+        if (!this.needsWatering()) {
+            node.warn(`${this.name}: Keine Bewässerung notwendig (Moisture: ${this.soilMoisture}, EC: ${this.soilEC}).`);
+            return { entity_id: this.switches[0], action: "no_water_needed" };
+        }
+
+        this.lastPumpTime = new Date();
+        this.isRunning = true;
+
+        node.warn(`${this.name}: Starte automatische Bewässerung.`);
+        return { entity_id: this.switches[0], action: "on", duration: this.pumpDuration };
+    }
+
+    // Manuelle Pumpaktion ausführen
+    runPump(state) {
+        if (state === "on" && !this.isRunning) {
+            this.isRunning = true;
+            this.lastPumpTime = new Date();
+            node.warn(`${this.name}: Pumpe manuell eingeschaltet.`);
+            return { entity_id: this.switches[0], action: "on" };
+        } else if (state === "off" && this.isRunning) {
+            this.isRunning = false;
+            node.warn(`${this.name}: Pumpe manuell ausgeschaltet.`);
+            return { entity_id: this.switches[0], action: "off" };
+        } else {
+            return { entity_id: this.switches[0], action: `Already ${state.toUpperCase()}` };
+        }
+    }
+
+    // AutoModus setzen
+    setAutoMode(state) {
+        this.isAutoRun = state;
+        const action = state ? "on" : "off";
+        node.warn(`${this.name}: Automatikmodus ${state ? "aktiviert" : "deaktiviert"}.`);
+        return { entity_id: this.switches[1], action: action };
+    }
+}
+
 class CO2 extends Device {
     constructor(name) {
         super(name, "co2"); // Setze den Gerätetyp auf "co2"
@@ -3172,29 +3347,37 @@ class CO2 extends Device {
     }
 
     setTargetCO2(target) {
-        this.targetCO2 = target;
+        if(target !== this.targetCO2){
+            this.targetCO2 = target;
+        }
     }
 
     enableAutoRegulation() {
-        this.autoRegulate = true;
+        if(!this.enableAutoRegulation){
+            this.autoRegulate = true;
+        }
     }
 
     disableAutoRegulation() {
-        this.autoRegulate = false;
+        if (this.enableAutoRegulation) {
+            this.autoRegulate = false;
+        }
     }
 
     updateCurrentCO2(value) {
-        this.currentCO2 = value;
+        if(value !== this.currentCO2){
+            this.currentCO2 = value;
+        }
     }
 
     evalAction(context) {
         if (this.action === "unchanged") return false;
 
         if (this.autoRegulate && this.currentCO2 < this.targetCO2) {
-            this.action = "increase";
+            this.action = "increased";
             return true;
         } else if (this.autoRegulate && this.currentCO2 > this.targetCO2) {
-            this.action = "decrease";
+            this.action = "reduced";
             return true;
         }
 
@@ -3207,11 +3390,11 @@ class CO2 extends Device {
         }
 
         switch (this.action) {
-            case "increase":
+            case "increased":
                 node.warn(`${this.name}: CO2-Zufuhr wird erhöht.`);
                 return { entity_id: this.switches[0], action: "on" };
 
-            case "decrease":
+            case "reduced":
                 node.warn(`${this.name}: CO2-Zufuhr wird gestoppt.`);
                 return { entity_id: this.switches[0], action: "off" };
 
@@ -3227,126 +3410,6 @@ class CO2 extends Device {
                 node.warn(`${this.name}: Unbekannte Aktion.`);
                 return { CO2: `${this.name}`, Action: "UnknownAction" };
         }
-    }
-}
-
-class Pump extends Device {
-    constructor(name) {
-        super(name, "pump");
-        this.pumpInterval = 0; // Mindestintervall zwischen Pumpzyklen
-        this.pumpDuration = 0; // Pumpdauer in Sekunden
-        this.isAutoRun = false; // Automatikmodus
-        this.lastPumpTime = null; // Zeitpunkt des letzten Pumpvorgangs
-        this.evaluateStateFromData()
-    }
-
-    setData(data, context) {
-        this.setFromtent(context.tentName)
-        this.identifyIfFromAmbient()
-        this.data = { ...this.data, ...data };
-        this.identifySwitchesAndSensors();
-        this.updateIsRunningState();
-        this.evaluateStateFromData();
-    }
-
-
-    evaluateStateFromData() {
-        if (this.data) {
-            // Dynamisch Pump-Status suchen
-            const pumpOnKey = Object.keys(this.data).find(key => key.includes("pump_on"));
-            const autoRunKey = Object.keys(this.data).find(key => key.includes("pump_autorun"));
-
-            if (pumpOnKey) {
-                this.isRunning = this.data[pumpOnKey] === "on";
-            }
-
-            if (autoRunKey) {
-                this.isAutoRun = this.data[autoRunKey] === "on";
-            }
-
-            // Dynamisch Pump-Duration suchen
-            const pumpDurationKey = Object.keys(this.data).find(key => key.includes("pump_watteringduration"));
-            if (pumpDurationKey) {
-                this.pumpDuration = parseInt(this.data[pumpDurationKey], 10) || 0;
-            }
-
-            // Dynamisch Pump-Intervall suchen
-            const pumpIntervalKey = Object.keys(this.data).find(key => key.includes("pump_hours"));
-            if (pumpIntervalKey) {
-                this.minPumpInterval = parseInt(this.data[pumpIntervalKey], 10) * 3600 || 0;
-            }
-        }
-    }
-
-    evalAction(context) {
-        if (this.action === "unchanged") {
-            return false; // Keine Aktion erforderlich
-        }
-        return true; // Standardmäßig erlauben
-    }
-
-    runAction(context) {
-        if (!this.evalAction(context)) {
-            return { Pump: `${this.name}`, Action: "noChangesNeeded" };
-        }
-
-        switch (this.action) {
-            case "on":
-                if (!this.isRunning) {
-                    this.isRunning = true;
-                    this.lastPumpTime = new Date();
-                    node.warn(`${this.name}: Pumpe wird eingeschaltet.`);
-                    return { entity_id: this.switches[0], action: "on" };
-                } else {
-                    node.warn(`${this.name}: Pumpe ist bereits eingeschaltet.`);
-                    return { entity_id: this.switches[0], action: "Already ON" };
-                }
-
-            case "off":
-                if (this.isRunning) {
-                    this.isRunning = false;
-                    node.warn(`${this.name}: Pumpe wird ausgeschaltet.`);
-                    return { entity_id: this.switches[0], action: "off" };
-                } else {
-                    node.warn(`${this.name}: Pumpe ist bereits ausgeschaltet.`);
-                    return { entity_id: this.switches[0], action: "Already OFF" };
-                }
-
-            case "autorun-on":
-                if (!this.isAutoRun) {
-                    this.isAutoRun = true;
-                    node.warn(`${this.name}: Automatikmodus wird aktiviert.`);
-                    return { entity_id: this.switches[1], action: "on" };
-                } else {
-                    node.warn(`${this.name}: Automatikmodus ist bereits aktiv.`);
-                    return { entity_id: this.switches[1], action: "Already ON" };
-                }
-
-            case "autorun-off":
-                if (this.isAutoRun) {
-                    this.isAutoRun = false;
-                    node.warn(`${this.name}: Automatikmodus wird deaktiviert.`);
-                    return { entity_id: this.switches[1], action: "off" };
-                } else {
-                    node.warn(`${this.name}: Automatikmodus ist bereits deaktiviert.`);
-                    return { entity_id: this.switches[1], action: "Already OFF" };
-                }
-
-            default:
-                node.warn(`${this.name}: Unbekannte Aktion.`);
-                return { Pump: `${this.name}`, Action: "UnknownAction" };
-        }
-    }
-
-    canPumpNow() {
-        if (!this.lastPumpTime || isNaN(this.lastPumpTime.getTime())) {
-            return true; // Noch keine Pumplogik ausgeführt
-        }
-
-        const now = new Date();
-        const elapsedTime = (now.getTime() - this.lastPumpTime.getTime()) / 1000; // Zeit seit dem letzten Pumpvorgang in Sekunden
-
-        return elapsedTime >= this.minPumpInterval;
     }
 }
 
@@ -3399,7 +3462,6 @@ class GenericSwitch extends Device {
         }
     }
 }
-//// UNTIL HERE
 
 class Sensor extends Device {
     constructor(name) {
