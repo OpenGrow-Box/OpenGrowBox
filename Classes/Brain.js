@@ -2259,18 +2259,32 @@ class ExhaustFan extends Device {
 
         switch (this.action) {
             case "maximum":
-                return this.changeDuty(this.maxDuty);
-
+                if (this.hasDuty) {
+                    return this.changeDuty(this.maxDuty);
+                } else {
+                    return this.turnON(switchId);
+                }
             case "minimum":
-                return this.changeDuty(this.minDuty);
-
+                if (this.hasDuty) {
+                    return this.changeDuty(this.minDuty);
+                } else {
+                    return this.turnON(switchId);
+                }
             case "increased":
-                const increasedDuty = Math.min(this.dutyCycle + 5, this.maxDuty);
-                return this.changeDuty(increasedDuty);
-
+                if(this.hasDuty){
+                    const increasedDuty = Math.min(this.dutyCycle + 5, this.maxDuty);
+                    return this.changeDuty(increasedDuty);
+                }else{
+                    return this.turnON(switchId);
+                }
             case "reduced":
-                const reducedDuty = Math.max(this.dutyCycle - 5, this.minDuty);
-                return this.changeDuty(reducedDuty);
+                if(this.hasDuty){
+                    const reducedDuty = Math.max(this.dutyCycle - 5, this.minDuty);
+                    return this.changeDuty(reducedDuty);
+                }else{
+                    return this.turnOFF(switchId);
+                }
+
 
             case "on":
                 return this.turnON(switchId);
@@ -2305,7 +2319,6 @@ class ExhaustFan extends Device {
         return { entity_id: switchId, action: "Already OFF" };
     }
 }
-
 class Ventilation extends Device {
     constructor(name) {
         super(name, "ventilation");
