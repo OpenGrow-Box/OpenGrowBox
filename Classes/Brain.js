@@ -276,7 +276,7 @@ class OpenGrowBox {
 
     }
 
-   // DATA SETTER/GETTER ******************************
+    // DATA SETTER/GETTER ******************************
     setTentName(tentName = "") {
         this.tentName = tentName;
     }
@@ -1239,587 +1239,584 @@ class OpenGrowBox {
     }
 
 
-        
-        // DRYMODE Classic
-        dryElClassico(currentPhase) {
-            const phaseConfig = this.drying.modes.elClassico.phase[currentPhase];
-            const dryAction = this.actions.Unchanged; // Modus-spezifische Aktionen
-            node.warn(`Aktuelle Phase der Trocknung:, ${currentPhase}`);
-            return {
-                tentName: this.tentName,
-                tentMode: this.tentMode,
-                inDryMode: this.drying.currentDryMode,
-                startTime: this.dryStartTime?.toISOString() || "Not Set", // Startzeit hinzufügen
-                currentPhase,
-                targetValues: {
-                    targetTemp: phaseConfig.targetTemp,
-                    targetHum: phaseConfig.targetHumidity,
-                    targetDuration: phaseConfig.durationHours,
-                },
-                actions: dryAction
-            };
+    
+    // DRYMODE Classic
+    dryElClassico(currentPhase) {
+        const phaseConfig = this.drying.modes.elClassico.phase[currentPhase];
+        const dryAction = this.actions.Unchanged; // Modus-spezifische Aktionen
+        node.warn(`Aktuelle Phase der Trocknung:, ${currentPhase}`);
+        return {
+            tentName: this.tentName,
+            tentMode: this.tentMode,
+            inDryMode: this.drying.currentDryMode,
+            startTime: this.dryStartTime?.toISOString() || "Not Set", // Startzeit hinzufügen
+            currentPhase,
+            targetValues: {
+                targetTemp: phaseConfig.targetTemp,
+                targetHum: phaseConfig.targetHumidity,
+                targetDuration: phaseConfig.durationHours,
+            },
+            actions: dryAction
+        };
+    }
+
+    // DRYMODE VPD Based
+    drySharkMouse(currentPhase) {
+        const phaseConfig = this.drying.modes.sharkMouse.phase[currentPhase];
+        const dryAction = this.actions.Unchanged; // Modus-spezifische Aktionen
+        node.warn(`Aktuelle Phase der Trocknung:, ${currentPhase}`);
+        return {
+            tentName: this.tentName,
+            tentMode: this.tentMode,
+            inDryMode: this.drying.currentDryMode,
+            startTime: this.dryStartTime?.toISOString() || "Not Set", // Startzeit hinzufügen
+            currentPhase,
+            targetValues: {
+                targetTemp: phaseConfig.targetTemp,
+                targetHum: phaseConfig.targetHumidity,
+                targetVPD: phaseConfig.targetVPD,
+                targetDuration: phaseConfig.durationHours,
+            },
+            actions: dryAction
+        };
+    }
+
+    // DRYMODE DewPoint Based
+    dryDewBased(currentPhase) {
+        const phaseConfig = this.drying.modes.dewBased.phase[currentPhase];
+        const dryAction = this.actions.Unchanged; // Modus-spezifische Aktionen
+        node.warn(`Aktuelle Phase der Trocknung:, ${currentPhase}`);
+        return {
+            tentName: this.tentName,
+            tentMode: this.tentMode,
+            inDryMode: this.drying.currentDryMode,
+            startTime: this.dryStartTime?.toISOString() || "Not Set", // Startzeit hinzufügen
+            currentPhase,
+            targetValues: {
+                targetTemp: phaseConfig.targetTemp,
+                targetDewPoint: phaseConfig.targetDewPoint,
+                targetDuration: phaseConfig.durationHours,
+            },
+            actions: dryAction
+        };
+    }
+
+    // EXPERIMENTEL
+    ecoAdjustments(currentVPD = this.vpd.current, ecoTarget = this.vpd.ecotarget) {
+        let action;
+        let vpdECOPercent;
+
+        if (currentVPD < ecoTarget[0]) {
+            vpdECOPercent = parseFloat((((currentVPD - ecoTarget[0]) / ecoTarget[0]) * 100).toFixed(2));
+            action = this.actions.Increased;
+        } else if (currentVPD > ecoTarget[1]) {
+            vpdECOPercent = parseFloat((((currentVPD - ecoTarget[1]) / ecoTarget[1]) * 100).toFixed(2));
+            action = this.actions.Reduced;
         }
 
-        // DRYMODE VPD Based
-        drySharkMouse(currentPhase) {
-            const phaseConfig = this.drying.modes.sharkMouse.phase[currentPhase];
-            const dryAction = this.actions.Unchanged; // Modus-spezifische Aktionen
-            node.warn(`Aktuelle Phase der Trocknung:, ${currentPhase}`);
-            return {
-                tentName: this.tentName,
-                tentMode: this.tentMode,
-                inDryMode: this.drying.currentDryMode,
-                startTime: this.dryStartTime?.toISOString() || "Not Set", // Startzeit hinzufügen
-                currentPhase,
-                targetValues: {
-                    targetTemp: phaseConfig.targetTemp,
-                    targetHum: phaseConfig.targetHumidity,
-                    targetVPD: phaseConfig.targetVPD,
-                    targetDuration: phaseConfig.durationHours,
-                },
-                actions: dryAction
-            };
-        }
-
-        // DRYMODE DewPoint Based
-        dryDewBased(currentPhase) {
-            const phaseConfig = this.drying.modes.dewBased.phase[currentPhase];
-            const dryAction = this.actions.Unchanged; // Modus-spezifische Aktionen
-            node.warn(`Aktuelle Phase der Trocknung:, ${currentPhase}`);
-            return {
-                tentName: this.tentName,
-                tentMode: this.tentMode,
-                inDryMode: this.drying.currentDryMode,
-                startTime: this.dryStartTime?.toISOString() || "Not Set", // Startzeit hinzufügen
-                currentPhase,
-                targetValues: {
-                    targetTemp: phaseConfig.targetTemp,
-                    targetDewPoint: phaseConfig.targetDewPoint,
-                    targetDuration: phaseConfig.durationHours,
-                },
-                actions: dryAction
-            };
-        }
-
-        // EXPERIMENTEL
-        ecoAdjustments(currentVPD = this.vpd.current, ecoTarget = this.vpd.ecotarget) {
-            let action;
-            let vpdECOPercent;
-
-            if (currentVPD < ecoTarget[0]) {
-                vpdECOPercent = parseFloat((((currentVPD - ecoTarget[0]) / ecoTarget[0]) * 100).toFixed(2));
-                action = this.actions.Increased;
-            } else if (currentVPD > ecoTarget[1]) {
-                vpdECOPercent = parseFloat((((currentVPD - ecoTarget[1]) / ecoTarget[1]) * 100).toFixed(2));
-                action = this.actions.Reduced;
+        return {
+            tentName: this.tentName,
+            tentMode: this.tentMode,
+            currentVPD: currentVPD,
+            targetVPDMin: ecoTarget[0],
+            targetVPDMax: ecoTarget[1],
+            vpdDiffPercent: vpdECOPercent,
+            Temps: {
+                Temperature: this.tentData.temperature,
+                MinTemperature: this.tentData.minTemp,
+                MaxTemperature: this.tentData.maxTemp
+            },
+            Humditys: {
+                Humidity: this.tentData.humidity,
+                MinHumidity: this.tentData.minHumidity,
+                MaxHumidity: this.tentData.maxHumidity
+            },
+            actions: action
+        };
+    }
+    // NIGHTHOLD VPD OUTPUT
+    inDontCareMode() {
+        let action = {
+            exhaust: "maximal",
+            humidifier: "Unchanged",
+            dehumidifier: "Unchanged",
+            heater: "Unchanged",
+            cooler: "Unchanged",
+            ventilation: "maximal",
+            light: "Unchanged",
+            co2: "Unchanged",
+            climate: {
+                cool: "Unchanged",
+                dry: "Unchanged",
+                heat: "Unchanged",
             }
 
-            return {
-                tentName: this.tentName,
-                tentMode: this.tentMode,
-                currentVPD: currentVPD,
-                targetVPDMin: ecoTarget[0],
-                targetVPDMax: ecoTarget[1],
-                vpdDiffPercent: vpdECOPercent,
-                Temps: {
-                    Temperature: this.tentData.temperature,
-                    MinTemperature: this.tentData.minTemp,
-                    MaxTemperature: this.tentData.maxTemp
-                },
-                Humditys: {
-                    Humidity: this.tentData.humidity,
-                    MinHumidity: this.tentData.minHumidity,
-                    MaxHumidity: this.tentData.maxHumidity
-                },
-                actions: action
-            };
         }
-        // NIGHTHOLD VPD OUTPUT
-        inDontCareMode() {
-            let action = {
-                exhaust: "maximal",
-                humidifier: "Unchanged",
-                dehumidifier: "Unchanged",
-                heater: "Unchanged",
-                cooler: "Unchanged",
-                ventilation: "maximal",
-                light: "Unchanged",
-                co2: "Unchanged",
-                climate: {
-                    cool: "Unchanged",
-                    dry: "Unchanged",
-                    heat: "Unchanged",
-                }
-
+        // NEED TO TEST ON LIGHT OFF PHASE
+        node.warn(`Ignore VPD on NightTime run minimal Actions`);
+        return {
+            tentName: this.tentName,
+            tentMode: "I DONT CARE MODE",
+            Temps: {
+                Temperature: this.tentData.temperature,
+                MinTemperature: this.tentData.minTemp,
+                MaxTemperature: this.tentData.maxTemp
+            },
+            Humditys: {
+                Humidity: this.tentData.humidity,
+                MinHumidity: this.tentData.minHumidity,
+                MaxHumidity: this.tentData.maxHumidity
+            },
+            actions: action
+        };
+    }
+    /// DISABELD 
+    disabledMode() {
+        node.log("Disabled mode active");
+        let action = {
+            exhaust: "Unchanged",
+            humidifier: "Unchanged",
+            dehumidifier: "Unchanged",
+            heater: "Unchanged",
+            cooler: "Unchanged",
+            ventilation: "Unchanged",
+            light: "Unchanged",
+            co2: "Unchanged",
+            climate: {
+                cool: "Unchanged",
+                dry: "Unchanged",
+                heat: "Unchanged",
             }
-            // NEED TO TEST ON LIGHT OFF PHASE
-            node.warn(`Ignore VPD on NightTime run minimal Actions`);
-            return {
-                tentName: this.tentName,
-                tentMode: "I DONT CARE MODE",
-                Temps: {
-                    Temperature: this.tentData.temperature,
-                    MinTemperature: this.tentData.minTemp,
-                    MaxTemperature: this.tentData.maxTemp
-                },
-                Humditys: {
-                    Humidity: this.tentData.humidity,
-                    MinHumidity: this.tentData.minHumidity,
-                    MaxHumidity: this.tentData.maxHumidity
-                },
-                actions: action
-            };
+
         }
-        /// DISABELD 
-        disabledMode() {
-            node.log("Disabled mode active");
-            let action = {
-                exhaust: "Unchanged",
-                humidifier: "Unchanged",
-                dehumidifier: "Unchanged",
-                heater: "Unchanged",
-                cooler: "Unchanged",
-                ventilation: "Unchanged",
-                light: "Unchanged",
-                co2: "Unchanged",
-                climate: {
-                    cool: "Unchanged",
-                    dry: "Unchanged",
-                    heat: "Unchanged",
-                }
+        return {
+            TentName: this.tentName,
+            tentMode: this.tentMode,
+            actions: action,
+        };
+    }
 
-            }
-            return {
-                TentName: this.tentName,
-                tentMode: this.tentMode,
-                actions: action,
-            };
+
+    /// ACTIONS ******************************
+    selectAction(context) {
+        let preparedDevices = []; // Speicher für Geräteaktionen
+        let actionData;
+        let limitAdjustments
+
+        // Prüfen, ob der Zustand seit der letzten Aktion unverändert ist
+        if (this.checkLastState()) {
+                this.needchange = false;
+                actionData = {
+                    tentName: this.tentName,
+                    tentMode: "Unchanged",
+                    currentVPD: this.vpd.current,
+                    Temps: {
+                        Temperature: this.tentData.temperature,
+                        MinTemperature: this.tentData.minTemp,
+                        MaxTemperature: this.tentData.maxTemp,
+                    },
+                    Humidities: {
+                        Humidity: this.tentData.humidity,
+                        MinHumidity: this.tentData.minHumidity,
+                        MaxHumidity: this.tentData.maxHumidity,
+                    },
+                    actions: this.actions.Unchanged,
+                    deviceActions: preparedDevices,
+                };
+        } else {
+            this.needchange = true;           
         }
 
 
-        /// ACTIONS ******************************
-        selectAction(context) {
-            let preparedDevices = []; // Speicher für Geräteaktionen
-            let actionData;
-            let limitAdjustments
+        // Modusabhängige Logik
+        if (this.needchange) {
+            switch (this.tentMode) {
+                case "VPD Perfection":
+                    actionData = this.perfectionAdjustments(
+                        this.vpd.current,
+                        this.vpd.perfection,
+                        this.vpd.perfectTolerance
+                    );
+                    break;
+                case "IN-VPD-Range":
+                    actionData = this.rangeAdjustments(
+                        this.vpd.current,
+                        this.vpd.range,
+                        this.vpd.rangeTolerance
+                    );
+                    break;
+                case "Targeted VPD":
+                    actionData = this.targetAdjustment(
+                        this.vpd.current,
+                        this.vpd.targeted,
+                        this.vpd.targetedTolerance
+                    );
+                    break;
+                case "ECO-VPD":
+                    actionData = this.ecoAdjustments(
+                        this.vpd.current,
+                        this.vpd.ecotarget,
+                    );
+                    break;
+                case "Drying":
+                    actionData = this.dryAdjustments();
+                    break;
+                case "Disabled":
+                    actionData = this.disabledMode();
+                    break;
 
-            // Prüfen, ob der Zustand seit der letzten Aktion unverändert ist
-            if (this.checkLastState()) {
-                    this.needchange = false;
-                    actionData = {
-                        tentName: this.tentName,
-                        tentMode: "Unchanged",
-                        currentVPD: this.vpd.current,
-                        Temps: {
-                            Temperature: this.tentData.temperature,
-                            MinTemperature: this.tentData.minTemp,
-                            MaxTemperature: this.tentData.maxTemp,
-                        },
-                        Humidities: {
-                            Humidity: this.tentData.humidity,
-                            MinHumidity: this.tentData.minHumidity,
-                            MaxHumidity: this.tentData.maxHumidity,
-                        },
-                        actions: this.actions.Unchanged,
-                        deviceActions: preparedDevices,
-                    };
-            } else {
-                this.needchange = true;           
+                default:
+                    throw new Error("Unknown mode: " + this.tentMode);
             }
 
-
-            // Modusabhängige Logik
-            if (this.needchange) {
-                switch (this.tentMode) {
-                    case "VPD Perfection":
-                        actionData = this.perfectionAdjustments(
-                            this.vpd.current,
-                            this.vpd.perfection,
-                            this.vpd.perfectTolerance
-                        );
-                        break;
-                    case "IN-VPD-Range":
-                        actionData = this.rangeAdjustments(
-                            this.vpd.current,
-                            this.vpd.range,
-                            this.vpd.rangeTolerance
-                        );
-                        break;
-                    case "Targeted VPD":
-                        actionData = this.targetAdjustment(
-                            this.vpd.current,
-                            this.vpd.targeted,
-                            this.vpd.targetedTolerance
-                        );
-                        break;
-                    case "ECO-VPD":
-                        actionData = this.ecoAdjustments(
-                            this.vpd.current,
-                            this.vpd.ecotarget,
-                        );
-                        break;
-                    case "Drying":
-                        actionData = this.dryAdjustments();
-                        break;
-                    case "Disabled":
-                        actionData = this.disabledMode();
-                        break;
-
-                    default:
-                        throw new Error("Unknown mode: " + this.tentMode);
-                }
-
-                if (this.isPlantDay.lightOn === false && this.isPlantDay.nightVPDHold === false) {
-                    actionData = this.inDontCareMode()
-                }
-                
+            if (this.isPlantDay.lightOn === false && this.isPlantDay.nightVPDHold === false) {
+                actionData = this.inDontCareMode()
             }
-
-            if(this.needchange){
-                limitAdjustments = this.checkLimits();
-            }
-            // Vorzeitige Anpassungen
-
-                // Kombiniere alle Aktionen
-            const finalActions = {
-            ...actionData.actions || null,
-            ...limitAdjustments || null,
-            };
-            //let absolutActions = this.evaluateDeviceEnvironment(finalActions)
-
-            this.devices.forEach((device) => {
-
-                // Prüfen, ob das Gerät korrekt initialisiert wurde
-                if (device.switches.length === 0) return
-                if (device && typeof device.prepareAction === "function") {
-                    if (device.deviceType === "sensor" || device.deviceType === "pump" || device.deviceType === "co2") return;
-                        
-                    device = device.prepareAction(finalActions);
-
-                    let actions = device.runAction(context)
-
-                    //node.warn(`FinalAction: ${JSON.stringify(actions, null, 2)}`);
-
-                    preparedDevices.push(actions)
-                    //preparedDevices.push(device)
-                } else {
-                    // Falls Gerät nicht korrekt initialisiert ist, Warnung ausgeben
-                    node.warn(`Device ${device?.name || "undefined"} konnte nicht verarbeitet werden.`);
-                }
-            });
-
-
-            // Aktion speichern
-            this.dataSetter({
-                ...actionData || null,
-                actions: finalActions || null,
-                devices: this.devices || null,
-                deviceActions: preparedDevices || null,
-            });
-
-            // Rückgabe der Aktion mit den angepassten Geräten
-            return {
-                ...actionData || null,
-                actions: finalActions || null,
-                devices: this.devices || null,
-                deviceActions: preparedDevices || null, 
-            };
-        }
-        // Check min/max settins and do adjustments
-        checkLimits() {
-            let adjustments = {};
             
-            if(this.tentMode === "Drying")return
-
-            if (!this.needchange) return adjustments
-
-            // Dynamische Gewichtung basierend auf Plant Stage
-            let humidityWeight, temperatureWeight;
-            
-            if(this.controls.ownWeights){
-                if (this.plantStage === "MidFlower" || this.plantStage === "LateFlower") {
-                    humidityWeight = this.controls.weights.hum; 
-                    temperatureWeight = this.controls.weights.temp;
-                } else {
-                    humidityWeight = this.controls.weights.hum; 
-                    temperatureWeight = this.controls.weights.temp;
-                }   
-            }else{
-                if (this.plantStage === "MidFlower" || this.plantStage === "LateFlower") {
-        
-                    humidityWeight = 1.25 // In der Blütephase hat die Feuchtigkeit eine höhere Priorität
-                    temperatureWeight = 1.0; // Temperatur hat in diesen Phasen weniger Priorität
-                } else {
-                    humidityWeight = 1.0; // In anderen Phasen wie der Vegetationsphase ist die Temperatur leicht höher als Feuchtigkeit
-                    temperatureWeight = 1.0;
-                }
-            }
-
-            // Temperatur- und Feuchtigkeitsabweichungen berechnen
-            const tempDeviation = (this.tentData.temperature - this.tentData.maxTemp) * temperatureWeight;
-            const humDeviation = (this.tentData.humidity - this.tentData.maxHumidity) * humidityWeight;
-
-            // **Initialisiere climate innerhalb von adjustments**
-            adjustments.climate = {
-                cool: "unchanged",
-                heat: "unchanged",
-                dry: "unchanged",
-            };
-
-
-            // **1. Hohe Temperatur + Hohe Feuchtigkeit**
-            if (tempDeviation > 0 && humDeviation > 0) {
-                adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
-                adjustments.cooler = "increased"; // Temperatur senken
-                adjustments.exhaust = "increased"; // Abluft maximieren
-                adjustments.climate.cool = "increased";
-                adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-            // node.warn(`${this.tentName} Fall: Hohe Temperatur + Hohe Feuchtigkeit`);
-
-                // **2. Hohe Temperatur + Niedrige Feuchtigkeit**
-            } else if (tempDeviation > 0 && humDeviation < 0) {
-                adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
-                adjustments.cooler = "increased"; // Temperatur senken
-                adjustments.exhaust = "increased"; // Abluft beibehalten oder erhöhen
-                adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-                adjustments.climate.cool = "increased";
-            // node.warn(`${this.tentName} Fall: Hohe Temperatur + Niedrige Feuchtigkeit`);
-
-                // **3. Niedrige Temperatur + Hohe Feuchtigkeit**
-            } else if (tempDeviation < 0 && humDeviation > 0) {
-                adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
-                adjustments.heater = "increased"; // Temperatur erhöhen
-                adjustments.exhaust = "increased"; // Abluft erhöhen, um Feuchtigkeit abzuführen
-                adjustments.climate.dry = "increased";
-                adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-                //node.warn(`${this.tentName} Fall: Niedrige Temperatur + Hohe Feuchtigkeit`);
-
-                // **4. Niedrige Temperatur + Niedrige Feuchtigkeit**
-            } else if (tempDeviation < 0 && humDeviation < 0) {
-                adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
-                adjustments.heater = "increased"; // Temperatur erhöhen
-                adjustments.exhaust = "reduced"; // Abluft reduzieren, um Wärme und Feuchtigkeit zu halten
-                adjustments.climate.heat = "increased";
-                adjustments.ventilation = "reduced"; // Vents verringern
-                //node.warn(`${this.tentName} Fall: Niedrige Temperatur + Niedrige Feuchtigkeit`);
-            }
-
-            // **Zusätzliche Fälle**
-
-            // **5. Notfallmaßnahmen bei extremer Übertemperatur**
-            if (this.tentData.temperature > this.tentData.maxTemp + 5) {
-                adjustments.exhaust = "maximum"; // Maximale Abluft
-                adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen            
-                adjustments.cooler = "increased";
-                adjustments.climate.cool = "increased";
-                adjustments.light = "reduced"; // Licht komplett ausschalten, um Wärme zu reduzieren
-            // node.warn(`${this.tentName} Kritische Übertemperatur! Notfallmaßnahmen aktiviert.`);
-            }
-
-            // **6. Notfallmaßnahmen bei extremer Untertemperatur**
-            if (this.tentData.temperature < this.tentData.minTemp - 5) {
-                adjustments.heater = "maximum"; // Maximale Heizung
-                adjustments.exhaust = "reduced"; // Abluft reduzieren, um Wärme zu halten
-                adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen        
-                adjustments.climate.heat = "increased";
-            // node.warn(` ${this.tentName} Kritische Untertemperatur! Notfallmaßnahmen aktiviert.`);
-            }
-
-            // **7. Lichtsteuerung basierend auf Temperatur**
-            if (this.tentData.temperature > this.tentData.maxTemp && this.isPlantDay.lightOn) {
-                adjustments.light = "reduced"; // Lichtleistung reduzieren, um Wärme zu verringern
-            //node.warn(`${this.tentName} Lichtleistung reduziert aufgrund hoher Temperatur`);
-            }
-
-            // **8. CO₂-Management**
-            if (this.tentData.co2Level < 400) {
-                adjustments.co2 = "increased"; // CO₂ hinzufügen
-                adjustments.exhaust = "minimum"; // CO₂ halten
-                //node.warn("CO₂-Level zu niedrig, CO₂-Zufuhr erhöht");
-            } else if (this.tentData.co2Level > 1200) {
-                adjustments.co2 = "reduced"; // CO₂-Zufuhr stoppen
-                adjustments.exhaust = "increased"; // CO₂ abführen
-                //node.warn(`${this.tentName} CO₂-Level zu hoch, Abluft erhöht`);
-            }
-
-            // **9. Taupunkt- und Kondensationsschutz**
-            if (this.tentData.dewpoint >= this.tentData.temperature - 1) {
-                adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
-                adjustments.exhaust = "increased"; // Abluft erhöhen
-                adjustments.climate.dry = "increased";
-                adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-                //node.warn(`${this.tentName} Taupunkt erreicht, Feuchtigkeit reduziert`);
-            }
-
-            // **10. Nachtmodus (Licht aus, maximale Abluft)**
-            if (!this.isPlantDay.lightOn) {
-                adjustments.light = "off"; // Licht ausschalten
-                adjustments.exhaust = "maximum"; // Abluft auf max setzen
-                adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-                //node.warn(`${this.tentName} Nachtmodus aktiv: Licht aus, Abluft erhöht`);
-            }
-
-            // **11. Sicherheitsfall: Abluft niemals reduzieren bei hoher Temperatur**
-            if (tempDeviation > 0) {
-                adjustments.exhaust = "increased"; // Abluft beibehalten oder erhöhen
-                adjustments.ventilation = "maximum" // Vents beibehalten oder erhöhen
-                //node.warn(`${this.tentName} Sicherheit: Abluft erhöht, da Temperatur zu hoch`);
-            }
-
-            // **12. Feuchtigkeitsgrenzwerte beachten**
-            if (this.tentData.humidity < this.tentData.minHumidity) {
-                adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
-                adjustments.ventilation = "increased"
-            //node.warn(`${this.tentName} Feuchtigkeit unter Minimum: Luftbefeuchter aktiviert`);
-            } else if (this.tentData.humidity > this.tentData.maxHumidity) {
-                adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
-                adjustments.climate.dry = "increased";
-                adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-                //node.warn(`${this.tentName} Feuchtigkeit über Maximum: Entfeuchter aktiviert`);
-            }
-
-            // **13. Temperaturgrenzwerte beachten**
-            if (this.tentData.temperature < this.tentData.minTemp) {
-                adjustments.heater = "increased"; // Temperatur erhöhen
-                adjustments.climate.heat = "increased";
-                adjustments.ventilation = "reduced"; // Vents beibehalten oder erhöhen
-                //node.warn(`${this.tentName} Temperatur unter Minimum: Heizung aktiviert`);
-            } else if (this.tentData.temperature > this.tentData.maxTemp) {
-                adjustments.cooler = "increased"; // Temperatur senken
-                adjustments.climate.cool = "increased";
-                adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-                //node.warn(`${this.tentName} Temperatur über Maximum: Kühler aktiviert`);
-            }
-
-            return adjustments;
         }
 
-        // Experimentel ( use outsite and ambient data)
-        analyzeTrends(){
-            let trend = {
-                temperature: this.enviorment.outsiteTemp - this.enviorment.ambientTemp,
-                humidity: this.enviorment.outsiteHumidity - this.enviorment.ambientHumidity,
-            };
-
-            if (trend.temperature > 0) {
-                // Außentemperatur steigt -> Vorzeitig lüften
-                this.actionsIncreased.exhaust = "preemptively increased";
-            } else if (trend.temperature < 0) {
-                // Außentemperatur sinkt -> Lüftung reduzieren
-                this.actionsReduced.exhaust = "preemptively reduced";
-            }
-
-            if (trend.humidity > 0) {
-                // Außenfeuchtigkeit steigt -> Entfeuchter verstärken
-                this.actionsIncreased.dehumidifier = "preemptively increased";
-            } else if (trend.humidity < 0) {
-                // Außenfeuchtigkeit sinkt -> Befeuchter anpassen
-                this.actionsReduced.humidifier = "preemptively reduced";
-            }
+        if(this.needchange){
+            limitAdjustments = this.checkLimits();
         }
+        // Vorzeitige Anpassungen
 
-        // DATA SETTER FAKE DB ******************************
-        dataSetter(data) {
-            const time = new Date().toISOString();
-            const lastAction = this.previousActions[this.previousActions.length - 1];
-            // Definiere eine Schwelle für Änderungen
-            const vpdThreshold = 0.001;
+            // Kombiniere alle Aktionen
+        const finalActions = {
+        ...actionData.actions || null,
+        ...limitAdjustments || null,
+        };
+        //let absolutActions = this.evaluateDeviceEnvironment(finalActions)
 
-            if (this.tentMode === "Unchanged" || "Disabled" || "I DONT CARE MODE" ){
-                return
-            }
+        this.devices.forEach((device) => {
 
+            // Prüfen, ob das Gerät korrekt initialisiert wurde
+            if (device.switches.length === 0) return
+            if (device && typeof device.prepareAction === "function") {
+                if (device.deviceType === "sensor" || device.deviceType === "pump" || device.deviceType === "co2") return;
+                    
+                device = device.prepareAction(finalActions);
 
-            // Filter für aktive oder relevante Geräte
-            // Filter für aktive oder relevante Geräte
-            const relevantDevices = this.devices.filter(
-                (device) => (device.switches.length > 0) || device.isRunning
-            );
+                let actions = device.runAction(context)
 
+                //node.warn(`FinalAction: ${JSON.stringify(actions, null, 2)}`);
 
-            // Erstelle das Datenobjekt
-            const enrichedData = {
-                time,
-                tentName: this.tentName,
-                tentMode: this.tentMode,
-                inMode: data.inMode,
-                currentVPD: this.vpd.current,
-                targetVPDMin: this.vpd.range[0],
-                targetVPDMax: this.vpd.range[1],
-                vpdDiffPercent: data.vpdDiffPercent || 0,
-                Temps: {
-                    Temperature: this.tentData.temperature,
-                    MinTemperature: this.tentData.minTemp,
-                    MaxTemperature: this.tentData.maxTemp,
-                },
-                Humditys: {
-                    Humidity: this.tentData.humidity,
-                    MinHumidity: this.tentData.minHumidity,
-                    MaxHumidity: this.tentData.maxHumidity,
-                },
-                Dewpoint: this.tentData.dewpoint,
-                actions: data.actions,
-                Environment: {
-                    ambientTemp: this.enviorment.ambientTemp,
-                    ambientHumidity: this.enviorment.ambientHumidity,
-                    ambientDewpoint: this.enviorment.ambientDewpoint,
-                },
-                Outside: {
-                    outsiteTemp: this.enviorment.outsiteTemp,
-                    outsiteHumidity: this.enviorment.outsiteHumidity,
-                    outsiteDewpoint: this.enviorment.outsiteDewpoint,
-                },
-                devices: relevantDevices.map((device) => ({
-                    name: device.name,
-                    deviceType: device.deviceType,
-                    isRunning: device.isRunning,
-                    needChange: device.needChange,
-                    action: device.action,
-                    hasDuty: device.hasDuty,
-                    dutyCycle: device.dutyCycle,
-                    switches: device.switches,
-                    sensors: device.sensors,
-                    data: device.data,
-                })),
-                deviceActions: data.deviceActions
-            };
-
-            // Bedingung für signifikante Änderungen
-            const significantChange =
-                !lastAction ||
-                Math.abs(lastAction.currentVPD - this.vpd.current) > vpdThreshold ||
-                lastAction.targetVPDMin !== enrichedData.targetVPDMin ||
-                lastAction.targetVPDMax !== enrichedData.targetVPDMax ||
-                lastAction.Temps.Temperature !== enrichedData.Temps.Temperature ||
-                lastAction.Humditys.Humidity !== enrichedData.Humditys.Humidity ||
-                lastAction.Dewpoint !== enrichedData.Dewpoint;
-
-            if (significantChange) {
-                this.previousActions.push(enrichedData);
-                node.log(`Neue Aktion gespeichert:", ${enrichedData}`);
+                preparedDevices.push(actions)
+                //preparedDevices.push(device)
             } else {
-                node.log("Änderung nicht signifikant - Keine Aktion gespeichert.");
+                // Falls Gerät nicht korrekt initialisiert ist, Warnung ausgeben
+                node.warn(`Device ${device?.name || "undefined"} konnte nicht verarbeitet werden.`);
             }
+        });
 
-            // Begrenze die Anzahl der gespeicherten Aktionen
-            if (this.previousActions.length > 250) {
-                this.previousActions = this.previousActions.slice(-250);
+
+        // Aktion speichern
+        this.dataSetter({
+            ...actionData || null,
+            actions: finalActions || null,
+            devices: this.devices || null,
+            deviceActions: preparedDevices || null,
+        });
+
+        // Rückgabe der Aktion mit den angepassten Geräten
+        return {
+            ...actionData || null,
+            actions: finalActions || null,
+            devices: this.devices || null,
+            deviceActions: preparedDevices || null, 
+        };
+    }
+    // Check min/max settins and do adjustments
+    checkLimits() {
+        let adjustments = {};
+        
+        if(this.tentMode === "Drying")return
+
+        if (!this.needchange) return adjustments
+
+        // Dynamische Gewichtung basierend auf Plant Stage
+        let humidityWeight, temperatureWeight;
+        
+        if(this.controls.ownWeights){
+            if (this.plantStage === "MidFlower" || this.plantStage === "LateFlower") {
+                humidityWeight = this.controls.weights.hum; 
+                temperatureWeight = this.controls.weights.temp;
+            } else {
+                humidityWeight = this.controls.weights.hum; 
+                temperatureWeight = this.controls.weights.temp;
+            }   
+        }else{
+            if (this.plantStage === "MidFlower" || this.plantStage === "LateFlower") {
+    
+                humidityWeight = 1.25 // In der Blütephase hat die Feuchtigkeit eine höhere Priorität
+                temperatureWeight = 1.0; // Temperatur hat in diesen Phasen weniger Priorität
+            } else {
+                humidityWeight = 1.0; // In anderen Phasen wie der Vegetationsphase ist die Temperatur leicht höher als Feuchtigkeit
+                temperatureWeight = 1.0;
             }
         }
-            // Check if action is needed to chagnes in vpd 
-        checkLastState() {
-            if (this.previousActions.length === 0) return false;
 
-            const lastAction = this.previousActions[this.previousActions.length - 1];
+        // Temperatur- und Feuchtigkeitsabweichungen berechnen
+        const tempDeviation = (this.tentData.temperature - this.tentData.maxTemp) * temperatureWeight;
+        const humDeviation = (this.tentData.humidity - this.tentData.maxHumidity) * humidityWeight;
 
-            // Prüfen, ob der aktuelle Zustand identisch mit dem letzten gespeicherten Zustand ist
-            if (lastAction && lastAction.currentVPD === this.vpd.current) {
-                node.log("VPD hat sich nicht geändert. Keine Aktion notwendig.");
-                return true;
-            }
+        // **Initialisiere climate innerhalb von adjustments**
+        adjustments.climate = {
+            cool: "unchanged",
+            heat: "unchanged",
+            dry: "unchanged",
+        };
 
-            return false;
+
+        // **1. Hohe Temperatur + Hohe Feuchtigkeit**
+        if (tempDeviation > 0 && humDeviation > 0) {
+            adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
+            adjustments.cooler = "increased"; // Temperatur senken
+            adjustments.exhaust = "increased"; // Abluft maximieren
+            adjustments.climate.cool = "increased";
+            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+        // node.warn(`${this.tentName} Fall: Hohe Temperatur + Hohe Feuchtigkeit`);
+
+            // **2. Hohe Temperatur + Niedrige Feuchtigkeit**
+        } else if (tempDeviation > 0 && humDeviation < 0) {
+            adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
+            adjustments.cooler = "increased"; // Temperatur senken
+            adjustments.exhaust = "increased"; // Abluft beibehalten oder erhöhen
+            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+            adjustments.climate.cool = "increased";
+        // node.warn(`${this.tentName} Fall: Hohe Temperatur + Niedrige Feuchtigkeit`);
+
+            // **3. Niedrige Temperatur + Hohe Feuchtigkeit**
+        } else if (tempDeviation < 0 && humDeviation > 0) {
+            adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
+            adjustments.heater = "increased"; // Temperatur erhöhen
+            adjustments.exhaust = "increased"; // Abluft erhöhen, um Feuchtigkeit abzuführen
+            adjustments.climate.dry = "increased";
+            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+            //node.warn(`${this.tentName} Fall: Niedrige Temperatur + Hohe Feuchtigkeit`);
+
+            // **4. Niedrige Temperatur + Niedrige Feuchtigkeit**
+        } else if (tempDeviation < 0 && humDeviation < 0) {
+            adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
+            adjustments.heater = "increased"; // Temperatur erhöhen
+            adjustments.exhaust = "reduced"; // Abluft reduzieren, um Wärme und Feuchtigkeit zu halten
+            adjustments.climate.heat = "increased";
+            adjustments.ventilation = "reduced"; // Vents verringern
+            //node.warn(`${this.tentName} Fall: Niedrige Temperatur + Niedrige Feuchtigkeit`);
         }
+
+        // **Zusätzliche Fälle**
+
+        // **5. Notfallmaßnahmen bei extremer Übertemperatur**
+        if (this.tentData.temperature > this.tentData.maxTemp + 5) {
+            adjustments.exhaust = "maximum"; // Maximale Abluft
+            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen            
+            adjustments.cooler = "increased";
+            adjustments.climate.cool = "increased";
+            adjustments.light = "reduced"; // Licht komplett ausschalten, um Wärme zu reduzieren
+        // node.warn(`${this.tentName} Kritische Übertemperatur! Notfallmaßnahmen aktiviert.`);
+        }
+
+        // **6. Notfallmaßnahmen bei extremer Untertemperatur**
+        if (this.tentData.temperature < this.tentData.minTemp - 5) {
+            adjustments.heater = "maximum"; // Maximale Heizung
+            adjustments.exhaust = "reduced"; // Abluft reduzieren, um Wärme zu halten
+            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen        
+            adjustments.climate.heat = "increased";
+        // node.warn(` ${this.tentName} Kritische Untertemperatur! Notfallmaßnahmen aktiviert.`);
+        }
+
+        // **7. Lichtsteuerung basierend auf Temperatur**
+        if (this.tentData.temperature > this.tentData.maxTemp && this.isPlantDay.lightOn) {
+            adjustments.light = "reduced"; // Lichtleistung reduzieren, um Wärme zu verringern
+        //node.warn(`${this.tentName} Lichtleistung reduziert aufgrund hoher Temperatur`);
+        }
+
+        // **8. CO₂-Management**
+        if (this.tentData.co2Level < 400) {
+            adjustments.co2 = "increased"; // CO₂ hinzufügen
+            adjustments.exhaust = "minimum"; // CO₂ halten
+            //node.warn("CO₂-Level zu niedrig, CO₂-Zufuhr erhöht");
+        } else if (this.tentData.co2Level > 1200) {
+            adjustments.co2 = "reduced"; // CO₂-Zufuhr stoppen
+            adjustments.exhaust = "increased"; // CO₂ abführen
+            //node.warn(`${this.tentName} CO₂-Level zu hoch, Abluft erhöht`);
+        }
+
+        // **9. Taupunkt- und Kondensationsschutz**
+        if (this.tentData.dewpoint >= this.tentData.temperature - 1) {
+            adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
+            adjustments.exhaust = "increased"; // Abluft erhöhen
+            adjustments.climate.dry = "increased";
+            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+            //node.warn(`${this.tentName} Taupunkt erreicht, Feuchtigkeit reduziert`);
+        }
+
+        // **10. Nachtmodus (Licht aus, maximale Abluft)**
+        if (!this.isPlantDay.lightOn) {
+            adjustments.light = "off"; // Licht ausschalten
+            adjustments.exhaust = "maximum"; // Abluft auf max setzen
+            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+            //node.warn(`${this.tentName} Nachtmodus aktiv: Licht aus, Abluft erhöht`);
+        }
+
+        // **11. Sicherheitsfall: Abluft niemals reduzieren bei hoher Temperatur**
+        if (tempDeviation > 0) {
+            adjustments.exhaust = "increased"; // Abluft beibehalten oder erhöhen
+            adjustments.ventilation = "maximum" // Vents beibehalten oder erhöhen
+            //node.warn(`${this.tentName} Sicherheit: Abluft erhöht, da Temperatur zu hoch`);
+        }
+
+        // **12. Feuchtigkeitsgrenzwerte beachten**
+        if (this.tentData.humidity < this.tentData.minHumidity) {
+            adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
+            adjustments.ventilation = "increased"
+        //node.warn(`${this.tentName} Feuchtigkeit unter Minimum: Luftbefeuchter aktiviert`);
+        } else if (this.tentData.humidity > this.tentData.maxHumidity) {
+            adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
+            adjustments.climate.dry = "increased";
+            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+            //node.warn(`${this.tentName} Feuchtigkeit über Maximum: Entfeuchter aktiviert`);
+        }
+
+        // **13. Temperaturgrenzwerte beachten**
+        if (this.tentData.temperature < this.tentData.minTemp) {
+            adjustments.heater = "increased"; // Temperatur erhöhen
+            adjustments.climate.heat = "increased";
+            adjustments.ventilation = "reduced"; // Vents beibehalten oder erhöhen
+            //node.warn(`${this.tentName} Temperatur unter Minimum: Heizung aktiviert`);
+        } else if (this.tentData.temperature > this.tentData.maxTemp) {
+            adjustments.cooler = "increased"; // Temperatur senken
+            adjustments.climate.cool = "increased";
+            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+            //node.warn(`${this.tentName} Temperatur über Maximum: Kühler aktiviert`);
+        }
+
+        return adjustments;
+    }
+
+    // Experimentel ( use outsite and ambient data)
+    analyzeTrends(){
+        let trend = {
+            temperature: this.enviorment.outsiteTemp - this.enviorment.ambientTemp,
+            humidity: this.enviorment.outsiteHumidity - this.enviorment.ambientHumidity,
+        };
+
+        if (trend.temperature > 0) {
+            // Außentemperatur steigt -> Vorzeitig lüften
+            this.actionsIncreased.exhaust = "preemptively increased";
+        } else if (trend.temperature < 0) {
+            // Außentemperatur sinkt -> Lüftung reduzieren
+            this.actionsReduced.exhaust = "preemptively reduced";
+        }
+
+        if (trend.humidity > 0) {
+            // Außenfeuchtigkeit steigt -> Entfeuchter verstärken
+            this.actionsIncreased.dehumidifier = "preemptively increased";
+        } else if (trend.humidity < 0) {
+            // Außenfeuchtigkeit sinkt -> Befeuchter anpassen
+            this.actionsReduced.humidifier = "preemptively reduced";
+        }
+    }
+    // DATA SETTER FAKE DB ******************************
+    dataSetter(data) {
+        const time = new Date().toISOString();
+        const lastAction = this.previousActions[this.previousActions.length - 1];
+        // Definiere eine Schwelle für Änderungen
+        const vpdThreshold = 0.005;
+
+        if (this.tentMode === "Unchanged" || this.tentMode === "Disabled" || this.tentMode === "I DONT CARE MODE") {
+            return;
+        }
+
+
+        // Filter für aktive oder relevante Geräte
+        // Filter für aktive oder relevante Geräte
+        const relevantDevices = this.devices.filter(
+            (device) => (device.switches.length > 0) || device.isRunning
+        );
+
+
+        // Erstelle das Datenobjekt
+        const enrichedData = {
+            time,
+            tentName: this.tentName,
+            tentMode: this.tentMode,
+            currentVPD: this.vpd.current,
+            targetVPDMin: this.vpd.range[0],
+            targetVPDMax: this.vpd.range[1],
+            vpdDiffPercent: data.vpdDiffPercent || 0,
+            Temps: {
+                Temperature: this.tentData.temperature,
+                MinTemperature: this.tentData.minTemp,
+                MaxTemperature: this.tentData.maxTemp,
+            },
+            Humditys: {
+                Humidity: this.tentData.humidity,
+                MinHumidity: this.tentData.minHumidity,
+                MaxHumidity: this.tentData.maxHumidity,
+            },
+            Dewpoint: this.tentData.dewpoint,
+            actions: data.actions,
+            Environment: {
+                ambientTemp: this.enviorment.ambientTemp,
+                ambientHumidity: this.enviorment.ambientHumidity,
+                ambientDewpoint: this.enviorment.ambientDewpoint,
+            },
+            Outside: {
+                outsiteTemp: this.enviorment.outsiteTemp,
+                outsiteHumidity: this.enviorment.outsiteHumidity,
+                outsiteDewpoint: this.enviorment.outsiteDewpoint,
+            },
+            devices: relevantDevices.map((device) => ({
+                name: device.name,
+                deviceType: device.deviceType,
+                isRunning: device.isRunning,
+                needChange: device.needChange,
+                action: device.action,
+                hasDuty: device.hasDuty,
+                dutyCycle: device.dutyCycle,
+                switches: device.switches,
+                sensors: device.sensors,
+                data: device.data,
+            })),
+            deviceActions: data.deviceActions
+        };
+
+        // Bedingung für signifikante Änderungen
+        const significantChange =
+            !lastAction ||
+            Math.abs(lastAction.currentVPD - this.vpd.current) > vpdThreshold ||
+            lastAction.Temps.Temperature !== enrichedData.Temps.Temperature ||
+            lastAction.Humditys.Humidity !== enrichedData.Humditys.Humidity ||
+            lastAction.Dewpoint !== enrichedData.Dewpoint;
+
+        if (significantChange) {
+            this.previousActions.push(enrichedData);
+            node.log(`Neue Aktion gespeichert:", ${enrichedData}`);
+        } else {
+            node.log("Änderung nicht signifikant - Keine Aktion gespeichert.");
+        }
+
+        // Begrenze die Anzahl der gespeicherten Aktionen
+        if (this.previousActions.length > 250) {
+            this.previousActions = this.previousActions.slice(-250);
+        }
+    }
+    
+    // Check if action is needed to chagnes in vpd 
+    checkLastState() {
+        if (this.previousActions.length === 0) return false;
+
+        const lastAction = this.previousActions[this.previousActions.length - 1];
+
+        // Prüfen, ob der aktuelle Zustand identisch mit dem letzten gespeicherten Zustand ist
+        if (lastAction && lastAction.currentVPD === this.vpd.current) {
+            node.log("VPD hat sich nicht geändert. Keine Aktion notwendig.");
+            return true;
+        }
+
+        return false;
+    }
 }
 
 class Device {
