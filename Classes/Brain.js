@@ -2176,13 +2176,19 @@ class ExhaustFan extends Device {
         this.maxDuty = 95;
         this.hasDuty = false;
         this.isRuckEC = false;
-        this.init();
+      
     }
 
-    init() {
-        this.findDutyCycle();
-        this.identifyIfRuckEC();
+    setData(data, context) {
+        this.setFromtent(context.tentName)
+        this.identifyIfFromAmbient()
+        this.data = { ...this.data, ...data };
+        this.identifySwitchesAndSensors();
+        this.updateIsRunningState();
+        this.identifyIfRuckEC(); // RuckEC zuerst prüfen
+        this.findDutyCycle();    // Danach Duty Cycle suchen
     }
+
 
     clampDutyCycle(dutyCycle) {
         return Math.max(this.minDuty, Math.min(this.maxDuty, dutyCycle));
@@ -2192,6 +2198,7 @@ class ExhaustFan extends Device {
         this.isRuckEC = this.name.toLowerCase().includes("ruck");
         if (this.isRuckEC) {
             node.warn(`${this.name}: Gerät als RuckEC erkannt.`);
+            //this.hasDuty = true
         }
     }
 
@@ -2203,11 +2210,39 @@ class ExhaustFan extends Device {
             return;
         }
 
+        node.warn(`${this.name}: Gerätedaten gefunden: ${JSON.stringify(this.data)}`);
+
+        // Prüfe, ob das Gerät als RuckEC erkannt wurde
+        if (this.isRuckEC) {
+            const dutyCycleKey = Object.keys(this.data).find((key) =>
+                key.toLowerCase().includes("dutycycle") ||
+                key.toLowerCase().includes("duty_cycle") ||
+                key.toLowerCase().includes("fan.") || 
+                key.toLowerCase().includes("light.") // IF FROM TASMOTA
+            );
+
+            if (dutyCycleKey) {
+                const dutyCycleValue = parseInt(this.data[dutyCycleKey], 10);
+                if (!isNaN(dutyCycleValue)) {
+                    this.dutyCycle = this.clampDutyCycle(dutyCycleValue);
+                    this.hasDuty = true;
+                    node.warn(`${this.name}: RuckEC erkannt. Duty Cycle gesetzt auf ${this.dutyCycle}%.`);
+                    return;
+                }
+            }
+
+            // Fallback für RuckEC-Geräte ohne gültigen Duty Cycle
+            this.hasDuty = true;
+            this.dutyCycle = this.minDuty;
+            node.warn(`${this.name}: RuckEC erkannt, aber kein gültiger Duty Cycle. Setze Standardwert: ${this.dutyCycle}%.`);
+            return;
+        }
+
+        // Allgemeine Logik für Nicht-RuckEC-Geräte
         const dutyCycleKey = Object.keys(this.data).find((key) =>
             key.toLowerCase().includes("dutycycle") ||
             key.toLowerCase().includes("duty_cycle") ||
-            key.toLowerCase().includes("duty") ||
-            key.toLowerCase().includes("number.")
+            key.toLowerCase().includes("fan.")
         );
 
         if (dutyCycleKey) {
@@ -2215,16 +2250,17 @@ class ExhaustFan extends Device {
             if (!isNaN(dutyCycleValue)) {
                 this.dutyCycle = this.clampDutyCycle(dutyCycleValue);
                 this.hasDuty = true;
-                node.warn(`${this.name}: Duty Cycle gesetzt auf ${this.dutyCycle}%.`);
-            } else {
-                node.warn(`${this.name}: Ungültiger Duty Cycle-Wert. Setze auf ${this.minDuty}%.`);
-                this.dutyCycle = this.minDuty;
+                node.warn(`${this.name}: Duty Cycle erkannt und gesetzt auf ${this.dutyCycle}%.`);
+                return;
             }
-        } else {
-            node.warn(`${this.name}: Kein Duty Cycle-Schlüssel gefunden.`);
-            this.dutyCycle = this.minDuty;
         }
+
+        // Wenn kein Schlüssel gefunden wurde
+        node.warn(`${this.name}: Kein Duty Cycle-Schlüssel gefunden. Setze Standardwert.`);
+        this.dutyCycle = this.minDuty;
+        this.hasDuty = false;
     }
+
 
     setDutyCycle(dutyCycle) {
         this.dutyCycle = this.clampDutyCycle(dutyCycle);
@@ -2319,6 +2355,7 @@ class ExhaustFan extends Device {
         return { entity_id: switchId, action: "Already OFF" };
     }
 }
+
 class Ventilation extends Device {
     constructor(name) {
         super(name, "ventilation");
@@ -2327,8 +2364,26 @@ class Ventilation extends Device {
         this.dutyMax = 100; // Maximalwert für Duty Cycle
         this.hasDuty = false;
         this.isTasmota = false;
-        this.init(); // Initialisierungsmethode aufrufen
     }
+
+
+
+   setData(data,context) {
+        this.setFromtent(context.tentName)
+        this.identifyIfFromAmbient()
+        this.data = { ...this.data, ...data };
+        this.identifySwitchesAndSensors();
+        this.updateIsRunningState();
+        this.findDutyCycle(); // Duty Cycle initialisieren
+        
+        if (this.dutyCycle < this.dutyMin) {
+            node.warn(`${this.name}: Duty Cycle unter Mindestwert. Setze auf ${this.dutyMin}%.`);
+            this.dutyCycle = this.dutyMin;
+        }
+
+        this.identifyIfTasmota();
+    }
+
 
     init() {
         this.findDutyCycle(); // Duty Cycle initialisieren
@@ -2362,32 +2417,40 @@ class Ventilation extends Device {
     findDutyCycle() {
         if (!this.data) {
             node.warn(`${this.name}: Keine Gerätedaten gefunden.`);
-            this.dutyCycle = this.dutyMin; // Fallback auf Mindestwert
+            this.dutyCycle = this.minDuty;
             this.hasDuty = false;
             return;
         }
 
-        if (this.isTasmota) return; // Ignoriere Tasmota-Geräte
+        node.warn(`${this.name}: Gerätedaten gefunden: ${JSON.stringify(this.data)}`);
 
+        // Suche nach einem passenden Schlüssel
         const dutyCycleKey = Object.keys(this.data).find((key) =>
-            key.toLowerCase().includes("dutycycle")
+            key.toLowerCase().includes("dutycycle") ||
+            key.toLowerCase().includes("duty_cycle") ||
+            key.toLowerCase().includes("fan.") ||
+            key.toLowerCase().includes("light.")
         );
 
         if (dutyCycleKey) {
+            this.hasDuty = true; // Ein passender Schlüssel wurde gefunden
+            node.warn(`${this.name}: Schlüssel für Duty Cycle gefunden: ${dutyCycleKey}`);
+
             const dutyCycleValue = parseInt(this.data[dutyCycleKey], 10);
             if (!isNaN(dutyCycleValue)) {
-                this.dutyCycle = Math.max(this.dutyMin, Math.min(this.dutyMax, dutyCycleValue));
-                this.hasDuty = true;
+                this.dutyCycle = this.clampDutyCycle(dutyCycleValue);
                 node.warn(`${this.name}: Duty Cycle gesetzt auf ${this.dutyCycle}%.`);
             } else {
-                node.warn(`${this.name}: Ungültiger Duty Cycle-Wert. Setze auf ${this.dutyMin}%.`);
-                this.dutyCycle = this.dutyMin;
+                node.warn(`${this.name}: Kein gültiger Wert für Duty Cycle. Standardwert wird verwendet.`);
+                this.dutyCycle = this.minDuty;
             }
         } else {
-            node.warn(`${this.name}: Kein Duty Cycle-Schlüssel gefunden. Setze auf ${this.dutyMin}%.`);
-            this.dutyCycle = this.dutyMin;
+            node.warn(`${this.name}: Kein Duty Cycle-Schlüssel gefunden. Setze Standardwert.`);
+            this.dutyCycle = this.minDuty;
+            this.hasDuty = false;
         }
     }
+
 
     setDutyCycle(dutyCycle) {
         const clampedDuty = Math.max(this.dutyMin, Math.min(this.dutyMax, dutyCycle));
@@ -2604,11 +2667,6 @@ class Light extends Device {
                 max: 100,
             },
         };
-        this.init();
-    }
-
-    init() {
-        this.findDutyCycle(); // Initialisiere den Duty-Cycle, falls vorhanden
     }
 
     findDutyCycle() {
@@ -2645,6 +2703,7 @@ class Light extends Device {
         this.identifySwitchesAndSensors();
         this.updateIsRunningState();
         this.setCurrenPlantPhaseName(context);
+        this.findDutyCycle(); // Initialisiere den Duty-Cycle, falls vorhanden
         this.setLightTimes(context);
         this.setSunTimes(context.isPlantDay.sunRiseTimes, context.isPlantDay.sunSetTimes);
     }
@@ -2820,10 +2879,6 @@ class Humidifier extends Device {
         this.stepSize = 5; // Schrittweite für Änderungen
     }
 
-    init() {
-        this.identifySwitchesAndSensors();
-    }
-
     setData(data, context) {
         this.setFromtent(context.tentName);
         this.identifyIfFromAmbient();
@@ -2915,10 +2970,6 @@ class Dehumidifier extends Device {
         this.stepSize = 5; // Schrittweite für Änderungen
     }
 
-    init() {
-        this.identifySwitchesAndSensors();
-    }
-
     setData(data, context) {
         this.setFromtent(context.tentName);
         this.identifyIfFromAmbient();
@@ -3008,10 +3059,6 @@ class Heater extends Device {
         this.currentTemp = null; // Aktuelle Temperatur
     }
 
-    init() {
-        // Initialisierungslogik, falls erforderlich
-    }
-
     setTemps(minTemp, maxTemp) {
         this.minTemp = minTemp;
         this.maxTemp = maxTemp;
@@ -3066,11 +3113,7 @@ class Cooler extends Device {
         this.currentTemp = null; // Aktuelle Temperatur
     }
 
-    init() {
-        // Initialisierungslogik, falls erforderlich
-    }
-
-    setTemps(minTemp, maxTemp) {
+     setTemps(minTemp, maxTemp) {
         this.minTemp = minTemp;
         this.maxTemp = maxTemp;
         node.warn(`${this.name}: Temperaturbereich gesetzt auf ${minTemp}°C - ${maxTemp}°C.`);
