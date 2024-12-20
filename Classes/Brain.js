@@ -1585,9 +1585,9 @@ class OpenGrowBox {
             adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
             adjustments.cooler = "increased"; // Temperatur senken
             adjustments.exhaust = "increased"; // Abluft maximieren
-            adjustments.climate.cool = "increased";
+            adjustments.climate.cool = "increased"; // Temp senken 
             adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-        // node.warn(`${this.tentName} Fall: Hohe Temperatur + Hohe Feuchtigkeit`);
+            node.warn(`${this.tentName} Fall: Hohe Temperatur + Hohe Feuchtigkeit`);
 
             // **2. Hohe Temperatur + Niedrige Feuchtigkeit**
         } else if (tempDeviation > 0 && humDeviation < 0) {
@@ -1595,26 +1595,26 @@ class OpenGrowBox {
             adjustments.cooler = "increased"; // Temperatur senken
             adjustments.exhaust = "increased"; // Abluft beibehalten oder erhöhen
             adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-            adjustments.climate.cool = "increased";
-        // node.warn(`${this.tentName} Fall: Hohe Temperatur + Niedrige Feuchtigkeit`);
+            adjustments.climate.cool = "increased"; // Temp senken 
+            node.warn(`${this.tentName} Fall: Hohe Temperatur + Niedrige Feuchtigkeit`);
 
             // **3. Niedrige Temperatur + Hohe Feuchtigkeit**
         } else if (tempDeviation < 0 && humDeviation > 0) {
             adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
             adjustments.heater = "increased"; // Temperatur erhöhen
             adjustments.exhaust = "increased"; // Abluft erhöhen, um Feuchtigkeit abzuführen
-            adjustments.climate.dry = "increased";
+            adjustments.climate.dry = "increased"; //  Feuchtigkeit Senken
             adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-            //node.warn(`${this.tentName} Fall: Niedrige Temperatur + Hohe Feuchtigkeit`);
+            node.warn(`${this.tentName} Fall: Niedrige Temperatur + Hohe Feuchtigkeit`);
 
             // **4. Niedrige Temperatur + Niedrige Feuchtigkeit**
         } else if (tempDeviation < 0 && humDeviation < 0) {
             adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
             adjustments.heater = "increased"; // Temperatur erhöhen
             adjustments.exhaust = "reduced"; // Abluft reduzieren, um Wärme und Feuchtigkeit zu halten
-            adjustments.climate.heat = "increased";
+            adjustments.climate.heat = "increased"; //  Heizung
             adjustments.ventilation = "reduced"; // Vents verringern
-            //node.warn(`${this.tentName} Fall: Niedrige Temperatur + Niedrige Feuchtigkeit`);
+            node.warn(`${this.tentName} Fall: Niedrige Temperatur + Niedrige Feuchtigkeit`);
         }
 
         // **Zusätzliche Fälle**
@@ -1623,36 +1623,36 @@ class OpenGrowBox {
         if (this.tentData.temperature > this.tentData.maxTemp + 5) {
             adjustments.exhaust = "maximum"; // Maximale Abluft
             adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen            
-            adjustments.cooler = "increased";
-            adjustments.climate.cool = "increased";
-            adjustments.light = "reduced"; // Licht komplett ausschalten, um Wärme zu reduzieren
-        // node.warn(`${this.tentName} Kritische Übertemperatur! Notfallmaßnahmen aktiviert.`);
+            adjustments.cooler = "increased"; // Temp Verringern
+            adjustments.climate.cool = "increased"; // Temp Verringern
+            adjustments.light = "reduced"; // Licht Reduzieren, um Wärme zu reduzieren
+            node.warn(`${this.tentName} Kritische Übertemperatur! Notfallmaßnahmen aktiviert.`);
         }
 
         // **6. Notfallmaßnahmen bei extremer Untertemperatur**
         if (this.tentData.temperature < this.tentData.minTemp - 5) {
-            adjustments.heater = "maximum"; // Maximale Heizung
+            adjustments.heater = "increased"; //  Heizung
             adjustments.exhaust = "reduced"; // Abluft reduzieren, um Wärme zu halten
             adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen        
-            adjustments.climate.heat = "increased";
-        // node.warn(` ${this.tentName} Kritische Untertemperatur! Notfallmaßnahmen aktiviert.`);
+            adjustments.climate.heat = "increased";//  Heizung
+            node.warn(` ${this.tentName} Kritische Untertemperatur! Notfallmaßnahmen aktiviert.`);
         }
 
         // **7. Lichtsteuerung basierend auf Temperatur**
         if (this.tentData.temperature > this.tentData.maxTemp && this.isPlantDay.lightOn) {
             adjustments.light = "reduced"; // Lichtleistung reduzieren, um Wärme zu verringern
-        //node.warn(`${this.tentName} Lichtleistung reduziert aufgrund hoher Temperatur`);
+            node.warn(`${this.tentName} Lichtleistung reduziert aufgrund hoher Temperatur`);
         }
 
         // **8. CO₂-Management**
         if (this.tentData.co2Level < 400) {
             adjustments.co2 = "increased"; // CO₂ hinzufügen
             adjustments.exhaust = "minimum"; // CO₂ halten
-            //node.warn("CO₂-Level zu niedrig, CO₂-Zufuhr erhöht");
+            node.warn("CO₂-Level zu niedrig, CO₂-Zufuhr erhöht");
         } else if (this.tentData.co2Level > 1200) {
             adjustments.co2 = "reduced"; // CO₂-Zufuhr stoppen
             adjustments.exhaust = "increased"; // CO₂ abführen
-            //node.warn(`${this.tentName} CO₂-Level zu hoch, Abluft erhöht`);
+            node.warn(`${this.tentName} CO₂-Level zu hoch, Abluft erhöht`);
         }
 
         // **9. Taupunkt- und Kondensationsschutz**
@@ -1661,7 +1661,7 @@ class OpenGrowBox {
             adjustments.exhaust = "increased"; // Abluft erhöhen
             adjustments.climate.dry = "increased";
             adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-            //node.warn(`${this.tentName} Taupunkt erreicht, Feuchtigkeit reduziert`);
+            node.warn(`${this.tentName} Taupunkt erreicht, Feuchtigkeit reduziert`);
         }
 
         // **10. Nachtmodus (Licht aus, maximale Abluft)**
@@ -1669,39 +1669,46 @@ class OpenGrowBox {
             adjustments.light = "off"; // Licht ausschalten
             adjustments.exhaust = "maximum"; // Abluft auf max setzen
             adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-            //node.warn(`${this.tentName} Nachtmodus aktiv: Licht aus, Abluft erhöht`);
+            node.warn(`${this.tentName} Nachtmodus aktiv: Licht aus, Abluft erhöht`);
         }
 
         // **11. Sicherheitsfall: Abluft niemals reduzieren bei hoher Temperatur**
         if (tempDeviation > 0) {
             adjustments.exhaust = "increased"; // Abluft beibehalten oder erhöhen
             adjustments.ventilation = "maximum" // Vents beibehalten oder erhöhen
-            //node.warn(`${this.tentName} Sicherheit: Abluft erhöht, da Temperatur zu hoch`);
+            node.warn(`${this.tentName} Sicherheit: Abluft erhöht, da Temperatur zu hoch`);
         }
 
         // **12. Feuchtigkeitsgrenzwerte beachten**
         if (this.tentData.humidity < this.tentData.minHumidity) {
             adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
-            adjustments.ventilation = "increased"
-        //node.warn(`${this.tentName} Feuchtigkeit unter Minimum: Luftbefeuchter aktiviert`);
+            adjustments.ventilation = "increased" // Feuchtigkeit verteilen
+            adjustments.dehumidifier = "reduced"; // Feuchtigkeit reduzieren
+            adjustments.climate.dry = "reduced"; // Feuchtigkeit reduzieren
+            adjustments.exhaust = "reduced" // Abluft senken
+            node.warn(`${this.tentName} Feuchtigkeit unter Minimum: Luftbefeuchter aktiviert`);
         } else if (this.tentData.humidity > this.tentData.maxHumidity) {
+            adjustments.humidifier = "reduced" // Feuchtigkeit reduzieren
             adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
-            adjustments.climate.dry = "increased";
-            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-            //node.warn(`${this.tentName} Feuchtigkeit über Maximum: Entfeuchter aktiviert`);
+            adjustments.climate.dry = "increased"; // Feuchtigkeit reduzieren
+            adjustments.ventilation = "increased"; // Feuchtigkeit verteilen
+            adjustments.exhaust = "increased" // Abluft erhöhen
+            node.warn(`${this.tentName} Feuchtigkeit über Maximum: Entfeuchter aktiviert`);
         }
 
         // **13. Temperaturgrenzwerte beachten**
         if (this.tentData.temperature < this.tentData.minTemp) {
             adjustments.heater = "increased"; // Temperatur erhöhen
-            adjustments.climate.heat = "increased";
-            adjustments.ventilation = "reduced"; // Vents beibehalten oder erhöhen
-            //node.warn(`${this.tentName} Temperatur unter Minimum: Heizung aktiviert`);
+            adjustments.climate.heat = "increased";// Temperatur erhöhen
+            adjustments.ventilation = "reduced"; // Temp Verteilen
+            adjustments.exhaust = "reduced" // Abluft senken
+            node.warn(`${this.tentName} Temperatur unter Minimum: Heizung aktiviert`);
         } else if (this.tentData.temperature > this.tentData.maxTemp) {
             adjustments.cooler = "increased"; // Temperatur senken
-            adjustments.climate.cool = "increased";
-            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-            //node.warn(`${this.tentName} Temperatur über Maximum: Kühler aktiviert`);
+            adjustments.climate.cool = "increased";// Temperatur senken
+            adjustments.ventilation = "increased"; // Temp Verteilen und Kühlen
+            adjustments.exhaust = "increased" // Abluft erhöhen
+            node.warn(`${this.tentName} Temperatur über Maximum: Kühler aktiviert`);
         }
 
         return adjustments;
@@ -2583,7 +2590,7 @@ class Light extends Device {
                 max: 50,
             },
             Flower: {
-                min: 50,
+                min: 70,
                 max: 100,
             },
         };
@@ -3428,3 +3435,4 @@ class Sensor extends Device {
         this.readings = [];
     }
 }
+
