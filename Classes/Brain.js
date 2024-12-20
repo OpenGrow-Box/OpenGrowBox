@@ -80,7 +80,7 @@ class OpenGrowBox {
             LateVeg: { vpdRange: [0.933, 1.2], minTemp: 22, maxTemp: 30, minHumidity: 50, maxHumidity: 60 },
             EarlyFlower: { vpdRange: [1.0, 1.25], minTemp: 22, maxTemp: 28, minHumidity: 45, maxHumidity: 60 },
             MidFlower: { vpdRange: [1.1, 1.4], minTemp: 22, maxTemp: 26, minHumidity: 40, maxHumidity: 55 },
-            LateFlower: { vpdRange: [1.2, 1.7], minTemp: 20, maxTemp: 24, minHumidity: 40, maxHumidity: 50 }
+            LateFlower: { vpdRange: [1.3, 1.7], minTemp: 20, maxTemp: 24, minHumidity: 40, maxHumidity: 50 }
         };
 
         this.vpd = {
@@ -2568,6 +2568,7 @@ class Light extends Device {
         this.lightOffTime = ""; // Endzeit des Lichts
         this.isScheduled = false; // Ob das Licht Zeitpläne berücksichtigt
         this.controlOverVoltage = false;
+        this.worksWithCO2 = false
         this.currentPlantPhase = {
             min: 0,
             max: 0,
@@ -2600,8 +2601,8 @@ class Light extends Device {
         this.setSunTimes(context.isPlantDay.sunRiseTimes, context.isPlantDay.sunSetTimes);
     }
 
-    voltageFactorToDutyCycle(duty) {
-        return Math.floor(duty * 10);
+    voltageFactorToDutyCycle(voltage) {
+        return Math.floor(voltage * 10);
     }
 
     findDutyCycle() {
@@ -2610,27 +2611,21 @@ class Light extends Device {
             return;
         }
 
-        // Schlüssel suchen, die "voltage" enthalten, aber keine "sensor."-Schlüssel
-        const voltageKey = Object.keys(this.data).find((key) => 
+        const voltageKey = Object.keys(this.data).find((key) =>
             key.toLowerCase().includes("voltage") && !key.toLowerCase().startsWith("sensor.")
         );
 
         if (voltageKey) {
-            // Wenn ein Voltage-Schlüssel gefunden wird, immer Voltage verwenden
             const voltageValue = parseFloat(this.data[voltageKey]);
             if (!isNaN(voltageValue)) {
-                this.controlOverVoltage = true; // Aktiviert Voltage-basierte Steuerung
+                this.controlOverVoltage = true;
                 const calculatedDuty = this.voltageFactorToDutyCycle(voltageValue);
                 this.dutyCycle = Math.max(this.minDuty, Math.min(this.maxDuty, calculatedDuty));
                 this.hasDuty = true;
-
-                // Speichere den Original-Voltage-Wert zur späteren Verwendung
-                this.originalVoltage = voltageValue;
             } else {
                 this.hasDuty = false;
             }
         } else {
-            // Fallback: DutyCycle verwenden, wenn kein Voltage vorhanden ist
             const dutyCycleKey = Object.keys(this.data).find((key) =>
                 ["dutycycle", "number."].some((term) => key.toLowerCase().includes(term))
             );
@@ -2690,11 +2685,11 @@ class Light extends Device {
     }
 
     parseTime(timeString) {
-        const [hours, minutes, seconds = 0] = timeString.split(":" ).map(Number);
+        const [hours, minutes, seconds = 0] = timeString.split(":").map(Number);
         return hours * 3600 + minutes * 60 + seconds;
     }
 
-    runAction(context) {
+    runAction() {
         if (!this.lightOnTime || !this.lightOffTime) {
             node.warn(`${this.name}: Lichtzeiten fehlen. Keine Aktion durchgeführt.`);
             return { Light: `${this.switches[0]}`, Action: "NoLightTimesSet", Status: this.isRunning };
@@ -2703,20 +2698,17 @@ class Light extends Device {
         const currentTime = new Date();
         const currentSeconds = this.parseTime(currentTime.toTimeString().split(" ")[0]);
 
-        // Sonnenaufgang und Sonnenuntergang prüfen
         const sunRiseSeconds = this.parseTime(this.sunRiseTime);
         const sunSetSeconds = this.parseTime(this.sunSetTime);
 
         if (currentSeconds >= sunRiseSeconds && currentSeconds < sunSetSeconds) {
-            // Sonnenaufgang: Duty-Cycle von minDuty auf maxDuty erhöhen
             const sunriseDuration = sunSetSeconds - sunRiseSeconds;
             const elapsed = currentSeconds - sunRiseSeconds;
             const dutyIncrement = (elapsed / sunriseDuration) * (this.maxDuty - this.minDuty);
             const newDuty = Math.min(this.maxDuty, this.minDuty + dutyIncrement);
             this.changeDuty(newDuty);
         } else if (currentSeconds >= sunSetSeconds || currentSeconds < sunRiseSeconds) {
-            // Sonnenuntergang: Duty-Cycle von maxDuty auf minDuty reduzieren
-            const sunsetDuration = (24 * 3600 - sunSetSeconds) + sunRiseSeconds; // Über Mitternacht
+            const sunsetDuration = (24 * 3600 - sunSetSeconds) + sunRiseSeconds;
             const elapsed = currentSeconds >= sunSetSeconds
                 ? currentSeconds - sunSetSeconds
                 : 24 * 3600 - sunSetSeconds + currentSeconds;
@@ -2725,7 +2717,6 @@ class Light extends Device {
             this.changeDuty(newDuty);
         }
 
-        // Lichtsteuerung basierend auf Zeitplan
         const startTime = this.parseTime(this.lightOnTime);
         const endTime = this.parseTime(this.lightOffTime);
 
@@ -2739,8 +2730,6 @@ class Light extends Device {
         if (isLightOn !== this.isRunning) {
             this.isRunning = isLightOn;
             this.action = isLightOn ? "on" : "off";
-        } else {
-            this.action = "unchanged";
         }
 
         switch (this.action) {
@@ -2751,7 +2740,6 @@ class Light extends Device {
                 return this.turnOFF();
 
             case "unchanged":
-                //node.warn(`${this.name}: Keine Änderung erforderlich, Lichtstatus bleibt ${this.isRunning ? "AN" : "AUS"} in ${this.inRoomName}.`);
                 return { Light: `${this.switches[0]}`, Action: "NoChange", Status: this.isRunning };
 
             case "increased":
@@ -2787,23 +2775,34 @@ class Light extends Device {
     }
 
     changeDuty(newDuty) {
-        if (this.hasDuty === false) {
+        if (!this.hasDuty) {
             return { entity_id: this.switches[0], action: "NoDutyCycle" };
         }
 
         const clampedDuty = Math.max(this.minDuty, Math.min(this.maxDuty, newDuty));
         this.dutyCycle = clampedDuty;
-        const entity = this.switches[0];
 
-        if (this.controlOverVoltage && this.originalVoltage !== undefined) {
-            // Sende den Original-Voltage-Wert
-            node.warn(`${this.name}: Voltage-Wert gesendet: ${this.originalVoltage}`);
-            return { entity_id: entity, action: "number", value: this.originalVoltage };
+        if (this.controlOverVoltage) {
+            // Suche den passenden Schlüssel für die Spannung in den Sensors
+            const voltageKey = this.sensors.find((key) =>
+                key.toLowerCase().includes("voltage") && !key.toLowerCase().startsWith("sensor.")
+            );
+
+            if (!voltageKey) {
+                node.warn(`${this.name}: Kein Voltage-Key in sensors gefunden.`);
+                return { entity_id: null, action: "NoVoltageKey" };
+            }
+
+            const correctedVoltage = this.dutyCycle / 10;
+            node.warn(`${this.name}: Voltage-Wert gesendet: ${correctedVoltage} an ${voltageKey}`);
+            return { entity_id: voltageKey, action: "number", value: correctedVoltage };
         }
 
+        const entity = this.switches[0];
         node.warn(`${this.name}: Duty-Cycle geändert auf ${clampedDuty}%.`);
         return { entity_id: entity, action: "dutycycle", dutycycle: clampedDuty };
     }
+
 
     turnON() {
         const entity = this.switches[0];
@@ -3003,43 +3002,22 @@ class Humidifier extends Device {
 class Dehumidifier extends Device {
     constructor(name) {
         super(name, "dehumidifier");
-        this.isRunning = false; // Status des Luftentfeuchters
-        this.currentHumidity = 0; // Aktueller Feuchtigkeitswert
-        this.minHumidity = 30; // Standard-Mindestfeuchtigkeit
-        this.maxHumidity = 70; // Standard-Maximalfeuchtigkeit
-        this.stepSize = 5; // Schrittweite für Änderungen
     }
 
-    setData(data, context) {
-        this.setFromtent(context.tentName);
-        this.identifyIfFromAmbient();
-        this.data = { ...this.data, ...data }; // Aktualisiere die Gerätedaten
-        this.identifySwitchesAndSensors();
-        this.updateIsRunningState();
-    }
-
-    evalAction() {
-        return this.action !== "unchanged"; // Nur Änderung erforderlich, wenn Aktion nicht "unchanged" ist
-    }
-
-    runAction(context) {
+    runAction() {
         if (!this.needChange) {
             return { entity_id: this.switches[0], action: "noChangesNeeded" };
         }
 
         switch (this.action) {
             case "off":
-                return this.turnOFF(context);
+                return this.turnOFF();
             case "on":
-                return this.turnON(context);
-            case "maximum":
-                return this.setHumidityLevel(context, this.maxHumidity);
-            case "minimum":
-                return this.setHumidityLevel(context, this.minHumidity);
+                return this.turnON();
             case "increased":
-                return this.changeHumidity(context, this.stepSize);
+                return this.turnON();
             case "reduced":
-                return this.changeHumidity(context, -this.stepSize);
+                return this.turnOFF();
             case "unchanged":
                 return { entity_id: this.switches[0], action: "UNCHANGED" };
             default:
@@ -3048,7 +3026,7 @@ class Dehumidifier extends Device {
         }
     }
 
-    turnON(context) {
+    turnON() {
         const entity = this.switches[0];
         if (!this.isRunning) {
             this.isRunning = true;
@@ -3058,7 +3036,7 @@ class Dehumidifier extends Device {
         return { entity_id: entity, action: "Already ON" };
     }
 
-    turnOFF(context) {
+    turnOFF() {
         const entity = this.switches[0];
         if (this.isRunning) {
             this.isRunning = false;
@@ -3068,134 +3046,100 @@ class Dehumidifier extends Device {
         return { entity_id: entity, action: "Already OFF" };
     }
 
-    setHumidityLevel(context, level) {
-        const entity = this.switches[0];
-        this.currentHumidity = level;
-        node.warn(`${this.name}: Luftfeuchtigkeit auf ${level}% gesetzt in ${this.inRoomName}`);
-        return { entity_id: entity, action: "setHumidity", value: level };
-    }
-
-    changeHumidity(context, delta) {
-        const entity = this.switches[0];
-        const newHumidity = Math.max(
-            this.minHumidity,
-            Math.min(this.maxHumidity, this.currentHumidity + delta)
-        );
-        if (newHumidity === this.currentHumidity) {
-            node.warn(`${this.name}: Luftfeuchtigkeit ist bereits auf Grenzwert (${this.currentHumidity}%) in ${this.inRoomName}`);
-            return { entity_id: entity, action: "No Change" };
-        }
-        this.currentHumidity = newHumidity;
-        node.warn(`${this.name}: Luftfeuchtigkeit geändert auf ${newHumidity}% in ${this.inRoomName}`);
-        return { entity_id: entity, action: "setHumidity", value: newHumidity };
-    }
 }
 
 class Heater extends Device {
     constructor(name) {
         super(name, "heater");
-        this.minTemp = 0; // Minimale Temperatur
-        this.maxTemp = 0; // Maximale Temperatur
-        this.currentTemp = null; // Aktuelle Temperatur
     }
-
-    setTemps(minTemp, maxTemp) {
-        this.minTemp = minTemp;
-        this.maxTemp = maxTemp;
-        node.warn(`${this.name}: Temperaturbereich gesetzt auf ${minTemp}°C - ${maxTemp}°C.`);
-    }
-
-    getTemperatureRange() {
-        return { minTemp: this.minTemp, maxTemp: this.maxTemp };
-    }
-
-    evalAction(context) {
-        if (this.action === "unchanged") {
-            return false; // Keine Aktion erforderlich
-        }
-        return true; // Standardmäßig erlauben
-    }
-
-    runAction(context) {
-        if (!this.evalAction(context)) {
-            return { Heater: `${this.name}`, Action: "noChangesNeeded" };
+    runAction() {
+        if (!this.needChange) {
+            return { entity_id: this.switches[0], action: "noChangesNeeded" };
         }
 
         switch (this.action) {
-            case "on":
-                node.warn(`${this.name}: Heizung wird eingeschaltet.`);
-                return { entity_id: this.switches[0], action: "on" };
-
             case "off":
-                node.warn(`${this.name}: Heizung wird ausgeschaltet.`);
-                return { entity_id: this.switches[0], action: "off" };
-
-            case "maximum":
-                node.warn(`${this.name}: Heizung wird auf maximale Temperatur ${this.maxTemp}°C eingestellt.`);
-                return { entity_id: this.switches[0], action: "setTemp", temperature: this.maxTemp };
-
-            case "minimum":
-                node.warn(`${this.name}: Heizung wird auf minimale Temperatur ${this.minTemp}°C eingestellt.`);
-                return { entity_id: this.switches[0], action: "setTemp", temperature: this.minTemp };
-
+                return this.turnOFF();
+            case "on":
+                return this.turnON();
+            case "increased":
+                return this.turnON();
+            case "reduced":
+                return this.turnOFF();
+            case "unchanged":
+                return { entity_id: this.switches[0], action: "UNCHANGED" };
             default:
-                node.warn(`${this.name}: Unbekannte Aktion.`);
-                return { Heater: `${this.name}`, Action: "UnknownAction" };
+                node.warn(`${this.name}: Unbekannte Aktion "${this.action}".`);
+                return { entity_id: this.switches[0], action: "Unknown Action" };
         }
+    }
+
+    turnON() {
+        const entity = this.switches[0];
+        if (!this.isRunning) {
+            this.isRunning = true;
+            node.warn(`${this.name}: Luftentfeuchter eingeschaltet in ${this.inRoomName}`);
+            return { entity_id: entity, action: "on" };
+        }
+        return { entity_id: entity, action: "Already ON" };
+    }
+
+    turnOFF() {
+        const entity = this.switches[0];
+        if (this.isRunning) {
+            this.isRunning = false;
+            node.warn(`${this.name}: Luftentfeuchter ausgeschaltet in ${this.inRoomName}`);
+            return { entity_id: entity, action: "off" };
+        }
+        return { entity_id: entity, action: "Already OFF" };
     }
 }
 
 class Cooler extends Device {
     constructor(name) {
         super(name, "cooler");
-        this.minTemp = 0; // Minimale Temperatur
-        this.maxTemp = 0; // Maximale Temperatur
-        this.currentTemp = null; // Aktuelle Temperatur
     }
 
-     setTemps(minTemp, maxTemp) {
-        this.minTemp = minTemp;
-        this.maxTemp = maxTemp;
-        node.warn(`${this.name}: Temperaturbereich gesetzt auf ${minTemp}°C - ${maxTemp}°C.`);
-    }
-
-    getTemperatureRange() {
-        return { minTemp: this.minTemp, maxTemp: this.maxTemp };
-    }
-
-    evalAction(context) {
-        if (this.action === "unchanged") {
-            return false; // Keine Aktion erforderlich
-        }
-        return true; // Standardmäßig erlauben
-    }
-
-    runAction(context) {
-        if (!this.evalAction(context)) {
-            return { Cooler: `${this.name}`, Action: "noChangesNeeded" };
+    runAction() {
+        if (!this.needChange) {
+            return { entity_id: this.switches[0], action: "noChangesNeeded" };
         }
 
         switch (this.action) {
-            case "on":
-                node.warn(`${this.name}: Kühlung wird eingeschaltet.`);
-                return { entity_id: this.switches[0], action: "on" };
-
             case "off":
-                node.warn(`${this.name}: Kühlung wird ausgeschaltet.`);
-                return { entity_id: this.switches[0], action: "off" };
-
-            case "maximum":
-                node.warn(`${this.name}: Kühlung wird auf maximale Temperatur ${this.maxTemp}°C eingestellt.`);
-                return { entity_id: this.switches[0], action: "setTemp", temperature: this.maxTemp };
-
-            case "minimum":
-                node.warn(`${this.name}: Kühlung wird auf minimale Temperatur ${this.minTemp}°C eingestellt.`);
-                return { entity_id: this.switches[0], action: "setTemp", temperature: this.minTemp };
-
+                return this.turnOFF();
+            case "on":
+                return this.turnON();
+            case "increased":
+                return this.turnON();
+            case "reduced":
+                return this.turnOFF();
+            case "unchanged":
+                return { entity_id: this.switches[0], action: "UNCHANGED" };
             default:
-                node.warn(`${this.name}: Unbekannte Aktion.`);
-                return { Cooler: `${this.name}`, Action: "UnknownAction" };
+                node.warn(`${this.name}: Unbekannte Aktion "${this.action}".`);
+                return { entity_id: this.switches[0], action: "Unknown Action" };
         }
+    }
+
+    turnON() {
+        const entity = this.switches[0];
+        if (!this.isRunning) {
+            this.isRunning = true;
+            node.warn(`${this.name}: Luftentfeuchter eingeschaltet in ${this.inRoomName}`);
+            return { entity_id: entity, action: "on" };
+        }
+        return { entity_id: entity, action: "Already ON" };
+    }
+
+    turnOFF() {
+        const entity = this.switches[0];
+        if (this.isRunning) {
+            this.isRunning = false;
+            node.warn(`${this.name}: Luftentfeuchter ausgeschaltet in ${this.inRoomName}`);
+            return { entity_id: entity, action: "off" };
+        }
+        return { entity_id: entity, action: "Already OFF" };
     }
 }
 
@@ -3456,8 +3400,6 @@ class GenericSwitch extends Device {
     }
 }
 //// UNTIL HERE
-
-
 class Sensor extends Device {
     constructor(name) {
         super(name, "sensor");
