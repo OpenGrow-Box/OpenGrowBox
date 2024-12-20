@@ -59,12 +59,15 @@ DASHBOARDVIEW="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/U
 
 
 ## ADDONS 
-
 NRCOMPANION="https://github.com/zachowj/hass-node-red/archive/refs/heads/main.zip"
 MINIGRAPH="https://github.com/kalkih/mini-graph-card/releases/download/v0.12.1/mini-graph-card-bundle.js"
 VPDCHART="https://raw.githubusercontent.com/OpenGrow-Box/vpdchart-card/master/vpdchart-card.js"
 MUSHROOM="https://github.com/piitaya/lovelace-mushroom/releases/download/v3.6.2/mushroom.js"
 LLRESSOURCE="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/lovelace_resources.json"
+VERTICALCARD="https://github.com/ofekashery/vertical-stack-in-card/releases/download/v1.0.1/vertical-stack-in-card.js"
+CUSTOMTEMPPLATE="https://github.com/iantrich/config-template-card/releases/download/1.3.6/config-template-card.js"
+TAPPEDCARD=""
+AUTOENTIES=""
 
 function systemPrep() {
     sudo apt update && sudo apt upgrade -y && sudo apt autoclean -y && sudo apt autoremove -y
@@ -170,6 +173,10 @@ function OpenGrowBoxSetup() {
     sudo wget "$VPDCHART" -O "vpdchart-card.js" 
     # Setup 
     sudo wget $MUSHROOM
+    sudo wget $CUSTOMTEMPPLATE
+    sudo wget $VERTICALCARD
+    sudo wget $AUTOENTIES
+    sudo wget $TAPPEDCARD
 
     # SETUP loveLace_Ressource
     cd /usr/share/hassio/homeassistant/.storage/ && sudo wget  "$LLRESSOURCE" -O lovelace_resources
@@ -203,6 +210,7 @@ ___                 ___                    ___
 EOF
 
 echo "OpenGrowBox Install Script"
+echo "One Control To Rule Them All!!!"
 sleep 3
 }
 
