@@ -730,14 +730,14 @@ class OpenGrowBox {
     identifyDevice(deviceName, deviceData) {
         const deviceTypeMapping = {
             "sensor": ["mode", "plant", "temperature", "temp", "humidity", "co2", "moisture", "dewpoint", "illuminance", "ppfd", "dli", "h5179"],
-            "humidifier": ["humidifier", "mist"],
+            "humidifier": ["humidifier", "mist","befeuchter",],
             "dehumidifier": ["dehumidifier", "drying", "dryer","entfeuchter", "removehumidity"],
             "exhaust": ["exhaust", "abluft", "ruck"],
             "ventilation": ["vent", "vents", "venti", "ventilation", "inlet", "outlet"],
             "heater": ["heater", "heizung", "warm"],
-            "cooler": ["cooler", "fan", "kühl"],
+            "cooler": ["cooler", "kühler","klima"],
             "light": ["light", "lamp", "led", "switch.light"],
-            "climate": ["klima", "climate"],
+            "climate": ["climate","klima",],
             "co2": ["co2", "carbon"],
             "switch": ["generic", "switch"],
             "pump": ["pump", "waterpump", "pumpe"],
@@ -3548,3 +3548,4 @@ class Sensor extends Device {
         this.readings = [];
     }
 }
+
