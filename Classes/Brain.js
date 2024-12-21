@@ -14,31 +14,31 @@ class OpenGrowBox {
         this.previousActions = [];
 
         this.controls = {
-            ownWeights:false,
-            weights:{
-                temp:null,
-                hum:null,
+            ownWeights: false,
+            weights: {
+                temp: null,
+                hum: null,
             },
-            co2Control:false,
-            co2ppm:{
-                minPPM:400,
-                maxPPM:1200,
+            co2Control: false,
+            co2ppm: {
+                minPPM: 400,
+                maxPPM: 1200,
             },
-            ownDeviceSetup:false,
-            experimental:false,
-            modes:{
-                vpdPerfection:"VPD Perfection",
-                inRangeVPD:"IN-VPD-Range",
-                targetedVDP:"Targeted VPD",
-                drying:"Drying",
-                experimentel:"Experimentel",
-                disabled:"Disabled"
+            ownDeviceSetup: false,
+            experimental: false,
+            modes: {
+                vpdPerfection: "VPD Perfection",
+                inRangeVPD: "IN-VPD-Range",
+                targetedVDP: "Targeted VPD",
+                drying: "Drying",
+                experimentel: "Experimentel",
+                disabled: "Disabled"
             }
         }
 
         this.expMods = {
-            current:"",
-            plantType:"",
+            current: "",
+            plantType: "",
         }
 
         this.isPlantDay = {
@@ -46,9 +46,9 @@ class OpenGrowBox {
             lightOn: false,
             lightOnTime: "",
             lightOffTime: "",
-            lightbyOGBControl:false,
-            sunRiseTimes:"",
-            sunSetTimes:"",
+            lightbyOGBControl: false,
+            sunRiseTimes: "",
+            sunSetTimes: "",
         }
 
         this.enviorment = {
@@ -69,7 +69,7 @@ class OpenGrowBox {
             minTemp: 0,
             maxHumidity: 0,
             minHumidity: 0,
-            co2Level:400,
+            co2Level: 400,
         };
 
         this.plantStages = {
@@ -123,13 +123,14 @@ class OpenGrowBox {
         this.dryStartTime = null;
         this.drying = {
             currentDryMode: "",
-            isEnabled:false,
-            isRunning:false,
+            isEnabled: false,
+            isRunning: false,
             waterActivity: 0.0,
             dewpointVPD: 0.0,
             vaporPressureActual: 0.0,
             vaporPressureSaturation: 0.0,
-            modes:{
+            sharkMouseVPD:0.0,
+            modes: {
                 elClassico: {
                     isActive: false,
                     phase: {
@@ -176,25 +177,25 @@ class OpenGrowBox {
 
         }
 
-        this.addons ={
-            GasLanternRoutine:{
-                Veg:{
+        this.addons = {
+            GasLanternRoutine: {
+                Veg: {
                     LightOnPhase: 12,
                     LightOffPhase: 5,
-                    LightAddon: 1,   
+                    LightAddon: 1,
                 },
-                Flower:{
-                    Sativa:{
-                    LightOnPhase: 8,
-                    LightOffPhase: 16,
+                Flower: {
+                    Sativa: {
+                        LightOnPhase: 8,
+                        LightOffPhase: 16,
                     },
-                    Indica:{
-                    LightOnPhase: 6,
-                    LightOffPhase: 18,
+                    Indica: {
+                        LightOnPhase: 6,
+                        LightOffPhase: 18,
                     }
                 }
             },
-            GLR_NaturalSunshine:{
+            GLR_NaturalSunshine: {
                 Veg: {
                     LightOnPhase: 12,
                     LightOffPhase: 5,
@@ -205,8 +206,8 @@ class OpenGrowBox {
                         LightOnStartPhase: 12,
                         LightOnEndPhase: 8,
                         LightOffPhase: 0,
-                        LightSteps:0,
-                        LightStepTime:0,
+                        LightSteps: 0,
+                        LightStepTime: 0,
 
                     },
                     Indica: {
@@ -246,7 +247,7 @@ class OpenGrowBox {
                 cooler: "increased",
                 ventilation: "reduced",
                 light: "reduced",
-                co2:"reduced",
+                co2: "reduced",
                 climate: {
                     cool: "increased",
                     dry: "reduced",
@@ -278,9 +279,12 @@ class OpenGrowBox {
 
     // DATA SETTER/GETTER ******************************
     setTentName(tentName = "") {
-        this.tentName = tentName;
+        if (tentName !== this.tentName) {
+            this.tentName = tentName;
+        }
+
     }
-    
+
     // Setze ob Ausleih funktion für Ambient aktiv ist. 
     setControlSet(controlSet) {
         if (this.controlSet !== controlSet) {
@@ -297,7 +301,7 @@ class OpenGrowBox {
     setTentMode(tentMode = "") {
         if (this.tentMode !== tentMode) { // Vergleiche auf Gleichheit
             node.warn(`TentMode geändert von ${this.tentMode} auf ${tentMode} in ${this.tentName}`);
-            
+
             // Prüfe, ob der neue Modus nicht "Drying" ist
             if (tentMode !== "Drying") {
                 this.drying.isRunning = false;
@@ -313,14 +317,14 @@ class OpenGrowBox {
         }
     }
 
-    getTentMode(){
+    getTentMode() {
         return this.tentMode
     }
 
     // Setze Targeted VPD wenn Mode aktiv!
     setTargetedVPD(targetVPD) {
         if (targetVPD !== this.vpd.targeted) {
-            if(this.tentMode === "Targeted VPD"){
+            if (this.tentMode === "Targeted VPD") {
                 this.vpd.targeted = parseFloat(targetVPD)
             }
         }
@@ -350,7 +354,7 @@ class OpenGrowBox {
         }
     }
 
-    getPlantStageValue(){
+    getPlantStageValue() {
         return this.plantStage
     }
 
@@ -380,10 +384,12 @@ class OpenGrowBox {
 
     // Setze Blatt Temp Offset
     setLeafOffset(offset) {
-        this.tentData.leafTempOffset = parseFloat(offset)
+        if (parseFloat(offset) !== parseFloat(this.tentData.leafTempOffset)) {
+            this.tentData.leafTempOffset = parseFloat(offset)
+        }
     }
 
-    getLeafOffset(){
+    getLeafOffset() {
         return this.tentData.leafTempOffset
     }
 
@@ -453,25 +459,27 @@ class OpenGrowBox {
 
     // Setze aktuellen Dewpoint
     setCurrentDewPoint(dewpoint) {
-        this.tentData.dewpoint = this.calculateDewPoint(dewpoint)
+        if (dewpoint !== this.tentData.dewpoint) {
+            this.tentData.dewpoint = this.calculateDewPoint(dewpoint)
+        }
     }
 
     // Aktiviere Nacht VPD Ignoranz
     setVPDNightHold(nightHold) {
-        if(nightHold != this.helperYesTrue(this.isPlantDay.nightVPDHold)){
+        if (nightHold != this.helperYesTrue(this.isPlantDay.nightVPDHold)) {
             this.isPlantDay.nightVPDHold = this.helperYesTrue(nightHold)
         }
     }
 
-    getVPDNightHold(){
-        return this.helperYesTrue(this.isPlantDay.nightVPDHold) 
+    getVPDNightHold() {
+        return this.helperYesTrue(this.isPlantDay.nightVPDHold)
     }
 
     // Aktiviere Gewicht für Feinjustierung
     activateOwnWeights(activ) {
-        if(activ !== this.controls.ownWeights){
+        if (activ !== this.controls.ownWeights) {
             this.controls.ownWeights = this.helperYesTrue(activ)
-            if(!this.controls.ownWeights){
+            if (!this.controls.ownWeights) {
                 this.controls.weights.temp = null
                 this.controls.weights.hum = null
             }
@@ -479,7 +487,7 @@ class OpenGrowBox {
     }
 
     // Erhatel Gewicht Aktivi Status
-    getifOwnWeightsActive(){
+    getifOwnWeightsActive() {
         return this.helperYesTrue(this.controls.ownWeights)
     }
 
@@ -521,27 +529,27 @@ class OpenGrowBox {
     }
 
     // EXPRIMENTEL
-    setGLSControl(glscControl){
-        if(glscControl !== this.controls.experimental){
+    setGLSControl(glscControl) {
+        if (glscControl !== this.controls.experimental) {
             this.controls.experimental = this.helperYesTrue(glscControl)
         }
     }
 
     // EXPRIMENTEL
-    getGLSControl(){
+    getGLSControl() {
         return this.helperYesTrue(this.controls.experimental)
     }
 
     // EXPRIMENTEL
     setGLSPlantType(plantType) {
-        if(this.controls.experimental){
+        if (this.controls.experimental) {
             if (plantType !== this.controls.experimental) {
                 this.expMods.plantType = plantType
             }
-        }else{
-            if(this.expMods.plantType != ""){
-                this.expMods.plantType =""
-                
+        } else {
+            if (this.expMods.plantType != "") {
+                this.expMods.plantType = ""
+
             }
 
         }
@@ -555,8 +563,8 @@ class OpenGrowBox {
 
     // EXPRIMENTEL
     // Aktiviere Eigene Geräte Steuerung(Experimentel"NOT-DONE")
-    setOwnDeviceSetup(deviceControl){
-        if (deviceControl !== this.controls.ownDeviceSetup){
+    setOwnDeviceSetup(deviceControl) {
+        if (deviceControl !== this.controls.ownDeviceSetup) {
             this.controls.ownDeviceSetup = this.helperYesTrue(deviceControl)
         }
         return
@@ -564,37 +572,37 @@ class OpenGrowBox {
 
     // EXPRIMENTEL
     // Aktiviere Eigene Geräte Steuerung(Experimentel"NOT-DONE")
-    getOwnDeviceSetup(){
+    getOwnDeviceSetup() {
         return this.helperYesTrue(this.controls.ownDeviceSetup)
     }
 
     // Aktiviere CO2 Steuerung
-    setCO2Control(co2Control){
-        if(co2Control !== this.controls.co2Control){
+    setCO2Control(co2Control) {
+        if (co2Control !== this.controls.co2Control) {
             this.controls.co2Control = this.helperYesTrue(co2Control)
         }
     }
 
     // COS Status
-    getCO2Control(){
-        return  this.helperYesTrue(this.controls.co2Control)
+    getCO2Control() {
+        return this.helperYesTrue(this.controls.co2Control)
     }
 
     // Aktiviere Kontorlle für Licht
-    setLightControlByOGB(wantsControl){
-        if(wantsControl !== this.isPlantDay.lightbyOGBControl){
+    setLightControlByOGB(wantsControl) {
+        if (wantsControl !== this.isPlantDay.lightbyOGBControl) {
             this.isPlantDay.lightbyOGBControl = this.helperYesTrue(wantsControl)
         }
     }
 
     // Licht Controll Status
-    getLightControlByOGB(){
+    getLightControlByOGB() {
         return this.helperYesTrue(this.isPlantDay.lightbyOGBControl)
     }
 
     // Setze lichtzeiten wenn Kontrolle AKTIV 
     setLightTimes(startTime = "", endTime = "") {
-        if(!this.isPlantDay.lightbyOGBControl)return
+        if (!this.isPlantDay.lightbyOGBControl) return
         if (startTime !== this.isPlantDay.lightOnTime || endTime !== this.isPlantDay.lightOffTime) {
             this.isPlantDay.lightOnTime = startTime;
             this.isPlantDay.lightOffTime = endTime;
@@ -688,13 +696,14 @@ class OpenGrowBox {
         const deviceClasses = {
             humidifier: Humidifier,
             dehumidifier: Dehumidifier,
-            exhaustfan: ExhaustFan,
+            exhaust: Exhaust,
             ventilation: Ventilation,
             heater: Heater,
             cooler: Cooler,
             light: Light,
             pump: Pump,
             climate: Climate,
+            switch: GenericSwitch,
             sensor: Sensor,
         };
 
@@ -702,7 +711,7 @@ class OpenGrowBox {
     }
 
     // Gerät direkt zur Instanz hinzufügen und in entities speichern
-    addDevice(deviceName,deviceData,context) {
+    addDevice(deviceName, deviceData, context) {
         const identifiedDevice = this.identifyDevice(deviceName, deviceData);
         if (!identifiedDevice) {
             node.error(`Failed to identify device: ${deviceName}`);
@@ -711,7 +720,7 @@ class OpenGrowBox {
 
         // Daten initialisieren, falls nicht vorhanden
         identifiedDevice.data = { ...deviceData };
-        identifiedDevice.setData(deviceData,context); // Gerätedaten setzen
+        identifiedDevice.setData(deviceData, context); // Gerätedaten setzen
         this.devices.push(identifiedDevice); // Gerät zur Liste hinzufügen
         this.registerDevices(identifiedDevice)
         node.warn(`Added new device: ${deviceName}`);
@@ -722,14 +731,15 @@ class OpenGrowBox {
         const deviceTypeMapping = {
             "sensor": ["mode", "plant", "temperature", "temp", "humidity", "co2", "moisture", "dewpoint", "illuminance", "ppfd", "dli", "h5179"],
             "humidifier": ["humidifier", "mist"],
-            "dehumidifier": ["dehumidifier", "dry", "removehumidity"],
-            "exhaustfan": ["exhaust", "abluft", "ruck"],
+            "dehumidifier": ["dehumidifier", "drying", "dryer","entfeuchter", "removehumidity"],
+            "exhaust": ["exhaust", "abluft", "ruck"],
             "ventilation": ["vent", "vents", "venti", "ventilation", "inlet", "outlet"],
             "heater": ["heater", "heizung", "warm"],
             "cooler": ["cooler", "fan", "kühl"],
             "light": ["light", "lamp", "led", "switch.light"],
             "climate": ["klima", "climate"],
             "co2": ["co2", "carbon"],
+            "switch": ["generic", "switch"],
             "pump": ["pump", "waterpump", "pumpe"],
             //"sensor": ["sensor", "mode","plant", "temperature", "temp", "humidity", "co2", "moisture", "dewpoint", "illuminance", "ppfd", "dli", "flower", "veggi", "vegi", "dutycycle", "duty", "h5179"],
         };
@@ -756,7 +766,7 @@ class OpenGrowBox {
         node.warn(`Device ${deviceName} not recognized, returning unknown device.`);
         return new Device(deviceName, "unknown");
     }
-    
+
     // Registierung Caps ( noch nicht in nutzung)
     registerDevices(device) {
         // Sensoren ignorieren
@@ -768,7 +778,7 @@ class OpenGrowBox {
             canCool: device.deviceType === "cooler" || device.deviceType === "climate",
             canHumidify: device.deviceType === "humidifier",
             canDehumidify: device.deviceType === "dehumidifier" || device.deviceType === "climate",
-            canVentilate: device.deviceType === "ventilation" ,
+            canVentilate: device.deviceType === "ventilation",
             canExhaust: device.deviceType === "exhaust",
             canLight: device.deviceType === "light",
         };
@@ -792,7 +802,7 @@ class OpenGrowBox {
     listDevices() {
         return this.devices;
     }
-    
+
     // Gerät sperren
     lockDevice(device, roomName) {
         if (!device.isLocked) {
@@ -853,7 +863,7 @@ class OpenGrowBox {
             device.inRoomName = "ambient"; // Setze den Raumnamen zurück auf Ambient
             device.isfromAmbient = true; // Markiere, dass es wieder zu Ambient gehört
             device.action = "off";
-           node.warn(`OFF_Action_ROOM: ${JSON.stringify(offAction, null, 2)}`);
+            node.warn(`OFF_Action_ROOM: ${JSON.stringify(offAction, null, 2)}`);
             return offAction
         }
         console.warn(`Gerät konnte nicht entsperrt werden: ${device.name}`);
@@ -936,7 +946,7 @@ class OpenGrowBox {
     // DRYING ******************************
     // Setze aktuellen DryMode
     setDryingMode(dryMode) {
-        if(this.tentMode !== "Drying")return
+        if (this.tentMode !== "Drying") return
         const normalizedMode = Object.keys(this.drying.modes).find(
             mode => mode.toLowerCase() === dryMode.toLowerCase()
         );
@@ -957,7 +967,6 @@ class OpenGrowBox {
         node.warn(`Trocknungsmodus aktiviert: ${this.drying.currentDryMode}`);
     }
 
-    
     // Erhalte aktulle DryPhase nach Zeitpunkt
     getDryingPhase() {
         // Sicherstellen, dass dryStartTime gültig ist
@@ -994,14 +1003,11 @@ class OpenGrowBox {
         return "completed";
     }
 
-
-
-
     // Erhalte aktuellen DryMode
     getDryingMode() {
         return this.drying.currentDryMode
     }
-    
+
     // Setze Initale Zeit für DryZeitpunkt
     setDryingStartTime() {
         if (!this.dryStartTime || !(this.dryStartTime instanceof Date) || isNaN(this.dryStartTime.getTime())) {
@@ -1009,8 +1015,6 @@ class OpenGrowBox {
             node.warn(`Startzeit wurde gesetzt: ${this.dryStartTime.toISOString()}`);
         }
     }
-
-
 
     // Berechne Wasseraktivität
     calcWatteractiviy(humidity = this.tentData.humidity) {
@@ -1046,6 +1050,24 @@ class OpenGrowBox {
         return this.drying.dewpointVPD;
     }
 
+    // Berechne SharkMouse VPD (Based on TERMP/HUM/VPD)
+    calcSharkMouseVPD(Temp = this.tentData.temperature, Humidity = this.tentData.humidity, LeafOffset = this.tentData.temperature) {
+        const temp = parseFloat(Temp);
+        const humidity = parseFloat(Humidity);
+        const leafTemp = parseFloat(Temp) - parseFloat(LeafOffset);
+
+        if (isNaN(temp) || isNaN(humidity) || isNaN(leafTemp)) {
+            return NaN;
+        }
+
+        let sdpLuft = 0.6108 * Math.exp((17.27 * temp) / (temp + 237.3));
+        let sdpBlatt = 0.6108 * Math.exp((17.27 * leafTemp) / (leafTemp + 237.3));
+        let adp = (humidity / 100) * sdpLuft;
+        let vpd = sdpBlatt - adp;
+
+        this.drying.sharkMouseVPD = parseFloat(vpd.toFixed(2));
+        return this.drying.sharkMouseVPD;
+    }
 
     // Setze Aktuelle Vapor Pressure Werte
     calcDryingVPs(airTemp = this.tentData.temperature, dewPoint = this.tentData.dewpoint) {
@@ -1073,141 +1095,140 @@ class OpenGrowBox {
         };
     }
 
+    //MODES ******************************
+    // MASTER MODE
+    ultraAdjustments(currentVPD = this.vpd.current, perfectVPD = this.vpd.perfection, tolerance = this.vpd.perfectTolerance) {
+        let action;
+        let vpdDiffPercent = parseFloat((((currentVPD - perfectVPD) / perfectVPD) * 100).toFixed(2));
 
-        //MODES ******************************
-        // MASTER MODE
-        ultraAdjustments(currentVPD = this.vpd.current, perfectVPD = this.vpd.perfection, tolerance = this.vpd.perfectTolerance) {
-            let action;
-            let vpdDiffPercent = parseFloat((((currentVPD - perfectVPD) / perfectVPD) * 100).toFixed(2));
-
-            if (currentVPD < perfectVPD - tolerance) {
-                action = this.actions.Increased;
-            } else if (currentVPD > perfectVPD + tolerance) {
-                action = this.actions.Reduced;
-            }
-
-            return {
-                tentName: this.tentName,
-                tentMode: this.tentMode,
-                inMode: "Ultra Perfection",
-                currentVPD: currentVPD,
-                targetVPD: perfectVPD,
-                vpdDiffPercent: vpdDiffPercent,
-                perfectMin: this.vpd.perfectMin,
-                perfectMax: this.vpd.perfectMax,
-                Temps: {
-                    Temperature: this.tentData.temperature,
-                    MinTemperature: this.tentData.minTemp,
-                    MaxTemperature: this.tentData.maxTemp
-                },
-                Humditys: {
-                    Humidity: this.tentData.humidity,
-                    MinHumidity: this.tentData.minHumidity,
-                    MaxHumidity: this.tentData.maxHumidity
-                },
-                actions: action
-            };
-        }
-        
-        // MITTEL wert ziel aus range vpd werten
-        perfectionAdjustments(currentVPD = this.vpd.current, perfectVPD = this.vpd.perfection, tolerance = this.vpd.perfectTolerance) {
-            let action;
-            let vpdDiffPercent = parseFloat((((currentVPD - perfectVPD) / perfectVPD) * 100).toFixed(2));
-
-            if (currentVPD < perfectVPD - tolerance) {
-                action = this.actions.Increased;
-            } else if (currentVPD > perfectVPD + tolerance) {
-                action = this.actions.Reduced;
-            }
-
-            return {
-                tentName: this.tentName,
-                tentMode: this.tentMode,
-                inMode: "VPD Perfection",
-                currentVPD: currentVPD,
-                targetVPD: perfectVPD,
-                vpdDiffPercent: vpdDiffPercent,
-                perfectMin: this.vpd.perfectMin,
-                perfectMax: this.vpd.perfectMax,
-                Temps: {
-                    Temperature: this.tentData.temperature,
-                    MinTemperature: this.tentData.minTemp,
-                    MaxTemperature: this.tentData.maxTemp
-                },
-                Humditys: {
-                    Humidity: this.tentData.humidity,
-                    MinHumidity: this.tentData.minHumidity,
-                    MaxHumidity: this.tentData.maxHumidity
-                },
-                actions: action
-            };
-        }
-        
-        // Jumper zwishen min und max werten.
-        rangeAdjustments(currentVPD = this.vpd.current, targetVPDRange = this.vpd.range, tolerance = this.vpd.rangeTolerance) {
-            let action;
-            let vpdDiffPercent;
-
-            if (currentVPD < targetVPDRange[0] - tolerance) {
-                vpdDiffPercent = parseFloat((((currentVPD - targetVPDRange[0]) / targetVPDRange[0]) * 100).toFixed(2));
-                action = this.actions.Increased;
-            } else if (currentVPD > targetVPDRange[1] + tolerance) {
-                vpdDiffPercent = parseFloat((((currentVPD - targetVPDRange[1]) / targetVPDRange[1]) * 100).toFixed(2));
-                action = this.actions.Reduced;
-            }
-
-            return {
-                tentName: this.tentName,
-                tentMode: this.tentMode,
-                inMode: "VPD Range",
-                currentVPD: currentVPD,
-                targetVPDMin: targetVPDRange[0],
-                targetVPDMax: targetVPDRange[1],
-                vpdDiffPercent: vpdDiffPercent,
-                Temps: {
-                    Temperature: this.tentData.temperature,
-                    MinTemperature: this.tentData.minTemp,
-                    MaxTemperature: this.tentData.maxTemp
-                },
-                Humditys: {
-                    Humidity: this.tentData.humidity,
-                    MinHumidity: this.tentData.minHumidity,
-                    MaxHumidity: this.tentData.maxHumidity
-                },
-                actions: action
-            };
+        if (currentVPD < perfectVPD - tolerance) {
+            action = this.actions.Increased;
+        } else if (currentVPD > perfectVPD + tolerance) {
+            action = this.actions.Reduced;
         }
 
-        // Targeted VPD Ziel mit Targed VPD
-        targetAdjustment(currentVPD = this.vpd.current, targetVPD = this.vpd.targeted, tolerance = this.vpd.targetedTolerance) {
-            let action;
-            let vpdDiffPercent = parseFloat((((currentVPD - targetVPD) / targetVPD) * 100)); // Korrektur der Berechnung
+        return {
+            tentName: this.tentName,
+            tentMode: this.tentMode,
+            inMode: "Ultra Perfection",
+            currentVPD: currentVPD,
+            targetVPD: perfectVPD,
+            vpdDiffPercent: vpdDiffPercent,
+            perfectMin: this.vpd.perfectMin,
+            perfectMax: this.vpd.perfectMax,
+            Temps: {
+                Temperature: this.tentData.temperature,
+                MinTemperature: this.tentData.minTemp,
+                MaxTemperature: this.tentData.maxTemp
+            },
+            Humditys: {
+                Humidity: this.tentData.humidity,
+                MinHumidity: this.tentData.minHumidity,
+                MaxHumidity: this.tentData.maxHumidity
+            },
+            actions: action
+        };
+    }
 
-            if (currentVPD < targetVPD + tolerance) {
-                action = this.actions.Increased;
-            } else if (currentVPD > targetVPD + tolerance) {
-                action = this.actions.Reduced;
-            }
+    // MITTEL wert ziel aus range vpd werten
+    perfectionAdjustments(currentVPD = this.vpd.current, perfectVPD = this.vpd.perfection, tolerance = this.vpd.perfectTolerance) {
+        let action;
+        let vpdDiffPercent = parseFloat((((currentVPD - perfectVPD) / perfectVPD) * 100).toFixed(2));
 
-            return {
-                tentName: this.tentName,
-                tentMode: this.tentMode,
-                currentVPD: currentVPD,
-                targetedVPD: targetVPD,
-                vpdDiffPercent: vpdDiffPercent,
-                Temps: {
-                    Temperature: this.tentData.temperature,
-                    MinTemperature: this.tentData.minTemp,
-                    MaxTemperature: this.tentData.maxTemp
-                },
-                Humditys: {
-                    Humidity: this.tentData.humidity,
-                    MinHumidity: this.tentData.minHumidity,
-                    MaxHumidity: this.tentData.maxHumidity
-                },
-                actions: action
-            };
+        if (currentVPD < perfectVPD - tolerance) {
+            action = this.actions.Increased;
+        } else if (currentVPD > perfectVPD + tolerance) {
+            action = this.actions.Reduced;
         }
+
+        return {
+            tentName: this.tentName,
+            tentMode: this.tentMode,
+            inMode: "VPD Perfection",
+            currentVPD: currentVPD,
+            targetVPD: perfectVPD,
+            vpdDiffPercent: vpdDiffPercent,
+            perfectMin: this.vpd.perfectMin,
+            perfectMax: this.vpd.perfectMax,
+            Temps: {
+                Temperature: this.tentData.temperature,
+                MinTemperature: this.tentData.minTemp,
+                MaxTemperature: this.tentData.maxTemp
+            },
+            Humditys: {
+                Humidity: this.tentData.humidity,
+                MinHumidity: this.tentData.minHumidity,
+                MaxHumidity: this.tentData.maxHumidity
+            },
+            actions: action
+        };
+    }
+
+    // Jumper zwishen min und max werten.
+    rangeAdjustments(currentVPD = this.vpd.current, targetVPDRange = this.vpd.range, tolerance = this.vpd.rangeTolerance) {
+        let action;
+        let vpdDiffPercent;
+
+        if (currentVPD < targetVPDRange[0] - tolerance) {
+            vpdDiffPercent = parseFloat((((currentVPD - targetVPDRange[0]) / targetVPDRange[0]) * 100).toFixed(2));
+            action = this.actions.Increased;
+        } else if (currentVPD > targetVPDRange[1] + tolerance) {
+            vpdDiffPercent = parseFloat((((currentVPD - targetVPDRange[1]) / targetVPDRange[1]) * 100).toFixed(2));
+            action = this.actions.Reduced;
+        }
+
+        return {
+            tentName: this.tentName,
+            tentMode: this.tentMode,
+            inMode: "VPD Range",
+            currentVPD: currentVPD,
+            targetVPDMin: targetVPDRange[0],
+            targetVPDMax: targetVPDRange[1],
+            vpdDiffPercent: vpdDiffPercent,
+            Temps: {
+                Temperature: this.tentData.temperature,
+                MinTemperature: this.tentData.minTemp,
+                MaxTemperature: this.tentData.maxTemp
+            },
+            Humditys: {
+                Humidity: this.tentData.humidity,
+                MinHumidity: this.tentData.minHumidity,
+                MaxHumidity: this.tentData.maxHumidity
+            },
+            actions: action
+        };
+    }
+
+    // Targeted VPD Ziel mit Targed VPD
+    targetAdjustment(currentVPD = this.vpd.current, targetVPD = this.vpd.targeted, tolerance = this.vpd.targetedTolerance) {
+        let action;
+        let vpdDiffPercent = parseFloat((((currentVPD - targetVPD) / targetVPD) * 100)); // Korrektur der Berechnung
+
+        if (currentVPD < targetVPD + tolerance) {
+            action = this.actions.Increased;
+        } else if (currentVPD > targetVPD + tolerance) {
+            action = this.actions.Reduced;
+        }
+
+        return {
+            tentName: this.tentName,
+            tentMode: this.tentMode,
+            currentVPD: currentVPD,
+            targetedVPD: targetVPD,
+            vpdDiffPercent: vpdDiffPercent,
+            Temps: {
+                Temperature: this.tentData.temperature,
+                MinTemperature: this.tentData.minTemp,
+                MaxTemperature: this.tentData.maxTemp
+            },
+            Humditys: {
+                Humidity: this.tentData.humidity,
+                MinHumidity: this.tentData.minHumidity,
+                MaxHumidity: this.tentData.maxHumidity
+            },
+            actions: action
+        };
+    }
 
     // DryingModeChecks 
     dryAdjustments() {
@@ -1231,11 +1252,13 @@ class OpenGrowBox {
         }
 
         // Wasseraktivität und VPD berechnen
-        const waterActivity = this.calcWatteractiviy(this.tentData.humidity);
-        const dewVPD = this.calcDewVPD(this.tentData.temperature, this.tentData.dewpoint);
-        const vapors = this.calcDryingVPs(this.tentData.temperature,this.tentData.dewpoint)
-        
+        this.calcWatteractiviy(this.tentData.humidity);
+        this.calcDewVPD(this.tentData.temperature, this.tentData.dewpoint);
+        this.calcDryingVPs(this.tentData.temperature, this.tentData.dewpoint)
+        this.calcSharkMouseVPD(this.tentData.temperature, this.tentData.humidity)
+
         node.warn(`CURRENTPHASE: ${currentPhase}`);
+
 
         // Phase-spezifische Aktionen ausführen
         switch (this.drying.currentDryMode) {
@@ -1251,13 +1274,48 @@ class OpenGrowBox {
         }
     }
 
-
-    
     // DRYMODE Classic
     dryElClassico(currentPhase) {
         const phaseConfig = this.drying.modes.elClassico.phase[currentPhase];
-        const dryAction = this.actions.Unchanged; // Modus-spezifische Aktionen
-        node.warn(`Aktuelle Phase der Trocknung:, ${currentPhase}`);
+        const dryAction = { ...this.actions.Unchanged }; // Modus-spezifische Aktionen
+        const tempTolerance = 0.5; // Toleranz in °C
+        const humTolerance = 2;   // Toleranz in %
+
+        // Anpassungen basierend auf Temperatur
+        if (Math.abs(this.tentData.temperature - phaseConfig.targetTemp) > tempTolerance) {
+            if (this.tentData.temperature < phaseConfig.targetTemp) {
+                dryAction.heater = "increased";
+                dryAction.cooler = "unchanged";
+                dryAction.exhaust = "increased";
+                dryAction.climate = { heat: "increased", cool: "unchanged", dry: "unchanged" };
+            } else {
+                dryAction.cooler = "increased";
+                dryAction.heater = "unchanged";
+                dryAction.exhaust = "increased";
+                dryAction.climate = { heat: "unchanged", cool: "increased", dry: "unchanged" };
+            }
+        }
+
+        // Anpassungen basierend auf Feuchtigkeit
+        if (Math.abs(this.tentData.humidity - phaseConfig.targetHumidity) > humTolerance) {
+            if (this.tentData.humidity < phaseConfig.targetHumidity) {
+                dryAction.humidifier = "increased";
+                dryAction.dehumidifier = "unchanged";
+                dryAction.ventilation = "increased";
+                dryAction.climate = { ...dryAction.climate, dry: "unchanged" };
+            } else {
+                dryAction.dehumidifier = "increased";
+                dryAction.humidifier = "unchanged";
+                dryAction.ventilation = "increased";
+                dryAction.climate = { ...dryAction.climate, dry: "increased" };
+            }
+        }
+
+        // Konfliktlösung: Priorisierung von Temperatur
+        if (dryAction.dehumidifier === "increased" && this.tentData.temperature < phaseConfig.targetTemp) {
+            dryAction.heater = "increased";
+        }
+
         return {
             tentName: this.tentName,
             tentMode: this.tentMode,
@@ -1276,8 +1334,27 @@ class OpenGrowBox {
     // DRYMODE VPD Based
     drySharkMouse(currentPhase) {
         const phaseConfig = this.drying.modes.sharkMouse.phase[currentPhase];
-        const dryAction = this.actions.Unchanged; // Modus-spezifische Aktionen
-        node.warn(`Aktuelle Phase der Trocknung:, ${currentPhase}`);
+        const dryAction = { ...this.actions.Unchanged }; // Modus-spezifische Aktionen
+        const vpdTolerance = 0.05; // Toleranz für VPD
+
+        // Anpassungen basierend auf VPD
+        const currentVPD = this.calculateCurrentVPD();
+        if (Math.abs(currentVPD - phaseConfig.targetVPD) > vpdTolerance) {
+            if (currentVPD < phaseConfig.targetVPD) {
+                dryAction.heater = "increased";
+                dryAction.dehumidifier = "unchanged";
+                dryAction.exhaust = "increased";
+                dryAction.ventilation = "increased";
+                dryAction.climate = { heat: "increased", cool: "unchanged", dry: "unchanged" };
+            } else {
+                dryAction.cooler = "increased";
+                dryAction.humidifier = "unchanged";
+                dryAction.exhaust = "increased";
+                dryAction.ventilation = "increased";
+                dryAction.climate = { heat: "unchanged", cool: "increased", dry: "unchanged" };
+            }
+        }
+
         return {
             tentName: this.tentName,
             tentMode: this.tentMode,
@@ -1295,10 +1372,56 @@ class OpenGrowBox {
     }
 
     // DRYMODE DewPoint Based
+    // DRYMODE DewPoint Based
     dryDewBased(currentPhase) {
         const phaseConfig = this.drying.modes.dewBased.phase[currentPhase];
-        const dryAction = this.actions.Unchanged; // Modus-spezifische Aktionen
-        node.warn(`Aktuelle Phase der Trocknung:, ${currentPhase}`);
+        const dryAction = { ...this.actions.Unchanged }; // Modus-spezifische Aktionen
+        const dewPointTolerance = 0.5; // Toleranz für Taupunkt
+
+        // Anpassungen basierend auf Vapor Pressure (Taupunkt, tatsächlicher Dampfdruck und Sättigungsdampfdruck)
+        const currentDewPoint = this.calculateDewPoint();
+        const vaporPressureActual = this.drying.vaporPressureActual;
+        const vaporPressureSaturation = this.drying.vaporPressureSaturation;
+
+        // Sicherstellen, dass currentDewPoint eine Zahl ist
+        if (typeof currentDewPoint !== "number" || isNaN(currentDewPoint)) {
+            console.warn("Current Dew Point is unavailable or invalid.");
+            return {
+                tentName: this.tentName,
+                tentMode: this.tentMode,
+                inDryMode: this.drying.currentDryMode,
+                currentPhase,
+                targetValues: {
+                    targetTemp: phaseConfig.targetTemp,
+                    targetDewPoint: phaseConfig.targetDewPoint,
+                    targetDuration: phaseConfig.durationHours,
+                },
+                actions: dryAction,
+                warning: "Dew Point data is invalid or unavailable.",
+            };
+        }
+
+        // Überprüfen, ob die aktuellen Werte im Zielbereich liegen
+        if (
+            Math.abs(currentDewPoint - phaseConfig.targetDewPoint) > dewPointTolerance ||
+            vaporPressureActual < 0.9 * vaporPressureSaturation ||
+            vaporPressureActual > 1.1 * vaporPressureSaturation
+        ) {
+            if (currentDewPoint < phaseConfig.targetDewPoint || vaporPressureActual < 0.9 * vaporPressureSaturation) {
+                dryAction.humidifier = "increased";
+                dryAction.cooler = "unchanged";
+                dryAction.exhaust = "increased";
+                dryAction.ventilation = "increased";
+                dryAction.climate = { dry: "unchanged", cool: "unchanged", heat: "increased" };
+            } else {
+                dryAction.dehumidifier = "increased";
+                dryAction.heater = "unchanged";
+                dryAction.exhaust = "increased";
+                dryAction.ventilation = "increased";
+                dryAction.climate = { dry: "increased", cool: "unchanged", heat: "unchanged" };
+            }
+        }
+
         return {
             tentName: this.tentName,
             tentMode: this.tentMode,
@@ -1310,9 +1433,10 @@ class OpenGrowBox {
                 targetDewPoint: phaseConfig.targetDewPoint,
                 targetDuration: phaseConfig.durationHours,
             },
-            actions: dryAction
+            actions: dryAction,
         };
     }
+
 
     // EXPERIMENTEL
     ecoAdjustments(currentVPD = this.vpd.current, ecoTarget = this.vpd.ecotarget) {
@@ -1347,6 +1471,7 @@ class OpenGrowBox {
             actions: action
         };
     }
+
     // NIGHTHOLD VPD OUTPUT
     inDontCareMode() {
         let action = {
@@ -1383,6 +1508,7 @@ class OpenGrowBox {
             actions: action
         };
     }
+
     /// DISABELD 
     disabledMode() {
         node.log("Disabled mode active");
@@ -1409,7 +1535,6 @@ class OpenGrowBox {
         };
     }
 
-
     /// ACTIONS ******************************
     selectAction(context) {
         let preparedDevices = []; // Speicher für Geräteaktionen
@@ -1418,26 +1543,26 @@ class OpenGrowBox {
 
         // Prüfen, ob der Zustand seit der letzten Aktion unverändert ist
         if (this.checkLastState()) {
-                this.needchange = false;
-                actionData = {
-                    tentName: this.tentName,
-                    tentMode: "Unchanged",
-                    currentVPD: this.vpd.current,
-                    Temps: {
-                        Temperature: this.tentData.temperature,
-                        MinTemperature: this.tentData.minTemp,
-                        MaxTemperature: this.tentData.maxTemp,
-                    },
-                    Humidities: {
-                        Humidity: this.tentData.humidity,
-                        MinHumidity: this.tentData.minHumidity,
-                        MaxHumidity: this.tentData.maxHumidity,
-                    },
-                    actions: this.actions.Unchanged,
-                    deviceActions: preparedDevices,
-                };
+            this.needchange = false;
+            actionData = {
+                tentName: this.tentName,
+                tentMode: "Unchanged",
+                currentVPD: this.vpd.current,
+                Temps: {
+                    Temperature: this.tentData.temperature,
+                    MinTemperature: this.tentData.minTemp,
+                    MaxTemperature: this.tentData.maxTemp,
+                },
+                Humidities: {
+                    Humidity: this.tentData.humidity,
+                    MinHumidity: this.tentData.minHumidity,
+                    MaxHumidity: this.tentData.maxHumidity,
+                },
+                actions: this.actions.Unchanged,
+                deviceActions: preparedDevices,
+            };
         } else {
-            this.needchange = true;           
+            this.needchange = true;
         }
 
 
@@ -1485,18 +1610,18 @@ class OpenGrowBox {
             if (this.isPlantDay.lightOn === false && this.isPlantDay.nightVPDHold === false) {
                 actionData = this.inDontCareMode()
             }
-            
+
         }
 
-        if(this.needchange){
+        if (this.needchange) {
             limitAdjustments = this.checkLimits();
         }
         // Vorzeitige Anpassungen
 
-            // Kombiniere alle Aktionen
+        // Kombiniere alle Aktionen
         const finalActions = {
-        ...actionData.actions || null,
-        ...limitAdjustments || null,
+            ...actionData.actions || null,
+            ...limitAdjustments || null,
         };
         //let absolutActions = this.evaluateDeviceEnvironment(finalActions)
 
@@ -1506,7 +1631,7 @@ class OpenGrowBox {
             if (device.switches.length === 0) return
             if (device && typeof device.prepareAction === "function") {
                 if (device.deviceType === "sensor" || device.deviceType === "pump" || device.deviceType === "co2") return;
-                    
+
                 device = device.prepareAction(finalActions);
 
                 let actions = device.runAction(context)
@@ -1535,42 +1660,51 @@ class OpenGrowBox {
             ...actionData || null,
             actions: finalActions || null,
             devices: this.devices || null,
-            deviceActions: preparedDevices || null, 
+            deviceActions: preparedDevices || null,
         };
     }
-    // Check min/max settins and do adjustments
+
     checkLimits() {
         let adjustments = {};
-        
-        if(this.tentMode === "Drying")return
 
-        if (!this.needchange) return adjustments
+        // Sicherstellen, dass der Modus nicht "Drying" ist
+        if (this.tentMode === "Drying") return;
+
+        // Keine Änderungen erforderlich, wenn kein Bedarf besteht
+        if (!this.needchange) return adjustments;
 
         // Dynamische Gewichtung basierend auf Plant Stage
         let humidityWeight, temperatureWeight;
-        
-        if(this.controls.ownWeights){
+
+        if (this.controls.ownWeights) {
+            humidityWeight = this.controls.weights.hum || 1.0;
+            temperatureWeight = this.controls.weights.temp || 1.0;
+        } else {
             if (this.plantStage === "MidFlower" || this.plantStage === "LateFlower") {
-                humidityWeight = this.controls.weights.hum; 
-                temperatureWeight = this.controls.weights.temp;
+                humidityWeight = 1.25; // Feuchtigkeit ist wichtiger
+                temperatureWeight = 1.0; // Temperatur ist weniger wichtig
             } else {
-                humidityWeight = this.controls.weights.hum; 
-                temperatureWeight = this.controls.weights.temp;
-            }   
-        }else{
-            if (this.plantStage === "MidFlower" || this.plantStage === "LateFlower") {
-    
-                humidityWeight = 1.25 // In der Blütephase hat die Feuchtigkeit eine höhere Priorität
-                temperatureWeight = 1.0; // Temperatur hat in diesen Phasen weniger Priorität
-            } else {
-                humidityWeight = 1.0; // In anderen Phasen wie der Vegetationsphase ist die Temperatur leicht höher als Feuchtigkeit
+                humidityWeight = 1.0; // Standardgewichtung
                 temperatureWeight = 1.0;
             }
         }
 
-        // Temperatur- und Feuchtigkeitsabweichungen berechnen
-        const tempDeviation = (this.tentData.temperature - this.tentData.maxTemp) * temperatureWeight;
-        const humDeviation = (this.tentData.humidity - this.tentData.maxHumidity) * humidityWeight;
+        // Initialisierung von Abweichungen
+        let tempDeviation = 0;
+        let humDeviation = 0;
+
+        // Abweichungen nur berechnen, wenn außerhalb der Grenzen
+        if (this.tentData.temperature > this.tentData.maxTemp) {
+            tempDeviation = (this.tentData.temperature - this.tentData.maxTemp) * temperatureWeight;
+        } else if (this.tentData.temperature < this.tentData.minTemp) {
+            tempDeviation = (this.tentData.temperature - this.tentData.minTemp) * temperatureWeight;
+        }
+
+        if (this.tentData.humidity > this.tentData.maxHumidity) {
+            humDeviation = (this.tentData.humidity - this.tentData.maxHumidity) * humidityWeight;
+        } else if (this.tentData.humidity < this.tentData.minHumidity) {
+            humDeviation = (this.tentData.humidity - this.tentData.minHumidity) * humidityWeight;
+        }
 
         // **Initialisiere climate innerhalb von adjustments**
         adjustments.climate = {
@@ -1579,143 +1713,100 @@ class OpenGrowBox {
             dry: "unchanged",
         };
 
-
         // **1. Hohe Temperatur + Hohe Feuchtigkeit**
         if (tempDeviation > 0 && humDeviation > 0) {
-            adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
-            adjustments.cooler = "increased"; // Temperatur senken
-            adjustments.exhaust = "increased"; // Abluft maximieren
-            adjustments.climate.cool = "increased"; // Temp senken 
-            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+            adjustments.dehumidifier = "increased";
+            adjustments.cooler = "increased";
+            adjustments.exhaust = "increased";
+            adjustments.climate.cool = "increased";
+            adjustments.ventilation = "increased";
             node.warn(`${this.tentName} Fall: Hohe Temperatur + Hohe Feuchtigkeit`);
 
             // **2. Hohe Temperatur + Niedrige Feuchtigkeit**
         } else if (tempDeviation > 0 && humDeviation < 0) {
-            adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
-            adjustments.cooler = "increased"; // Temperatur senken
-            adjustments.exhaust = "increased"; // Abluft beibehalten oder erhöhen
-            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
-            adjustments.climate.cool = "increased"; // Temp senken 
+            adjustments.humidifier = "increased";
+            adjustments.cooler = "increased";
+            adjustments.exhaust = "increased";
+            adjustments.ventilation = "increased";
+            adjustments.climate.cool = "increased";
             node.warn(`${this.tentName} Fall: Hohe Temperatur + Niedrige Feuchtigkeit`);
 
             // **3. Niedrige Temperatur + Hohe Feuchtigkeit**
         } else if (tempDeviation < 0 && humDeviation > 0) {
-            adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
-            adjustments.heater = "increased"; // Temperatur erhöhen
-            adjustments.exhaust = "increased"; // Abluft erhöhen, um Feuchtigkeit abzuführen
-            adjustments.climate.dry = "increased"; //  Feuchtigkeit Senken
-            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+            adjustments.dehumidifier = "increased";
+            adjustments.heater = "increased";
+            adjustments.exhaust = "increased";
+            adjustments.climate.dry = "increased";
+            adjustments.ventilation = "increased";
             node.warn(`${this.tentName} Fall: Niedrige Temperatur + Hohe Feuchtigkeit`);
 
             // **4. Niedrige Temperatur + Niedrige Feuchtigkeit**
         } else if (tempDeviation < 0 && humDeviation < 0) {
-            adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
-            adjustments.heater = "increased"; // Temperatur erhöhen
-            adjustments.exhaust = "reduced"; // Abluft reduzieren, um Wärme und Feuchtigkeit zu halten
-            adjustments.climate.heat = "increased"; //  Heizung
-            adjustments.ventilation = "reduced"; // Vents verringern
+            adjustments.humidifier = "increased";
+            adjustments.heater = "increased";
+            adjustments.exhaust = "reduced";
+            adjustments.climate.heat = "increased";
+            adjustments.ventilation = "reduced";
             node.warn(`${this.tentName} Fall: Niedrige Temperatur + Niedrige Feuchtigkeit`);
         }
 
-        // **Zusätzliche Fälle**
-
         // **5. Notfallmaßnahmen bei extremer Übertemperatur**
         if (this.tentData.temperature > this.tentData.maxTemp + 5) {
-            adjustments.exhaust = "maximum"; // Maximale Abluft
-            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen            
-            adjustments.cooler = "increased"; // Temp Verringern
-            adjustments.climate.cool = "increased"; // Temp Verringern
-            adjustments.light = "reduced"; // Licht Reduzieren, um Wärme zu reduzieren
+            adjustments.exhaust = "maximum";
+            adjustments.ventilation = "increased";
+            adjustments.cooler = "increased";
+            adjustments.climate.cool = "increased";
+            adjustments.light = "reduced";
             node.warn(`${this.tentName} Kritische Übertemperatur! Notfallmaßnahmen aktiviert.`);
         }
 
         // **6. Notfallmaßnahmen bei extremer Untertemperatur**
         if (this.tentData.temperature < this.tentData.minTemp - 5) {
-            adjustments.heater = "increased"; //  Heizung
-            adjustments.exhaust = "reduced"; // Abluft reduzieren, um Wärme zu halten
-            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen        
-            adjustments.climate.heat = "increased";//  Heizung
-            node.warn(` ${this.tentName} Kritische Untertemperatur! Notfallmaßnahmen aktiviert.`);
+            adjustments.heater = "increased";
+            adjustments.exhaust = "reduced";
+            adjustments.ventilation = "increased";
+            adjustments.climate.heat = "increased";
+            node.warn(`${this.tentName} Kritische Untertemperatur! Notfallmaßnahmen aktiviert.`);
         }
 
         // **7. Lichtsteuerung basierend auf Temperatur**
         if (this.tentData.temperature > this.tentData.maxTemp && this.isPlantDay.lightOn) {
-            adjustments.light = "reduced"; // Lichtleistung reduzieren, um Wärme zu verringern
+            adjustments.light = "reduced";
             node.warn(`${this.tentName} Lichtleistung reduziert aufgrund hoher Temperatur`);
         }
 
         // **8. CO₂-Management**
         if (this.tentData.co2Level < 400) {
-            adjustments.co2 = "increased"; // CO₂ hinzufügen
-            adjustments.exhaust = "minimum"; // CO₂ halten
+            adjustments.co2 = "increased";
+            adjustments.exhaust = "minimum";
             node.warn("CO₂-Level zu niedrig, CO₂-Zufuhr erhöht");
         } else if (this.tentData.co2Level > 1200) {
-            adjustments.co2 = "reduced"; // CO₂-Zufuhr stoppen
-            adjustments.exhaust = "increased"; // CO₂ abführen
+            adjustments.co2 = "reduced";
+            adjustments.exhaust = "increased";
             node.warn(`${this.tentName} CO₂-Level zu hoch, Abluft erhöht`);
         }
 
         // **9. Taupunkt- und Kondensationsschutz**
         if (this.tentData.dewpoint >= this.tentData.temperature - 1) {
-            adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
-            adjustments.exhaust = "increased"; // Abluft erhöhen
+            adjustments.exhaust = "increased";
             adjustments.climate.dry = "increased";
-            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+            adjustments.ventilation = "increased";
             node.warn(`${this.tentName} Taupunkt erreicht, Feuchtigkeit reduziert`);
         }
 
         // **10. Nachtmodus (Licht aus, maximale Abluft)**
         if (!this.isPlantDay.lightOn) {
-            adjustments.light = "off"; // Licht ausschalten
-            adjustments.exhaust = "maximum"; // Abluft auf max setzen
-            adjustments.ventilation = "increased"; // Vents beibehalten oder erhöhen
+            adjustments.light = "off";
+            adjustments.exhaust = "maximum";
+            adjustments.ventilation = "increased";
             node.warn(`${this.tentName} Nachtmodus aktiv: Licht aus, Abluft erhöht`);
-        }
-
-        // **11. Sicherheitsfall: Abluft niemals reduzieren bei hoher Temperatur**
-        if (tempDeviation > 0) {
-            adjustments.exhaust = "increased"; // Abluft beibehalten oder erhöhen
-            adjustments.ventilation = "maximum" // Vents beibehalten oder erhöhen
-            node.warn(`${this.tentName} Sicherheit: Abluft erhöht, da Temperatur zu hoch`);
-        }
-
-        // **12. Feuchtigkeitsgrenzwerte beachten**
-        if (this.tentData.humidity < this.tentData.minHumidity) {
-            adjustments.humidifier = "increased"; // Feuchtigkeit erhöhen
-            adjustments.ventilation = "increased" // Feuchtigkeit verteilen
-            adjustments.dehumidifier = "reduced"; // Feuchtigkeit reduzieren
-            adjustments.climate.dry = "reduced"; // Feuchtigkeit reduzieren
-            adjustments.exhaust = "reduced" // Abluft senken
-            node.warn(`${this.tentName} Feuchtigkeit unter Minimum: Luftbefeuchter aktiviert`);
-        } else if (this.tentData.humidity > this.tentData.maxHumidity) {
-            adjustments.humidifier = "reduced" // Feuchtigkeit reduzieren
-            adjustments.dehumidifier = "increased"; // Feuchtigkeit reduzieren
-            adjustments.climate.dry = "increased"; // Feuchtigkeit reduzieren
-            adjustments.ventilation = "increased"; // Feuchtigkeit verteilen
-            adjustments.exhaust = "increased" // Abluft erhöhen
-            node.warn(`${this.tentName} Feuchtigkeit über Maximum: Entfeuchter aktiviert`);
-        }
-
-        // **13. Temperaturgrenzwerte beachten**
-        if (this.tentData.temperature < this.tentData.minTemp) {
-            adjustments.heater = "increased"; // Temperatur erhöhen
-            adjustments.climate.heat = "increased";// Temperatur erhöhen
-            adjustments.ventilation = "reduced"; // Temp Verteilen
-            adjustments.exhaust = "reduced" // Abluft senken
-            node.warn(`${this.tentName} Temperatur unter Minimum: Heizung aktiviert`);
-        } else if (this.tentData.temperature > this.tentData.maxTemp) {
-            adjustments.cooler = "increased"; // Temperatur senken
-            adjustments.climate.cool = "increased";// Temperatur senken
-            adjustments.ventilation = "increased"; // Temp Verteilen und Kühlen
-            adjustments.exhaust = "increased" // Abluft erhöhen
-            node.warn(`${this.tentName} Temperatur über Maximum: Kühler aktiviert`);
         }
 
         return adjustments;
     }
 
     // Experimentel ( use outsite and ambient data)
-    analyzeTrends(){
+    analyzeTrends() {
         let trend = {
             temperature: this.enviorment.outsiteTemp - this.enviorment.ambientTemp,
             humidity: this.enviorment.outsiteHumidity - this.enviorment.ambientHumidity,
@@ -1737,6 +1828,7 @@ class OpenGrowBox {
             this.actionsReduced.humidifier = "preemptively reduced";
         }
     }
+
     // DATA SETTER FAKE DB ******************************
     dataSetter(data) {
         const time = new Date().toISOString();
@@ -1822,7 +1914,7 @@ class OpenGrowBox {
             this.previousActions = this.previousActions.slice(-250);
         }
     }
-    
+
     // Check if action is needed to chagnes in vpd 
     checkLastState() {
         if (this.previousActions.length === 0) return false;
@@ -1847,7 +1939,7 @@ class Device {
         this.isLocked = false
         this.lockedFor = ""
         this.needChange = false
-        this.inRoomName  = ""
+        this.inRoomName = ""
         this.isfromAmbient = false
         this.action = ""
         this.switches = [];
@@ -1856,7 +1948,7 @@ class Device {
 
     }
 
-    setData(data,context) {
+    setData(data, context) {
         this.setFromtent(context.tentName)
         this.identifyIfFromAmbient()
         this.data = { ...this.data, ...data };
@@ -1864,14 +1956,14 @@ class Device {
         this.updateIsRunningState();
     }
 
-    setFromtent(roomName){
-        if(roomName != this.inRoomName){
+    setFromtent(roomName) {
+        if (roomName != this.inRoomName) {
             this.inRoomName = roomName
         }
     }
 
     identifyIfFromAmbient() {
-        if (typeof this.inRoomName === "string" && 
+        if (typeof this.inRoomName === "string" &&
             (this.inRoomName.toLowerCase().includes("ambient"))) {
             this.isfromAmbient = true;
         } else {
@@ -1887,7 +1979,7 @@ class Device {
             key.startsWith("switch.") || key.startsWith("light.") || key.startsWith("fan.") || key.startsWith("climate.")
         );
         this.sensors = keys.filter((key) =>
-            key.startsWith("sensor.") ||key.startsWith("select.") || key.startsWith("number.") || key.startsWith("text.") || key.startsWith("time.")
+            key.startsWith("sensor.") || key.startsWith("select.") || key.startsWith("number.") || key.startsWith("text.") || key.startsWith("time.")
         );
     }
 
@@ -1926,6 +2018,12 @@ class Device {
             this.isRunning = true;
             return;
         }
+        // 5. Prüfung Humdifier
+        const humhKeys = Object.keys(this.data).filter((key) => key.startsWith("humidifier."));
+        if (humhKeys.some((key) => this.data[key] === "on")) {
+            this.isRunning = true;
+            return;
+        }
 
         // 5. Prüfen, ob ein gültiger Duty-Cycle-Wert vorhanden ist
         const dutyCycleKey = Object.keys(this.data).find((key) =>
@@ -1959,13 +2057,14 @@ class Device {
     prepareAction(finalActions) {
         if (finalActions.hasOwnProperty(this.deviceType)) {
             const actionValue = finalActions[this.deviceType];
-            //node.warn(`Climate Aciton Value: ${JSON.stringify(finalActions,actionValue)}`);
-            // Sonderfall für "climate" Geräte
+
+            // Spezielles Verhalten für "light"-Geräte
             if (this.deviceType === "light") {
-                // Spezielles Verhalten für "light"-Geräte
+
                 this.needChange = true;
                 this.action = actionValue;
-            } else if (this.deviceType === "climate"){
+                // Sonderfall für "climate" Geräte
+            } else if (this.deviceType === "climate") {
                 //node.warn(`IN Climate Aciton Value: ${JSON.stringify(finalActions, actionValue)}`);
                 if (finalActions.climate && typeof finalActions.climate === "object") {
                     for (const [mode, action] of Object.entries(finalActions.climate)) {
@@ -1978,13 +2077,13 @@ class Device {
                 } else {
                     this.action = "unchanged"; // Standardwert, falls keine gültigen Climate-Aktionen vorhanden sind
                 }
-            } else{
+            } else {
                 // Standard-Verhalten für andere Gerätetypen
                 if (actionValue === "unchanged") {
                     this.needChange = false;
                     this.action = actionValue;
                 } else if (
-                    ["maximum", "reduced", "increased", "minimum", "medium", "on", "off"].includes(actionValue)
+                    ["maximum", "reduced", "increased", "minimum", "on", "off"].includes(actionValue)
                 ) {
                     this.needChange = true;
                     this.action = actionValue;
@@ -2016,7 +2115,7 @@ class Device {
         // Falls keine Änderung notwendig ist, abbrechen
         if (this.needChange === false) return;
         if (!this.evalAction()) {
-            return { Device: `${this.switches[0]}`, Action: "noChangesNeeded",State:"unchanged" };
+            return { Device: `${this.switches[0]}`, Action: "noChangesNeeded", State: "unchanged" };
         }
 
         //node.warn(`Running Action for ${this.name} in ${this.inRoomName} `);
@@ -2076,7 +2175,7 @@ class Device {
             }
 
             // Aktion: unchanged
-        } else if (this.action === "maximum"){
+        } else if (this.action === "maximum") {
             if (!this.hasDuty) {
                 // Kein Duty-Modus: Schalte das Gerät ein, falls es nicht läuft
                 if (!this.isRunning) {
@@ -2135,7 +2234,7 @@ class Device {
     }
 }
 
-class ExhaustFan extends Device {
+class Exhaust extends Device {
     constructor(name, dutyCycle = 0) {
         super(name, "exhaust");
         this.dutyCycle = this.clampDutyCycle(dutyCycle);
@@ -2143,7 +2242,7 @@ class ExhaustFan extends Device {
         this.maxDuty = 95;
         this.hasDuty = false;
         this.isRuckEC = false;
-      
+
     }
 
     setData(data, context) {
@@ -2222,7 +2321,7 @@ class ExhaustFan extends Device {
 
     runAction(context) {
         if (!this.needChange) {
-            return { ExhaustFan: `${this.name}`, Action: "NoChangeNeeded" };
+            return { Exhaust: `${this.name}`, Action: "NoChangeNeeded" };
         }
 
         const switchId = this.switches?.[0];
@@ -2244,17 +2343,17 @@ class ExhaustFan extends Device {
                     return this.turnON(switchId);
                 }
             case "increased":
-                if(this.hasDuty){
+                if (this.hasDuty) {
                     const increasedDuty = Math.min(this.dutyCycle + 5, this.maxDuty);
                     return this.changeDuty(increasedDuty);
-                }else{
+                } else {
                     return this.turnON(switchId);
                 }
             case "reduced":
-                if(this.hasDuty){
+                if (this.hasDuty) {
                     const reducedDuty = Math.max(this.dutyCycle - 5, this.minDuty);
                     return this.changeDuty(reducedDuty);
-                }else{
+                } else {
                     return this.turnOFF(switchId);
                 }
 
@@ -2270,7 +2369,7 @@ class ExhaustFan extends Device {
 
             default:
                 node.warn(`${this.name}: Unbekannte Aktion.`);
-                return { ExhaustFan: `${this.name}`, Action: "UnknownAction" };
+                return { Exhaust: `${this.name}`, Action: "UnknownAction" };
         }
     }
 
@@ -2332,7 +2431,7 @@ class Ventilation extends Device {
     }
 
     initializeDutyCycle() {
-        if(this.isTasmota) return
+        if (this.isTasmota) return
         node.warn(`${this.name}: Initialisiere Duty Cycle auf ${this.dutyCycle}%.`);
         this.dutyCycle = this.dutyMin; // Initialisiere auf 50%
     }
@@ -2530,10 +2629,10 @@ class Climate extends Device {
 
     turnON(mode) {
         this.isRunning = true;
-        if(this.currentHAVOC !== mode){
+        if (this.currentHAVOC !== mode) {
             this.currentHAVOC = mode;
             return { entity_id: this.switches[0], action: "climate", climate_mode: mode };
-        }else{
+        } else {
             return { entity_id: this.switches[0], action: "AllReady_Running", climate_mode: mode };
         }
 
@@ -2542,19 +2641,24 @@ class Climate extends Device {
     turnOFF() {
         if (this.isRunning) {
             const previousMode = this.currentHAVOC;
-            this.isRunning = false;
-            this.currentHAVOC = "off";
-            return { entity_id: this.switches[0], action: "off", previous_mode: previousMode };
+
+            if (this.isRunning === true) {
+                this.isRunning = false;
+                this.currentHAVOC = "off";
+                return { entity_id: this.switches[0], action: "off", previous_mode: previousMode };
+            } else {
+                return { entity_id: this.switches[0], action: "AllreadyOFF", previous_mode: previousMode };
+            }
         }
         return { entity_id: this.switches[0], action: "already_off" };
     }
 
     changeMode(mode) {
-        
-        if(this.currentHAVOC !== mode){
+
+        if (this.currentHAVOC !== mode) {
             this.currentHAVOC = mode;
             return { entity_id: this.switches[0], action: "climate", climate_mode: mode };
-        }else{
+        } else {
             return { entity_id: this.switches[0], action: "AllReady_OFF", climate_mode: mode };
         }
 
@@ -2568,6 +2672,8 @@ class Light extends Device {
         this.dutyCycle = null;
         this.minDuty = 20;
         this.maxDuty = 100;
+        this.sunriseMin = 20;
+        this.sunsetMin = 20;
         this.stepSize = 1; // Schrittweite für Änderungen
         this.sunRiseTime = "";
         this.sunSetTime = "";
@@ -2575,7 +2681,7 @@ class Light extends Device {
         this.lightOffTime = ""; // Endzeit des Lichts
         this.isScheduled = false; // Ob das Licht Zeitpläne berücksichtigt
         this.controlOverVoltage = false;
-        this.worksWithCO2 = false
+        this.worksWithCO2 = false;
         this.currentPlantPhase = {
             min: 0,
             max: 0,
@@ -2711,16 +2817,16 @@ class Light extends Device {
         if (currentSeconds >= sunRiseSeconds && currentSeconds < sunSetSeconds) {
             const sunriseDuration = sunSetSeconds - sunRiseSeconds;
             const elapsed = currentSeconds - sunRiseSeconds;
-            const dutyIncrement = (elapsed / sunriseDuration) * (this.maxDuty - this.minDuty);
-            const newDuty = Math.min(this.maxDuty, this.minDuty + dutyIncrement);
+            const dutyIncrement = (elapsed / sunriseDuration) * (this.maxDuty - this.sunriseMin);
+            const newDuty = Math.min(this.maxDuty, this.sunriseMin + dutyIncrement);
             this.changeDuty(newDuty);
         } else if (currentSeconds >= sunSetSeconds || currentSeconds < sunRiseSeconds) {
             const sunsetDuration = (24 * 3600 - sunSetSeconds) + sunRiseSeconds;
             const elapsed = currentSeconds >= sunSetSeconds
                 ? currentSeconds - sunSetSeconds
                 : 24 * 3600 - sunSetSeconds + currentSeconds;
-            const dutyDecrement = (elapsed / sunsetDuration) * (this.maxDuty - this.minDuty);
-            const newDuty = Math.max(this.minDuty, this.maxDuty - dutyDecrement);
+            const dutyDecrement = (elapsed / sunsetDuration) * (this.maxDuty - this.sunsetMin);
+            const newDuty = Math.max(this.sunsetMin, this.maxDuty - dutyDecrement);
             this.changeDuty(newDuty);
         }
 
@@ -2790,7 +2896,6 @@ class Light extends Device {
         this.dutyCycle = clampedDuty;
 
         if (this.controlOverVoltage) {
-            // Suche den passenden Schlüssel für die Spannung in den Sensors
             const voltageKey = this.sensors.find((key) =>
                 key.toLowerCase().includes("voltage") && !key.toLowerCase().startsWith("sensor.")
             );
@@ -2810,19 +2915,28 @@ class Light extends Device {
         return { entity_id: entity, action: "dutycycle", dutycycle: clampedDuty };
     }
 
-
     turnON() {
         const entity = this.switches[0];
-        this.isRunning = true;
-        node.warn(`${this.name}: Licht wurde eingeschaltet.`);
-        return { entity_id: entity, action: "on" };
+        if (this.isRunning === false) {
+            this.isRunning = true;
+            node.warn(`${this.name}: Licht wurde eingeschaltet.`);
+            return { entity_id: entity, action: "on" };
+        } else {
+            return { entity_id: entity, action: "AllReadyON" };
+        }
+
     }
 
     turnOFF() {
         const entity = this.switches[0];
-        this.isRunning = false;
-        node.warn(`${this.name}: Licht wurde ausgeschaltet.`);
-        return { entity_id: entity, action: "off" };
+        if (this.isRunning === true) {
+            this.isRunning = false;
+            node.warn(`${this.name}: Licht wurde ausgeschaltet.`);
+            return { entity_id: entity, action: "off" };
+        } else {
+            return { entity_id: entity, action: "AllReadyOff" };
+        }
+
     }
 }
 
@@ -2894,7 +3008,7 @@ class Humidifier extends Device {
         return { entity_id: entity, action: "setHumidity", value: humlevel };
     }
 
-    runAction(context) {
+    runAction() {
         if (!this.needChange) {
             return { entity_id: this.switches[0], action: "noChangesNeeded" };
         }
@@ -2912,11 +3026,11 @@ class Humidifier extends Device {
                 return this.turnON();
             case "increased":
                 return this.hasModes
-                    ? this.changeMode("increase")
+                    ? this.changeMode("increased")
                     : this.turnON();
             case "reduced":
                 return this.hasModes
-                    ? this.changeMode("decrease")
+                    ? this.changeMode("reduced")
                     : this.turnOFF();
             case "unchanged":
                 return { entity_id: this.switches[0], action: "UNCHANGED" };
@@ -3150,8 +3264,6 @@ class Cooler extends Device {
     }
 }
 
-
-
 class Pump extends Device {
     constructor(name) {
         super(name, "pump");
@@ -3291,13 +3403,13 @@ class CO2 extends Device {
     }
 
     setTargetCO2(target) {
-        if(target !== this.targetCO2){
+        if (target !== this.targetCO2) {
             this.targetCO2 = target;
         }
     }
 
     enableAutoRegulation() {
-        if(!this.enableAutoRegulation){
+        if (!this.enableAutoRegulation) {
             this.autoRegulate = true;
         }
     }
@@ -3309,7 +3421,7 @@ class CO2 extends Device {
     }
 
     updateCurrentCO2(value) {
-        if(value !== this.currentCO2){
+        if (value !== this.currentCO2) {
             this.currentCO2 = value;
         }
     }
@@ -3406,6 +3518,7 @@ class GenericSwitch extends Device {
         }
     }
 }
+
 //// UNTIL HERE
 class Sensor extends Device {
     constructor(name) {
@@ -3435,4 +3548,3 @@ class Sensor extends Device {
         this.readings = [];
     }
 }
-
