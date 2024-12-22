@@ -1996,6 +1996,8 @@ class Device {
         if (fanKeys.some((key) => this.data[key] === "on")) {
             this.isRunning = true;
             return;
+        }else{
+            this.isRunning = false;
         }
 
         // 2. Prüfen, ob ein Light eingeschaltet ist
@@ -2003,6 +2005,8 @@ class Device {
         if (lightKeys.some((key) => this.data[key] === "on")) {
             this.isRunning = true;
             return;
+        }else{
+            this.isRunning = false;
         }
 
         // 3. Prüfen, ob eine Klimaanlage eingeschaltet ist
@@ -2010,6 +2014,8 @@ class Device {
         if (climateKeys.some((key) => this.data[key] === "on")) {
             this.isRunning = true;
             return;
+        }else{
+            this.isRunning = false;
         }
 
         // 4. Prüfung Switches
@@ -2017,12 +2023,17 @@ class Device {
         if (switchKeys.some((key) => this.data[key] === "on")) {
             this.isRunning = true;
             return;
+        }else{
+            this.isRunning = false;
         }
+        
         // 5. Prüfung Humdifier
         const humhKeys = Object.keys(this.data).filter((key) => key.startsWith("humidifier."));
         if (humhKeys.some((key) => this.data[key] === "on")) {
             this.isRunning = true;
             return;
+        }else{
+            this.isRunning = false;
         }
 
         // 5. Prüfen, ob ein gültiger Duty-Cycle-Wert vorhanden ist
@@ -2060,9 +2071,15 @@ class Device {
 
             // Spezielles Verhalten für "light"-Geräte
             if (this.deviceType === "light") {
+                if (actionValue !== "unchanged"){
+                    this.needChange = true;
+                    this.action = actionValue;
+                }else{
+                    this.needChange = false;
+                    this.action = actionValue;
+                }
 
-                this.needChange = true;
-                this.action = actionValue;
+
                 // Sonderfall für "climate" Geräte
             } else if (this.deviceType === "climate") {
                 //node.warn(`IN Climate Aciton Value: ${JSON.stringify(finalActions, actionValue)}`);
@@ -2307,19 +2324,24 @@ class Exhaust extends Device {
     }
 
     changeDuty(duty) {
-        const clampedDuty = this.clampDutyCycle(duty);
-        this.dutyCycle = clampedDuty;
-
+        const newDuty = this.clampDutyCycle(duty);
         if (this.switches?.[0]) {
             const switchId = this.switches[0];
+            if(newDuty !== this.dutyCycle){
+                const clampedDuty = this.clampDutyCycle(duty);
+                this.dutyCycle = clampedDuty;
+            }else{
+                return { entity_id: switchId, action: "SameDuty", dutycycle: newDuty };
+            }
+
             node.warn(`${this.name}: Duty Cycle ${this.dutyCycle} an Abluft ${switchId} gesendet.`);
-            return { entity_id: switchId, action: "dutycycle", dutycycle: clampedDuty };
+            return { entity_id: switchId, action: "dutycycle", dutycycle: newDuty };
         } else {
             return { error: "No switch available" };
         }
     }
 
-    runAction(context) {
+    runAction() {
         if (!this.needChange) {
             return { Exhaust: `${this.name}`, Action: "NoChangeNeeded" };
         }
@@ -2672,6 +2694,8 @@ class Light extends Device {
         this.dutyCycle = null;
         this.minDuty = 20;
         this.maxDuty = 100;
+        this.lastSentDutyCycle = null;
+        this.voltage = 0.0;
         this.sunriseMin = 20;
         this.sunsetMin = 20;
         this.stepSize = 1; // Schrittweite für Änderungen
@@ -2681,6 +2705,430 @@ class Light extends Device {
         this.lightOffTime = ""; // Endzeit des Lichts
         this.isScheduled = false; // Ob das Licht Zeitpläne berücksichtigt
         this.controlOverVoltage = false;
+        this.controledOverOGB = true
+        this.worksWithCO2 = false;
+        this.currentPlantPhase = {
+            min: 0,
+            max: 0,
+        };
+        this.PlantStageMinMax = {
+            Germ: {
+                min: 20,
+                max: 30,
+            },
+            Veg: {
+                min: 20,
+                max: 50,
+            },
+            Flower: {
+                min: 70,
+                max: 100,
+            },
+        };
+    }
+
+    setData(data, context) {
+        this.setFromtent(context.tentName);
+        this.identifyIfFromAmbient();
+        this.data = { ...this.data, ...data };
+        this.identifySwitchesAndSensors();
+        this.updateIsRunningState();
+        this.setCurrenPlantPhaseName(context);
+        this.findDutyCycle(); // Initialisiere den Duty-Cycle, falls vorhanden
+        this.setLightTimes(context);
+        this.setSunTimes(context.isPlantDay.sunRiseTimes, context.isPlantDay.sunSetTimes);
+    }
+
+    voltageFactorToDutyCycle(voltage) {
+        return Math.floor(voltage * 10);
+    }
+
+    findDutyCycle() {
+        if (!this.data) {
+            console.log(`${this.name}: Keine Gerätedaten gefunden.`);
+            return;
+        }
+    
+        const voltageKey = Object.keys(this.data).find((key) =>
+            key.toLowerCase().includes("voltage") && !key.toLowerCase().startsWith("sensor.")
+        );
+    
+        if (voltageKey) {
+            const voltageValue = parseFloat(this.data[voltageKey]);
+            if (!isNaN(voltageValue)) {
+                this.controlOverVoltage = true;
+                const calculatedDuty = this.voltageFactorToDutyCycle(voltageValue); // Voltage zu Duty umrechnen
+                this.dutyCycle = Math.max(this.minDuty, Math.min(this.maxDuty, calculatedDuty));
+                this.hasDuty = true;
+                console.log(`${this.name}: Duty-Cycle basierend auf Spannung (${voltageValue}V) berechnet: ${this.dutyCycle}`);
+            } else {
+                this.hasDuty = false;
+                console.log(`${this.name}: Keine gültige Spannung gefunden.`);
+            }
+        } else {
+            console.log(`${this.name}: Kein Voltage-Key gefunden.`);
+            this.hasDuty = false;
+        }
+    }
+    
+    setCurrenPlantPhaseName(context) {
+        if (!context) return;
+        if (context.plantStage !== this.currentPlantPhase) {
+            this.currentPlantPhase = context.plantStage;
+            this.setForPlantLightPhase();
+        }
+    }
+
+    setForPlantLightPhase() {
+        const phase = this.currentPlantPhase;
+        if (phase.includes("Germination") || phase.includes("Clones")) {
+            this.currentPlantPhase = { ...this.PlantStageMinMax.Germ };
+        } else if (phase.includes("Veg")) {
+            this.currentPlantPhase = { ...this.PlantStageMinMax.Veg };
+        } else if (phase.includes("Flower")) {
+            this.currentPlantPhase = { ...this.PlantStageMinMax.Flower };
+        }
+        this.minDuty = this.currentPlantPhase.min;
+        this.maxDuty = this.currentPlantPhase.max;
+    }
+
+    setLightTimes(context) {
+        if (!context) return;
+        const { lightOnTime, lightOffTime } = context.isPlantDay || {};
+        this.lightOnTime = lightOnTime;
+        this.lightOffTime = lightOffTime;
+
+        if (this.lightOnTime && this.lightOffTime !== "") {
+            this.isScheduled = true;
+        }
+    }
+
+    setSunTimes(sunRiseTime, sunSetTime) {
+        if (this.hasDuty) {
+            if (sunRiseTime || sunSetTime !== "") {
+                this.sunRiseTime = sunRiseTime;
+                this.sunSetTime = sunSetTime;
+            }
+        } else {
+            return { ERROR: "NoDuty" }
+        }
+
+    }
+
+    parseTime(timeString) {
+        if (!timeString || typeof timeString !== "string") {
+            console.log("DEBUG: Invalid time string provided:", timeString);
+            return 0; // Fallback auf Mitternacht
+        }
+
+        const [hours, minutes, seconds = 0] = timeString.split(":").map(Number);
+        return (hours * 3600) + (minutes * 60) + seconds;
+    }
+
+    checkforStartStop() {
+        const currentTime = new Date();
+        const currentSeconds = this.parseTime(currentTime.toTimeString().split(" ")[0]);
+        const startTime = this.parseTime(this.lightOnTime);
+        const endTime = this.parseTime(this.lightOffTime);
+    
+        let isLightOn;
+    
+        if (endTime < startTime) {
+            // Handling when light off time is past midnight
+            isLightOn = currentSeconds >= startTime || currentSeconds <= endTime;
+        } else {
+            isLightOn = currentSeconds >= startTime && currentSeconds <= endTime;
+        }
+    
+        console.log("LIGHTONSTATE:", isLightOn);
+    
+        if (isLightOn !== this.isRunning) {
+            this.action = isLightOn ? "on" : "off";
+            console.log("ON/OFF ACTION", this.action);
+            return isLightOn ? this.turnON() : this.turnOFF();
+        }
+    }
+    
+    checkforPhase() {
+        const currentTime = new Date();
+        const currentSeconds = this.parseTime(currentTime.toTimeString().split(" ")[0]);
+
+        const lightOnSeconds = this.parseTime(this.lightOnTime);
+        const lightOffSeconds = this.parseTime(this.lightOffTime);
+        const sunRiseSeconds = this.parseTime(this.sunRiseTime); // Dauer des Sonnenaufgangs
+        const sunSetSeconds = this.parseTime(this.sunSetTime);   // Dauer des Sonnenuntergangs
+        const sunriseEndSeconds = lightOnSeconds + sunRiseSeconds; // Endzeit Sunrise
+        const sunsetStartSeconds = lightOffSeconds - sunSetSeconds; // Startzeit Sunset
+
+        // **Sonnenaufgang (Sunrise Phase)**
+        const isSunriseActive = currentSeconds >= lightOnSeconds && currentSeconds < sunriseEndSeconds;
+        if (isSunriseActive) {
+            const sunriseDuration = sunRiseSeconds; // Gesamtdauer der Sunrise-Phase
+            const elapsedSunrise = currentSeconds - lightOnSeconds; // Verstrichene Zeit
+            const dutyIncrement = (elapsedSunrise / sunriseDuration) * (this.currentPlantPhase.max - this.sunriseMin);
+            const newDuty = Math.min(this.currentPlantPhase.max, this.sunriseMin + dutyIncrement);
+
+            console.log("DEBUG: Sunrise Phase Active");
+            console.log(`Elapsed Sunrise Time: ${elapsedSunrise}`);
+            console.log(`Sunrise Duration: ${sunriseDuration}`);
+            console.log(`Duty Increment: ${dutyIncrement}`);
+            console.log(`${this.name}: Sunrise - Increasing Duty to ${Math.floor(newDuty)}`);
+
+            if (this.dutyCycle !== Math.floor(newDuty)) {
+                // **Hier wird der neue DutyCycle berechnet und gesendet**
+                this.dutyCycle = Math.floor(newDuty);
+                return {
+                    entity_id: this.switches[0],
+                    action: "setDutyCycle",
+                    dutycycle: this.dutyCycle, // Neuer DutyCycle
+                };
+            }
+            return true; // Sunrise-Phase aktiv
+        }
+
+        // **Sonnenuntergang (Sunset Phase)**
+        const isSunsetActive = currentSeconds >= sunsetStartSeconds && currentSeconds < lightOffSeconds;
+        if (isSunsetActive) {
+            const sunsetDuration = sunSetSeconds; // Gesamtdauer der Sunset-Phase
+            const elapsedSunset = currentSeconds - sunsetStartSeconds; // Verstrichene Zeit
+            const dutyDecrement = (elapsedSunset / sunsetDuration) * (this.dutyCycle - this.sunsetMin);
+            const newDuty = Math.max(this.sunsetMin, this.dutyCycle - dutyDecrement);
+
+            console.log("DEBUG: Sunset Phase Active");
+            console.log(`Elapsed Sunset Time: ${elapsedSunset}`);
+            console.log(`Sunset Duration: ${sunsetDuration}`);
+            console.log(`Duty Decrement: ${dutyDecrement}`);
+            console.log(`${this.name}: Sunset - Reducing Duty to ${Math.floor(newDuty)}`);
+
+            if (this.dutyCycle !== Math.floor(newDuty)) {
+                // **Hier wird der neue DutyCycle berechnet und gesendet**
+                this.dutyCycle = Math.floor(newDuty);
+                return {
+                    entity_id: this.switches[0],
+                    action: "setDutyCycle",
+                    dutycycle: this.dutyCycle, // Neuer DutyCycle
+                };
+            }
+            return true; // Sunset-Phase aktiv
+        }
+
+        console.log("DEBUG: No active Sunrise or Sunset phase.");
+        return false; // Keine Phase aktiv
+    }
+
+
+    runAction(context) {
+        const actions = []; // Liste, die alle Aktionen sammelt
+
+        // 1. Prüfen auf Start/Stop
+        const startStopAction = this.checkforStartStop();
+        if (startStopAction) {
+            console.log("DEBUG: Start/Stop Action:", startStopAction);
+            actions.push(startStopAction); // Die Start/Stop-Aktion zur Liste hinzufügen
+        }
+
+        // 2. Prüfen auf aktive Sunrise/Sunset-Phasen
+        const isInPhase = this.checkforPhase();
+        if (isInPhase) {
+            console.log("DEBUG: Sunrise or Sunset phase active.");
+            actions.push({
+                entity_id: this.switches[0],
+                action: "SunriseOrSunset",
+                status: true,
+            });
+
+            // Sicherstellen, dass DutyCycle während der Phase gesetzt wird
+            const dutyAction = this.changeDuty(this.dutyCycle);
+            if (dutyAction && dutyAction.action !== "NoChangeNeeded") {
+                actions.push(dutyAction);
+            }
+        }
+
+        // 3. Verarbeiten der Aktionen, wenn keine Phase aktiv ist
+        if (!isInPhase) {
+            switch (this.action) {
+                case "on":
+                    const onAction = this.turnON();
+                    actions.push(onAction);
+                    break;
+
+                case "off":
+                    const offAction = this.turnOFF();
+                    actions.push(offAction);
+                    break;
+
+                case "unchanged":
+                    return { Light: `${this.switches[0]}`, Action: "NoChange", Status: this.isRunning };
+
+                case "increased":
+                    if (this.hasDuty) {
+                        const newDuty = Math.min(this.maxDuty, this.dutyCycle + this.stepSize);
+                        if (this.dutyCycle !== newDuty) {
+                            console.log(`${this.name}: Increasing DutyCycle to ${newDuty}.`);
+                            actions.push(this.changeDuty(newDuty));
+                        } else {
+                            console.log(`${this.name}: DutyCycle unchanged (${this.dutyCycle}).`);
+                        }
+                    }
+                    break;
+
+                case "reduced":
+                    if (this.hasDuty) {
+                        const newDuty = Math.max(this.minDuty, this.dutyCycle - this.stepSize);
+                        if (this.dutyCycle !== newDuty) {
+                            console.log(`${this.name}: Reducing DutyCycle to ${newDuty}.`);
+                            actions.push(this.changeDuty(newDuty));
+                        } else {
+                            console.log(`${this.name}: DutyCycle unchanged (${this.dutyCycle}).`);
+                        }
+                    }
+                    break;
+
+                case "maximum":
+                    if (this.hasDuty) {
+                        if (this.dutyCycle !== this.maxDuty) {
+                            console.log(`${this.name}: Setting DutyCycle to maximum (${this.maxDuty}).`);
+                            actions.push(this.changeDuty(this.maxDuty));
+                        } else {
+                            console.log(`${this.name}: DutyCycle already at maximum (${this.maxDuty}).`);
+                        }
+                    }
+                    break;
+
+                case "minimum":
+                    if (this.hasDuty) {
+                        if (this.dutyCycle !== this.minDuty) {
+                            console.log(`${this.name}: Setting DutyCycle to minimum (${this.minDuty}).`);
+                            actions.push(this.changeDuty(this.minDuty));
+                        } else {
+                            console.log(`${this.name}: DutyCycle already at minimum (${this.minDuty}).`);
+                        }
+                    }
+                    break;
+
+                default:
+                    console.log(`${this.name}: Unknown action.`);
+                    actions.push({
+                        entity_id: this.switches[0] || "unknown",
+                        action: "UnknownAction",
+                        status: this.isRunning,
+                    });
+            }
+        }
+
+        // 4. Sicherstellen, dass keine wiederholten DutyCycle- oder Voltage-Werte gesendet werden
+        const filteredActions = actions.filter((action) => {
+            if (action.action === "setVoltage") {
+                const isSameDutyCycle = action.dutycycle === this.dutyCycle;
+                const isSameVoltage = action.voltage === this.voltage;
+                if (isSameDutyCycle && isSameVoltage) {
+                    console.log(`${this.name}: Skipping redundant setVoltage action.`);
+                    return false; // Überspringen, wenn Werte gleich sind
+                }
+            }
+            return true; // Alle anderen Aktionen bleiben erhalten
+        });
+
+        // 5. Sicherstellen, dass mindestens eine Aktion zurückgegeben wird
+        if (filteredActions.length === 0) {
+            filteredActions.push({
+                entity_id: this.switches[0] || "unknown",
+                action: "NoActionNeeded",
+                status: this.isRunning,
+            });
+        }
+
+        return filteredActions;
+    }
+
+    
+    changeDuty(newDuty) {
+        if (!this.hasDuty) {
+            return { entity_id: this.switches[0], action: "NoDutyCycle" };
+        }
+
+        const clampedDuty = Math.max(this.minDuty, Math.min(this.maxDuty, newDuty));
+        const newVoltage = parseFloat((clampedDuty / 10).toFixed(1)); // Voltage ist Faktor 10 kleiner als DutyCycle
+
+        console.log(`DEBUG: Current DutyCycle: ${this.dutyCycle}, New DutyCycle: ${clampedDuty}`);
+        console.log(`DEBUG: Current Voltage: ${this.voltage}, New Voltage: ${newVoltage}`);
+
+        // Prüfen, ob der neue Duty-Cycle gesendet werden muss
+        if (this.lastSentDutyCycle === clampedDuty && this.voltage === newVoltage) {
+            console.log(`${this.name}: Duty-Cycle und Voltage unverändert, keine Aktion notwendig.`);
+            return { entity_id: this.switches[0], action: "NoChangeNeeded" };
+        }
+
+        // Aktualisiere den aktuellen und den zuletzt gesendeten Duty-Cycle
+        this.dutyCycle = clampedDuty;
+        this.voltage = newVoltage;
+        this.lastSentDutyCycle = clampedDuty;
+
+        if (this.controlOverVoltage) {
+            const voltageKey = this.sensors.find((key) =>
+                key.toLowerCase().includes("voltage") && !key.toLowerCase().startsWith("sensor.")
+            );
+
+            if (!voltageKey) {
+                console.log(`${this.name}: Kein Voltage-Key in sensors gefunden.`);
+                return { entity_id: null, action: "NoVoltageKey" };
+            }
+
+            console.log(`${this.name}: Voltage-Wert gesendet: ${newVoltage} an ${voltageKey}`);
+            return { entity_id: voltageKey, action: "number", value: newVoltage };
+        }
+
+        console.log(`${this.name}: Duty-Cycle geändert auf ${clampedDuty}%, Voltage: ${this.voltage}V.`);
+        return { entity_id: this.switches[0], action: "dutycycle", dutycycle: clampedDuty };
+    }
+    
+    turnOFF() {
+        const entity = this.switches[0];
+        if (this.isRunning) {
+            this.isRunning = false;
+            console.log(`${this.name}: Gerät wurde ausgeschaltet.`);
+            return { entity_id: entity, action: "off" };
+        } else {
+            console.log(`${this.name}: Gerät ist bereits ausgeschaltet.`);
+            return { entity_id: entity, action: "AlreadyOFF" };
+        }
+    }
+    
+    turnON() {
+        const entity = this.switches[0];
+        if (!this.isRunning) {
+            this.isRunning = true;
+            console.log(`${this.name}: Gerät wurde eingeschaltet.`);
+            return { entity_id: entity, action: "on" };
+        } else {
+            console.log(`${this.name}: Gerät ist bereits eingeschaltet.`);
+            return { entity_id: entity, action: "AlreadyON" };
+        }
+    }
+    
+    
+    
+    
+}
+
+class Light2 extends Device {
+    constructor(name) {
+        super(name, "light");
+        this.hasDuty = false;
+        this.dutyCycle = null;
+        this.minDuty = 20;
+        this.maxDuty = 100;
+        this.voltage = 0.0;
+        this.sunriseMin = 20;
+        this.sunsetMin = 20;
+        this.stepSize = 1; // Schrittweite für Änderungen
+        this.sunRiseTime = "";
+        this.sunSetTime = "";
+        this.lightOnTime = ""; // Startzeit des Lichts
+        this.lightOffTime = ""; // Endzeit des Lichts
+        this.isScheduled = false; // Ob das Licht Zeitpläne berücksichtigt
+        this.controlOverVoltage = false;
+        this.controledOverOGB = true
         this.worksWithCO2 = false;
         this.currentPlantPhase = {
             min: 0,
@@ -2724,6 +3172,13 @@ class Light extends Device {
             return;
         }
 
+        // Prüfe, ob die Pflanzenphase bereits definiert ist
+        if (this.currentPlantPhase.min !== 0 || this.currentPlantPhase.max !== 0) {
+            this.minDuty = this.currentPlantPhase.min;
+            this.maxDuty = this.currentPlantPhase.max;
+            //node.warn(`${this.name}: Duty-Cycle wird basierend auf der Pflanzenphase gesetzt. Min: ${this.minDuty}, Max: ${this.maxDuty}`);
+        }
+
         const voltageKey = Object.keys(this.data).find((key) =>
             key.toLowerCase().includes("voltage") && !key.toLowerCase().startsWith("sensor.")
         );
@@ -2735,6 +3190,7 @@ class Light extends Device {
                 const calculatedDuty = this.voltageFactorToDutyCycle(voltageValue);
                 this.dutyCycle = Math.max(this.minDuty, Math.min(this.maxDuty, calculatedDuty));
                 this.hasDuty = true;
+                node.warn(`${this.name}: Duty-Cycle basierend auf Spannung berechnet: ${this.dutyCycle}`);
             } else {
                 this.hasDuty = false;
             }
@@ -2749,6 +3205,7 @@ class Light extends Device {
                     const clampedValue = Math.max(this.minDuty, Math.min(this.maxDuty, dutyCycleValue));
                     this.dutyCycle = clampedValue;
                     this.hasDuty = true;
+                    node.warn(`${this.name}: Duty-Cycle aus Daten berechnet: ${this.dutyCycle}`);
                 } else {
                     this.hasDuty = false;
                 }
@@ -2791,10 +3248,15 @@ class Light extends Device {
     }
 
     setSunTimes(sunRiseTime, sunSetTime) {
-        if (sunRiseTime || sunSetTime !== "") {
-            this.sunRiseTime = sunRiseTime;
-            this.sunSetTime = sunSetTime;
+        if (this.hasDuty) {
+            if (sunRiseTime || sunSetTime !== "") {
+                this.sunRiseTime = sunRiseTime;
+                this.sunSetTime = sunSetTime;
+            }
+        } else {
+            return { ERROR: "NoDuty" }
         }
+
     }
 
     parseTime(timeString) {
@@ -2802,34 +3264,9 @@ class Light extends Device {
         return hours * 3600 + minutes * 60 + seconds;
     }
 
-    runAction() {
-        if (!this.lightOnTime || !this.lightOffTime) {
-            node.warn(`${this.name}: Lichtzeiten fehlen. Keine Aktion durchgeführt.`);
-            return { Light: `${this.switches[0]}`, Action: "NoLightTimesSet", Status: this.isRunning };
-        }
-
+    checkforStartStop(){
         const currentTime = new Date();
         const currentSeconds = this.parseTime(currentTime.toTimeString().split(" ")[0]);
-
-        const sunRiseSeconds = this.parseTime(this.sunRiseTime);
-        const sunSetSeconds = this.parseTime(this.sunSetTime);
-
-        if (currentSeconds >= sunRiseSeconds && currentSeconds < sunSetSeconds) {
-            const sunriseDuration = sunSetSeconds - sunRiseSeconds;
-            const elapsed = currentSeconds - sunRiseSeconds;
-            const dutyIncrement = (elapsed / sunriseDuration) * (this.maxDuty - this.sunriseMin);
-            const newDuty = Math.min(this.maxDuty, this.sunriseMin + dutyIncrement);
-            this.changeDuty(newDuty);
-        } else if (currentSeconds >= sunSetSeconds || currentSeconds < sunRiseSeconds) {
-            const sunsetDuration = (24 * 3600 - sunSetSeconds) + sunRiseSeconds;
-            const elapsed = currentSeconds >= sunSetSeconds
-                ? currentSeconds - sunSetSeconds
-                : 24 * 3600 - sunSetSeconds + currentSeconds;
-            const dutyDecrement = (elapsed / sunsetDuration) * (this.maxDuty - this.sunsetMin);
-            const newDuty = Math.max(this.sunsetMin, this.maxDuty - dutyDecrement);
-            this.changeDuty(newDuty);
-        }
-
         const startTime = this.parseTime(this.lightOnTime);
         const endTime = this.parseTime(this.lightOffTime);
 
@@ -2841,9 +3278,57 @@ class Light extends Device {
         }
 
         if (isLightOn !== this.isRunning) {
-            this.isRunning = isLightOn;
             this.action = isLightOn ? "on" : "off";
         }
+
+    }
+
+    checkforPhase() {
+        const currentTime = new Date();
+        const currentSeconds = this.parseTime(currentTime.toTimeString().split(" ")[0]);
+
+        const sunRiseSeconds = this.parseTime(this.sunRiseTime);
+        const sunSetSeconds = this.parseTime(this.sunSetTime);
+
+        // Prüfe, ob die aktuelle Zeit innerhalb des Sonnenzeitfensters liegt
+        if (currentSeconds >= sunRiseSeconds && currentSeconds < sunSetSeconds) {
+            const sunriseDuration = sunSetSeconds - sunRiseSeconds;
+            const elapsed = currentSeconds - sunRiseSeconds;
+
+            // Berechne den Duty-Inkrement basierend auf der verstrichenen Zeit
+            const dutyIncrement = (elapsed / sunriseDuration) * (this.maxDuty - this.sunriseMin);
+            const newDuty = Math.min(this.maxDuty, this.sunriseMin + dutyIncrement);
+            node.warn(`${this.inRoomName} Sonnenuntergang New Duty ${newDuty}`)
+            // Aktualisiere den Duty-Cycle entsprechend
+            this.changeDuty(newDuty);
+        } else if (currentSeconds >= sunSetSeconds || currentSeconds < sunRiseSeconds) {
+            const sunsetDuration = (24 * 3600 - sunSetSeconds) + sunRiseSeconds;
+            const elapsed = currentSeconds >= sunSetSeconds
+                ? currentSeconds - sunSetSeconds
+                : 24 * 3600 - sunSetSeconds + currentSeconds;
+
+            // Berechne den Duty-Decrement basierend auf der verstrichenen Zeit
+            const dutyDecrement = (elapsed / sunsetDuration) * (this.maxDuty - this.sunsetMin);
+            const newDuty = Math.max(this.sunsetMin, this.maxDuty - dutyDecrement);
+
+            // Aktualisiere den Duty-Cycle entsprechend
+            node.warn(`${this.inRoomName} Sonnenaufgang New Duty ${newDuty}`)
+            this.changeDuty(newDuty);
+        } else {
+            // Außerhalb des Zeitplans: Zurücksetzen auf normale Min-/Max-Werte der Phase
+            this.changeDuty(this.maxDuty);
+        }
+    }
+
+    runAction() {
+        if (!this.lightOnTime || !this.lightOffTime) {
+            node.warn(`${this.name}: Lichtzeiten fehlen. Keine Aktion durchgeführt.`);
+            return { Light: `${this.switches[0]}`, Action: "NoLightTimesSet", Status: this.isRunning };
+        }
+
+
+        this.checkforStartStop()
+        this.checkforPhase()
 
         switch (this.action) {
             case "on":
@@ -2858,26 +3343,34 @@ class Light extends Device {
             case "increased":
                 if (this.hasDuty && this.isRunning) {
                     const newDuty = Math.min(this.maxDuty, this.dutyCycle + this.stepSize);
-                    return this.changeDuty(newDuty);
+                    if(this.dutyCycle != newDuty){
+                        return this.changeDuty(newDuty);
+                    }
                 }
                 break;
 
             case "reduced":
                 if (this.hasDuty && this.isRunning) {
                     const newDuty = Math.max(this.minDuty, this.dutyCycle - this.stepSize);
-                    return this.changeDuty(newDuty);
+                    if (this.dutyCycle !== newDuty){
+                        return this.changeDuty(newDuty);
+                    }
                 }
                 break;
 
             case "minimum":
                 if (this.hasDuty && this.isRunning) {
-                    return this.changeDuty(this.minDuty);
+                    if(this.dutyCycle !== this.minDuty){
+                        return this.changeDuty(this.minDuty);
+                    }
                 }
                 break;
 
             case "maximum":
                 if (this.hasDuty && this.isRunning) {
-                    return this.changeDuty(this.maxDuty);
+                    if(this.dutyCycle !== this.maxDuty){
+                        return this.changeDuty(this.maxDuty);
+                    }
                 }
                 break;
 
@@ -2893,7 +3386,17 @@ class Light extends Device {
         }
 
         const clampedDuty = Math.max(this.minDuty, Math.min(this.maxDuty, newDuty));
+
+        // Überprüfen, ob sich dutyCycle oder voltage tatsächlich geändert haben
+        const newVoltage = Math.floor(clampedDuty / 10);
+        if (this.dutyCycle === clampedDuty && this.voltage === newVoltage) {
+            //node.warn(`${this.name}: Duty-Cycle und Voltage unverändert.`);
+            return { entity_id: this.switches[0], action: "NoChangeNeeded" };
+        }
+
+        // Aktualisiere dutyCycle und voltage
         this.dutyCycle = clampedDuty;
+        this.voltage = newVoltage;
 
         if (this.controlOverVoltage) {
             const voltageKey = this.sensors.find((key) =>
@@ -2905,13 +3408,14 @@ class Light extends Device {
                 return { entity_id: null, action: "NoVoltageKey" };
             }
 
-            const correctedVoltage = this.dutyCycle / 10;
+            const correctedVoltage = parseFloat((this.dutyCycle / 10).toFixed(1)); // Runde auf eine Dezimalstelle
+
             node.warn(`${this.name}: Voltage-Wert gesendet: ${correctedVoltage} an ${voltageKey}`);
             return { entity_id: voltageKey, action: "number", value: correctedVoltage };
         }
 
         const entity = this.switches[0];
-        node.warn(`${this.name}: Duty-Cycle geändert auf ${clampedDuty}%.`);
+        //node.warn(`${this.name}: Duty-Cycle geändert auf ${clampedDuty}%, Voltage: ${this.voltage}V.`);
         return { entity_id: entity, action: "dutycycle", dutycycle: clampedDuty };
     }
 
@@ -2919,7 +3423,7 @@ class Light extends Device {
         const entity = this.switches[0];
         if (this.isRunning === false) {
             this.isRunning = true;
-            node.warn(`${this.name}: Licht wurde eingeschaltet.`);
+            node.warn(`${this.name}: Licht wurde eingeschaltet in ${this.inRoomName}.`);
             return { entity_id: entity, action: "on" };
         } else {
             return { entity_id: entity, action: "AllReadyON" };
@@ -2931,7 +3435,7 @@ class Light extends Device {
         const entity = this.switches[0];
         if (this.isRunning === true) {
             this.isRunning = false;
-            node.warn(`${this.name}: Licht wurde ausgeschaltet.`);
+            node.warn(`${this.name}: Licht wurde ausgeschaltet in ${this.inRoomName}.`);
             return { entity_id: entity, action: "off" };
         } else {
             return { entity_id: entity, action: "AllReadyOff" };
@@ -3548,4 +4052,3 @@ class Sensor extends Device {
         this.readings = [];
     }
 }
-

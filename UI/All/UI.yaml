@@ -8,20 +8,38 @@ views:
         cards:
           - type: heading
             heading_style: subtitle
-            heading: Räume
+            heading: Auswahl
             badges:
               - type: entity
                 entity: select.ogb_rooms
+          - type: custom:bubble-card
+            entity: select.ogb_rooms
+            button_type: switch
+            show_icon: true
+            force_icon: true
+            show_name: true
+            show_state: true
+            show_attribute: true
+            scrolling_effect: true
+            card_layout: large-2-rows
+            button_action:
+              tap_action:
+                action: toggle
+            tap_action:
+              action: more-info
+            card_type: select
+            icon: mdi:flower-outline
+            sub_button: []
+            name: Rooms
+            grid_options:
+              columns: 12
+              rows: 1
           - type: markdown
             content: >
               Aktueller Raum im Select: **{{ states('select.ogb_rooms') }}**
 
               Verfügbare Räume {% for option in state_attr('select.ogb_rooms',
-              'options') %} - {{ option }} {% endfor %}
-          - type: entities
-            title: Raum auswählen
-            entities:
-              - entity: select.ogb_rooms
+              'options') %} / {{ option }} {% endfor %}
           - show_name: true
             show_icon: true
             type: button
@@ -169,8 +187,14 @@ views:
                               domain: number
                           exclude:
                             - name: '*Weight*'
+                            - name: '*CO2*'
+                            - name: '*Water*'
+                            - name: '*Pump*'
+                            - name: '*Light*'
+                            - name: '*light*'
+                            - name: '*Output*'
                 attributes:
-                  label: Targets
+                  label: VPD Targets
                   icon: mdi:target
             layout_options:
               grid_columns: 4
@@ -194,9 +218,23 @@ views:
                         filter:
                           include:
                             - area: ${ogb_room}
+                              domain: sensor
+                              name: '*Tank*'
+                            - area: ${ogb_room}
+                              domain: switch
+                              name: '*Pump*'
+                            - area: ${ogb_room}
                               domain: number
                           exclude:
                             - name: '*Weight*'
+                            - name: '*CO2*'
+                            - name: '*Leaf*'
+                            - name: '*VPD*'
+                            - name: '*OGB*'
+                            - name: '*Light*'
+                            - name: '*light*'
+                            - name: '*Output*'
+                            - name: '*Switch*'
                 attributes:
                   label: Bewässerung
                   icon: mdi:target
@@ -319,14 +357,33 @@ views:
         show_name: true
         show_state: false
         show_icon: true
-        color: primary
-        name: All Data
+        color: deep-orange
         state_content: name
         tap_action:
           action: navigate
-          navigation_path: /dashboard-opengrowbox/AllData
+          navigation_path: /dashboard-opengrowbox/devices
         entity: select.ogb_rooms
-        icon: mdi:chart-donut
+        icon: mdi:devices
+        name: Devices
+      - type: entity
+        show_name: true
+        show_state: false
+        show_icon: true
+        color: yellow
+        state_content: name
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-opengrowbox/Controlls
+        entity: select.ogb_rooms
+        icon: mdi:controller
+        name: Controlls
+      - type: custom:mushroom-template-badge
+        content: NodeRed
+        icon: mdi:mushroom
+        color: red
+        tap_action:
+          action: navigate
+          navigation_path: /a0d7b954_nodered
   - title: Room
     path: roomdetails
     type: sections
@@ -335,79 +392,6 @@ views:
         cards:
           - type: custom:tabbed-card
             tabs:
-              - card:
-                  type: custom:config-template-card
-                  variables:
-                    ogb_room: states['select.ogb_rooms'].state
-                  entities:
-                    - select.ogb_rooms
-                  card:
-                    type: custom:auto-entities
-                    card:
-                      type: custom:layout-card
-                      layout_type: grid
-                      layout:
-                        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))
-                      cards: []
-                    filter:
-                      include:
-                        - area: ${ogb_room}
-                          domain: sensor
-                          device: '*'
-                          entity_id: '*ogb*'
-                      exclude:
-                        - domain: select
-                        - domain: number
-                        - domain: time
-                    sort:
-                      method: state
-                      reverse: true
-                attributes:
-                  label: OGB-Sens
-                  icon: mdi:data-matrix
-              - card:
-                  type: custom:config-template-card
-                  variables:
-                    ogb_room: states['select.ogb_rooms'].state
-                  entities:
-                    - select.ogb_rooms
-                  card:
-                    type: custom:auto-entities
-                    card:
-                      type: custom:layout-card
-                      layout_type: grid
-                      layout:
-                        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))
-                      cards: []
-                    filter:
-                      include:
-                        - area: ${ogb_room}
-                      exclude:
-                        - name: '*Own*'
-                        - name: '*Control*'
-                        - domain: select
-                        - domain: number
-                        - domain: sensor
-                        - domain: time
-                        - entity_id: '*wifi*'
-                        - entity_id: '*ssid*'
-                        - entity_id: '*mqtt*'
-                        - entity_id: '*ApparentPower*'
-                        - entity_id: '*factor*'
-                        - entity_id: '*restart*'
-                        - entity_id: '*Period*'
-                        - entity_id: '*TotalStartTime*'
-                        - entity_id: '*Model*'
-                        - entity_id: '*factor*'
-                        - entity_id: '*restart*'
-                        - state: unknown
-                        - state: unavailable
-                    sort:
-                      method: state
-                      reverse: true
-                attributes:
-                  label: Aktoren
-                  icon: mdi:switch
               - card:
                   type: custom:config-template-card
                   variables:
@@ -452,8 +436,51 @@ views:
                       method: state
                       reverse: true
                 attributes:
-                  label: Room-Sens
+                  label: Sensors
                   icon: mdi:data-matrix
+              - card:
+                  type: custom:config-template-card
+                  variables:
+                    ogb_room: states['select.ogb_rooms'].state
+                  entities:
+                    - select.ogb_rooms
+                  card:
+                    type: custom:auto-entities
+                    card:
+                      type: custom:layout-card
+                      layout_type: grid
+                      layout:
+                        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))
+                      cards: []
+                    filter:
+                      include:
+                        - area: ${ogb_room}
+                      exclude:
+                        - name: '*Own*'
+                        - name: '*Control*'
+                        - domain: select
+                        - domain: number
+                        - domain: sensor
+                        - domain: time
+                        - entity_id: '*wifi*'
+                        - entity_id: '*ssid*'
+                        - entity_id: '*mqtt*'
+                        - entity_id: '*ApparentPower*'
+                        - entity_id: '*factor*'
+                        - entity_id: '*restart*'
+                        - entity_id: '*Period*'
+                        - entity_id: '*TotalStartTime*'
+                        - entity_id: '*Model*'
+                        - entity_id: '*factor*'
+                        - entity_id: '*restart*'
+                        - state: unknown
+                        - state: unavailable
+                    sort:
+                      method: state
+                      reverse: true
+                attributes:
+                  label: Aktoren
+                  icon: mdi:switch
         column_span: 1
       - type: grid
         cards:
@@ -803,6 +830,30 @@ views:
         name: Hauptmenü
         icon: mdi:cellphone-information
         entity: select.ogb_rooms
+      - type: entity
+        show_name: true
+        show_state: false
+        show_icon: true
+        color: yellow
+        state_content: name
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-opengrowbox/Controlls
+        entity: select.ogb_rooms
+        icon: mdi:controller
+        name: Controlls
+      - type: entity
+        show_name: true
+        show_state: false
+        show_icon: true
+        color: deep-orange
+        state_content: name
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-opengrowbox/devices
+        entity: select.ogb_rooms
+        icon: mdi:devices
+        name: Devices
       - type: custom:mushroom-template-card
         primary: '{{ states(''select.ogb_rooms'') }}'
         icon: mdi:flower
@@ -815,312 +866,596 @@ views:
         hold_action:
           action: none
         secondary: ''
-      - type: entity
-        show_name: true
-        show_state: false
-        show_icon: true
-        color: primary
-        name: All Data
-        state_content: name
-        tap_action:
-          action: navigate
-          navigation_path: /dashboard-opengrowbox/AllData
-        entity: select.ogb_rooms
-        icon: mdi:chart-donut
     max_columns: 4
     icon: ''
     cards: []
     subview: false
   - type: sections
-    path: AllData
+    path: Controlls
+    sections:
+      - type: grid
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 4
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - area: '*'
+                  domain: select
+                  options:
+                    type: custom:bubble-card
+                    card_type: select
+                    button_type: select
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:select-arrow-down
+                    show_icon: false
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(115, 102, 153,0.8) !important;
+                      }
+                      .bubble-range-fill { 
+                        background: rgba(153, 204, 255,0.5) !important;
+                        opacity: 1 !important;
+                      }
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
+            grid_options:
+              columns: 48
+              rows: 1
+        column_span: 4
     max_columns: 4
-    dense_section_placement: true
+    title: Controlls
+    cards: []
+    badges:
+      - type: entity
+        show_name: true
+        show_state: false
+        show_icon: true
+        color: primary
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-opengrowbox/select
+        name: Hauptmenü
+        icon: mdi:cellphone-information
+        entity: select.ogb_rooms
+      - type: entity
+        show_name: true
+        show_state: false
+        show_icon: true
+        color: green
+        state_content: name
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-opengrowbox/roomdetails
+        entity: select.ogb_rooms
+        icon: mdi:flower-tulip-outline
+        name: To Room
+      - type: entity
+        show_name: true
+        show_state: false
+        show_icon: true
+        color: deep-orange
+        state_content: name
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-opengrowbox/devices
+        entity: select.ogb_rooms
+        icon: mdi:devices
+        name: Devices
+  - type: sections
+    max_columns: 4
+    title: Devices
+    path: devices
     sections:
       - type: grid
         cards:
           - type: heading
-            heading: VPDS
+            heading: Exhausts
             heading_style: title
           - type: custom:auto-entities
             card:
-              type: vertical-stack
+              type: grid
+              columns: 1
+              square: false
             card_param: cards
             filter:
               include:
-                - domain: sensor
-                  name: '*VPD*'
+                - domain: fan
+                  state: 'on'
                   options:
-                    type: custom:mini-graph-card
-                    name: 'Sensor: this.entity_id'
-                    entities:
-                      - this.entity_id
-                    hours_to_show: 24
-                    points_per_hour: 30
-                    group_by: minute
-                    align_header: center
-                    align_state: center
-                    show:
-                      name: true
-                      legend: true
-                      icon: false
-                      labels: true
-                    color_thresholds:
-                      - value: 0
-                        color: '#0007DC'
-                      - value: 0.4
-                        color: '#10BCDF'
-                      - value: 0.8
-                        color: '#22CF9D'
-                      - value: 1
-                        color: '#29DF10'
-                      - value: 1.25
-                        color: '#C3DF10'
-                      - value: 1.5
-                        color: '#DB8800'
-                      - value: 1.61
-                        color: '#F80707'
-              exclude:
-                - entity_id: '*wish*'
-                - entity_id: '*ambient*'
-                - entity_id: '*outsite*'
-                - state: unknown
-                - state: unavailable
-                - state: undefined
-                - state: NaN
-                - state: '0'
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: slider
+                    show_attribute: false
+                    show_last_changed: true
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(255, 128, 0,0.5) !important;
+                        color: black !important;
+                      }
+                      .bubble-range-fill { 
+                        background: rgba(255, 128, 0,0.9) !important;
+                        opacity: 1 !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
           - type: heading
-            heading: 'Humiditys  '
+            heading: Vents
             heading_style: title
-            layout_options:
-              grid_columns: 8
-              grid_rows: 1
           - type: custom:auto-entities
             card:
-              type: vertical-stack
+              type: grid
+              columns: 1
+              square: false
             card_param: cards
             filter:
               include:
-                - domain: sensor
-                  name: '*'
-                  attributes:
-                    device_class: humidity
+                - domain: light
+                  state: 'on'
                   options:
-                    type: custom:mini-graph-card
-                    name: 'Sensor: this.entity_id'
-                    entities:
-                      - this.entity_id
-                    hours_to_show: 24
-                    points_per_hour: 30
-                    group_by: minute
-                    align_header: center
-                    align_state: center
-                    show:
-                      name: true
-                      legend: true
-                      icon: false
-                      labels: true
-                    color_thresholds:
-                      - value: 5
-                        color: '#66ffff'
-                      - value: 18
-                        color: '#66ffff'
-                      - value: 19
-                        color: '#80ffaa'
-                      - value: 23
-                        color: '#80ffaa'
-                      - value: 24
-                        color: '#00ff55'
-                      - value: 28
-                        color: '#00ff55'
-                      - value: 29
-                        color: '#ff0000'
-                      - value: 32
-                        color: '#ff0000'
-                      - value: 35
-                        color: '#b3ffff'
-                      - value: 40
-                        color: '#b3ffff'
-                      - value: 45
-                        color: '#80ffd4'
-                      - value: 50
-                        color: '#80ffd4'
-                      - value: 55
-                        color: '#66ff99'
-                      - value: 60
-                        color: '#66ff99'
-                      - value: 65
-                        color: '#cc33ff'
-                      - value: 70
-                        color: '#cc33ff'
-                      - value: 75
-                        color: '#ff0000'
-                      - value: 80
-                        color: '#ff0000'
-              exclude:
-                - entity_id: '*wish*'
-                - entity_id: '*Ambient*'
-                - entity_id: '*ambient*'
-                - entity_id: '*avg*'
-                - entity_id: '*outsite*'
-                - state: unknown
-                - state: unavailable
-                - state: undefined
-                - state: NaN
-                - state: '0'
-        column_span: 1
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: slider
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:fan
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(255, 77, 77,0.5) !important;
+                        color: black !important;
+                      }
+                      .bubble-range-fill { 
+                        background: rgba(255, 0, 0,0.9) !important;
+                        opacity: 1 !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
+          - type: heading
+            heading: Climate
+            heading_style: title
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: climate
+                  options:
+                    type: custom:bubble-card
+                    card_type: climate
+                    show_attribute: true
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(153, 153, 255,0.8) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+                    sub_button:
+                      - name: HVAC modes menu
+                        select_attribute: hvac_modes
+                        show_arrow: false
+                        state_background: false
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
+          - type: heading
+            heading_style: title
+            heading: Hum
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: select
+                  entity_id: '*humidifier*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: select
+                    button_type: select
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:select-color
+                    show_state: true
+                    styles: |
+                      .bubble-select-card-container {
+                        background: rgba(51,153,255,0.7) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+                - domain: switch
+                  entity_id: '*humidifier*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(51, 187, 255,0.7) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+                - domain: humidifier
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(51, 187, 255,0.7) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+              exclude: null
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
+          - type: heading
+            heading_style: title
+            heading: DeHum
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: switch
+                  entity_id: '*entfeucht*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(204, 0, 0,0.8) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+                - domain: switch
+                  entity_id: '*dehumidi*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(204, 0, 0,0.8) !important;
+                      }
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
+          - type: heading
+            heading_style: title
+            heading: Cooler
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: switch
+                  entity_id: '*cool*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(0, 204, 204,0.8) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+                - domain: switch
+                  entity_id: '*klima*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(0, 204, 204,0.8) !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
+          - type: heading
+            heading_style: title
+            heading: Heater
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: switch
+                  entity_id: '*heater*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(255, 80, 80,0.8) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+                - domain: switch
+                  entity_id: '*heiz*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(255, 80, 80,0.8) !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
       - type: grid
         cards:
           - type: heading
-            heading: Temperaturen
             heading_style: title
+            heading: Light
+          - type: heading
+            heading_style: subtitle
+            heading: LightSwitches
           - type: custom:auto-entities
             card:
-              type: vertical-stack
+              type: grid
+              columns: 1
+              square: false
             card_param: cards
             filter:
               include:
-                - domain: sensor
-                  name: '*'
-                  attributes:
-                    device_class: temperature
+                - area: '*'
+                  domain: switch
+                  name: '**'
+                  entity_id: '*light*'
                   options:
-                    type: custom:mini-graph-card
-                    name: 'Sensor: this.entity_id'
-                    entities:
-                      - this.entity_id
-                    hours_to_show: 24
-                    points_per_hour: 30
-                    group_by: minute
-                    align_header: center
-                    align_state: center
-                    show:
-                      name: true
-                      legend: true
-                      icon: false
-                      labels: true
-                    color_thresholds:
-                      - value: 5
-                        color: '#66ffff'
-                      - value: 18
-                        color: '#66ffff'
-                      - value: 19
-                        color: '#80ffaa'
-                      - value: 23
-                        color: '#80ffaa'
-                      - value: 24
-                        color: '#00ff55'
-                      - value: 28
-                        color: '#00ff55'
-                      - value: 29
-                        color: '#ff0000'
-                      - value: 32
-                        color: '#ff0000'
-                      - value: 35
-                        color: '#b3ffff'
-                      - value: 40
-                        color: '#b3ffff'
-                      - value: 45
-                        color: '#80ffd4'
-                      - value: 50
-                        color: '#80ffd4'
-                      - value: 55
-                        color: '#66ff99'
-                      - value: 60
-                        color: '#66ff99'
-                      - value: 65
-                        color: '#cc33ff'
-                      - value: 70
-                        color: '#cc33ff'
-                      - value: 75
-                        color: '#ff0000'
-                      - value: 80
-                        color: '#ff0000'
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:lightbulb-cfl
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(204, 51, 255,0.85) !important;
+                        color: black !important;
+                      }
+                      .bubble-range-fill { 
+                        background: rgba(204, 51, 255, 51) !important;
+                        opacity: 1 !important;
+                      }
               exclude:
-                - entity_id: '*wish*'
-                - entity_id: '*Ambient*'
-                - entity_id: '*ambient*'
-                - entity_id: '*avg*'
-                - entity_id: '*outsite*'
-                - state: unknown
-                - state: unavailable
-                - state: undefined
-                - state: NaN
-                - state: '0'
-      - type: grid
-        cards:
+                - domain: fan
+                - domain: humdifier
+                - entity_id: '*vent*'
+                - entity_id: '*ogb*'
+                - entity_id: sensor*
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
           - type: heading
-            heading: ALL
-            heading_style: title
+            heading_style: subtitle
+            heading: LightSetters
           - type: custom:auto-entities
             card:
-              type: vertical-stack
+              type: grid
+              columns: 1
+              square: false
             card_param: cards
             filter:
               include:
-                - domain: sensor
-                  name: '*'
+                - area: '*'
+                  name: '**'
+                  domain: number
+                  entity_id: '*light*'
                   options:
-                    type: custom:mini-graph-card
-                    name: 'Sensor: this.entity_id'
-                    entities:
-                      - this.entity_id
-                    hours_to_show: 24
-                    points_per_hour: 30
-                    group_by: minute
-                    align_header: center
-                    align_state: center
-                    show:
-                      name: true
-                      legend: true
-                      icon: false
-                      labels: true
-                    color_thresholds:
-                      - value: 5
-                        color: '#66ffff'
-                      - value: 18
-                        color: '#66ffff'
-                      - value: 19
-                        color: '#80ffaa'
-                      - value: 23
-                        color: '#80ffaa'
-                      - value: 24
-                        color: '#00ff55'
-                      - value: 28
-                        color: '#00ff55'
-                      - value: 29
-                        color: '#ff0000'
-                      - value: 32
-                        color: '#ff0000'
-                      - value: 35
-                        color: '#b3ffff'
-                      - value: 40
-                        color: '#b3ffff'
-                      - value: 45
-                        color: '#80ffd4'
-                      - value: 50
-                        color: '#80ffd4'
-                      - value: 55
-                        color: '#66ff99'
-                      - value: 60
-                        color: '#66ff99'
-                      - value: 65
-                        color: '#cc33ff'
-                      - value: 70
-                        color: '#cc33ff'
-                      - value: 75
-                        color: '#ff0000'
-                      - value: 80
-                        color: '#ff0000'
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: slider
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:select-color
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(204, 51, 255,0.5) !important;
+                        color: black !important;
+                      }
+                      .bubble-range-fill { 
+                        background: rgba(255, 255, 255) !important;
+                        opacity: 1 !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
               exclude:
-                - state: unknown
-                - state: unavailable
-                - state: undefined
-                - state: NaN
-                - state: '0'
+                - domain: fan
+                - domain: humdifier
+                - entity_id: '*vent*'
+                - entity_id: '*ogb*'
+                - entity_id: sensor*
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
       - type: grid
         cards:
           - type: heading
-            heading: Selects
+            heading_style: title
+            heading: Pumps
+          - type: heading
+            heading_style: subtitle
+            heading: PumpSwitches
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - name: '*Pump*'
+                  domain: switch
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:water-pump
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(153, 230, 255,0.7) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
+          - type: heading
+            heading_style: subtitle
+            heading: Pump Setters
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - name: '*Pump*'
+                  domain: number
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: slider
+                    show_attribute: false
+                    show_last_changed: true
+                    show_state: true
+                    icon: mdi:select-color
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(51,153,255,0.7) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+              exclude:
+                - entity_id: '*ogb*'
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
+          - type: heading
+            heading: CO2 Device
             heading_style: title
     badges:
       - type: entity
@@ -1134,6 +1469,27 @@ views:
         name: Hauptmenü
         icon: mdi:cellphone-information
         entity: select.ogb_rooms
-    title: AllData
-    cards: []
-    subview: false
+      - type: entity
+        show_name: true
+        show_state: false
+        show_icon: true
+        color: green
+        state_content: name
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-opengrowbox/roomdetails
+        entity: select.ogb_rooms
+        icon: mdi:flower-tulip-outline
+        name: To Room
+      - type: entity
+        show_name: true
+        show_state: false
+        show_icon: true
+        color: yellow
+        state_content: name
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-opengrowbox/Controlls
+        entity: select.ogb_rooms
+        icon: mdi:controller
+        name: Controlls
