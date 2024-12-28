@@ -50,23 +50,30 @@ ADDONS="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setup
 NODEREDCONF="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/n-r-options.json"
 EDITORCONF="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/editor-options.json"
 
-
 ALLFLOWS="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/NodeRed/Core/All/All-Flows.json"
+
 ## UI 
 OPG_DASHBOARD="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/lovelace_dashboards.json"
 DASHBOARDVIEW="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/lovelace.dashboard_opengrowview.json"
 
 
-
 ## ADDONS 
+OGB="https://github.com/OpenGrow-Box/OpenGrowBox-HA/archive/refs/tags/v1.1.zip"
+OGB_EXHAUST="https://github.com/OpenGrow-Box/OpenGrowBox-Exhaust/archive/refs/tags/main.zip"
+
 NRCOMPANION="https://github.com/zachowj/hass-node-red/archive/refs/heads/main.zip"
 MINIGRAPH="https://github.com/kalkih/mini-graph-card/releases/download/v0.12.1/mini-graph-card-bundle.js"
-VPDCHART="https://raw.githubusercontent.com/OpenGrow-Box/vpdchart-card/master/vpdchart-card.js"
+
+
 MUSHROOM="https://github.com/piitaya/lovelace-mushroom/releases/download/v3.6.2/mushroom.js"
 LLRESSOURCE="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/lovelace_resources.json"
+
+VPDCHART="https://raw.githubusercontent.com/OpenGrow-Box/vpdchart-card/master/vpdchart-card.js"
+
+# New
 VERTICALCARD="https://github.com/ofekashery/vertical-stack-in-card/releases/download/v1.0.1/vertical-stack-in-card.js"
 CUSTOMTEMPPLATE="https://github.com/iantrich/config-template-card/releases/download/1.3.6/config-template-card.js"
-TAPPEDCARD=""
+TAPPEDCARD="https://github.com/kinghat/tabbed-card/releases/download/v0.3.2/tabbed-card.js"
 AUTOENTIES=""
 
 function systemPrep() {
@@ -152,7 +159,7 @@ function OpenGrowBoxSetup() {
     sudo wget -O /usr/share/hassio/addons/data/a0d7b954_nodered/options.json "$NODEREDCONF"
     sudo wget -O /usr/share/hassio/addons/data/core_configurator/options.json "$EDITORCONF"
 
-    sudo wget -O /usr/share/hassio/homeassistant/airCtrlSensor.yaml  "$RUCKEHACCONF"
+    #sudo wget -O /usr/share/hassio/homeassistant/airCtrlSensor.yaml  "$RUCKEHACCONF"
     sudo wget -O /usr/share/hassio/homeassistant/configuration.yaml "$MAINCONF"
     sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace.dashboard_opengrowview "$DASHBOARDVIEW"
     sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace_dashboards "$OPG_DASHBOARD" 
@@ -164,6 +171,22 @@ function OpenGrowBoxSetup() {
     sudo unzip nodered.zip
     sudo mv hass-node-red-main/custom_components/nodered/* .
     sudo rm -rf hass-node-red-main nodered.zip
+
+    # OGB_HA SETUP
+    echo "Instllation OGB HA-Integrations"
+    cd /usr/share/hassio/homeassistant/custom_components && sudo mkdir opengrowbox && cd opengrowbox
+    sudo wget "$OGB" -o ogb.zip
+    sudo unzip ogb.zip
+    sudo mv OpenGrowBox-HA-*/custom_components/opengrowbox/* .
+    sudo rm -rf  OpenGrowBox-HA-* ogb.zip
+
+    # OGB_Exhaust HA SETUP
+    echo "Instllation OGB Exhausts HA-Integrations"
+    cd /usr/share/hassio/homeassistant/custom_components && sudo mkdir ogb_exhaust && cd ogb_exhaust
+    sudo wget "$OGB_EXHAUST" -o ogbexhaust.zip
+    sudo unzip ogb.zip
+    sudo mv OpenGrowBox-Exhaust-main/custom_components/ogb_exhaust/* .
+    sudo rm -rf OpenGrowBox-Exhaust-main ogbexhaust.zip
 
     # Setup mini-Graph
     sudo mkdir -p /usr/share/hassio/homeassistant/www/
@@ -207,6 +230,9 @@ ___                 ___                    ___
 | | || . \/ ._>| ' || <_/\| '_>/ . \| | | || . \/ . \\ \/
 `___'|  _/\___.|_|_|`____/|_|  \___/|__/_/ |___/\___//\_\
      |_|                                                 
+
+Version 2
+
 EOF
 
 echo "OpenGrowBox Install Script"

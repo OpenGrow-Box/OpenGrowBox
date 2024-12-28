@@ -35,9 +35,9 @@
         "aliases": [],
         "floor_id": null,
         "icon": null,
-        "id": "growroom",
+        "id": "ambient",
         "labels": [],
-        "name": "GrowRoom",
+        "name": "Ambient",
         "picture": null
       }
     ]
