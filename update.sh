@@ -56,7 +56,7 @@ VPDCHART="https://raw.githubusercontent.com/OpenGrow-Box/vpdchart-card/master/vp
 VERTICALCARD="https://github.com/ofekashery/vertical-stack-in-card/releases/download/v1.0.1/vertical-stack-in-card.js"
 CUSTOMTEMPPLATE="https://github.com/iantrich/config-template-card/releases/download/1.3.6/config-template-card.js"
 TAPPEDCARD="https://github.com/kinghat/tabbed-card/releases/download/v0.3.2/tabbed-card.js"
-AUTOENTIES="https://raw.githubusercontent.com/thomasloven/lovelace-auto-entities/refs/heads/master/auto-entities.js"
+AUTOENTIES="https://github.com/thomasloven/lovelace-auto-entities/archive/refs/tags/v1.13.0.zip"
 BUBBLECARD="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js"
 BUBBLEFIX="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-pop-up-fix.js"
 
@@ -115,7 +115,7 @@ function OpenGrowBoxUpdate() {
     sudo wget "$TAPPEDCARD" -O "tabbed-card.js"
 
     # Setup Auto Entities
-    sudo wget "$AUTOENTIES" -O "auto-entities.js"
+    sudo wget "$AUTOENTIES" -O "auto-entities.zip" && sudo unzip auto-entities.zip && sudo rm auto-entities.zip  && cd lovelace-auto-entities-*
 
     # Setup Bubble Card
     sudo wget "$BUBBLECARD" -O "bubble-card.js"
