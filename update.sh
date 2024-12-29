@@ -36,7 +36,7 @@ ALLFLOWS="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/NodeRe
 
 ## UI 
 OPG_DASHBOARD="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/lovelace_dashboards.json"
-DASHBOARDVIEW="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/UI/setupFiles/lovelace.dashboard_opengrowview.json"
+DASHBOARDVIEW="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/refs/heads/main/UI/setupFiles/lovelace.dashboard_opengrowbox.json"
 
 
 ## ADDONS 
@@ -71,20 +71,9 @@ function HaRestart(){
 
 function OpenGrowBoxUpdate() {
     sudo wget -O /usr/share/hassio/addon_configs/a0d7b954_nodered/flows.json "$ALLFLOWS"
-
-    #sudo wget -O /usr/share/hassio/homeassistant/airCtrlSensor.yaml  "$RUCKEHACCONF"
-    sudo wget -O /usr/share/hassio/homeassistant/configuration.yaml "$MAINCONF"
     sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace.dashboard_opengrowbox "$DASHBOARDVIEW"
     sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace_dashboards "$OPG_DASHBOARD" 
     
-    # Node-Red-Companion-Setup
-    echo "Setup Node-Red-Companion-Integration"
-    cd /usr/share/hassio/homeassistant/custom_components && sudo mkdir nodered && cd nodered
-    sudo wget "$NRCOMPANION" -O nodered.zip
-    sudo unzip nodered.zip
-    sudo mv hass-node-red-main/custom_components/nodered/* .
-    sudo rm -rf hass-node-red-main nodered.zip
-
     # OGB_HA SETUP
     echo "Instllation OGB HA-Integrations"
     cd /usr/share/hassio/homeassistant/custom_components && sudo mkdir opengrowbox && cd opengrowbox
