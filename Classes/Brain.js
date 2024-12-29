@@ -99,7 +99,8 @@ class OpenGrowBox {
             targeted: 0.0,
             targetedTolerance: 0.0,
             diffTargeted: null,
-            ecotarget: [0.55, 0.88]
+            ecotarget: [0.55, 0.88],
+            lightControl:false,
         };
 
         this.watering = {
@@ -231,7 +232,7 @@ class OpenGrowBox {
                 heater: "increased",
                 cooler: "reduced",
                 ventilation: "increased",
-                light: "increased",
+                light: this.vpd.lightControl ? "increased" : "unchanged",
                 co2: "increased",
                 climate: {
                     cool: "reduced",
@@ -246,7 +247,7 @@ class OpenGrowBox {
                 heater: "reduced",
                 cooler: "increased",
                 ventilation: "reduced",
-                light: "reduced",
+                light: this.vpd.lightControl ? "reduced" : "unchanged",
                 co2: "reduced",
                 climate: {
                     cool: "increased",
@@ -598,6 +599,17 @@ class OpenGrowBox {
         return this.helperYesTrue(this.isPlantDay.lightbyOGBControl)
     }
 
+    setVPDLightControl(lightControl){
+        if (lightControl !== this.vpd.lightControl) {
+            this.vpd.lightControl = this.helperYesTrue(lightControl)
+        }
+        return
+    }
+
+    getVPDLightControl(){
+        return this.helperYesTrue(this.vpd.lightControl)  
+    }
+
     // Setze lichtzeiten wenn Kontrolle AKTIV 
     setLightTimes(startTime = "", endTime = "") {
         if (!this.isPlantDay.lightbyOGBControl) return
@@ -686,7 +698,6 @@ class OpenGrowBox {
         const [hours, minutes, seconds = 0] = timeString.split(":").map(Number);
         return hours * 3600 + minutes * 60 + seconds;
     }
-
 
     /// DEVCIES ******************************
     // Methode zum Abrufen der passenden Geräteklasse
@@ -1103,12 +1114,6 @@ class OpenGrowBox {
             action = this.actions.Increased;
         } else if (currentVPD > perfectVPD + tolerance) {
             action = this.actions.Reduced;
-        }else{
-            return {
-                inMode: "Unchanged",
-                tentMode: "Unchanged",
-                action: this.actions.Unchanged,
-            }
         }
 
         return {
@@ -1137,28 +1142,21 @@ class OpenGrowBox {
     // MITTEL wert ziel aus range vpd werten
     perfectionAdjustments(currentVPD = this.vpd.current, perfectVPD = this.vpd.perfection, tolerance = this.vpd.perfectTolerance) {
         let action;
-        let isUnchanged = false; // Variable, um festzulegen, ob der VPD im tolerierten Bereich liegt
         let vpdDiffPercent = parseFloat((((currentVPD - perfectVPD) / perfectVPD) * 100).toFixed(2));
+        let isUnchanged = false; 
 
-        // Wenn der aktuelle VPD unterhalb des Toleranzbereichs liegt
         if (currentVPD < perfectVPD - tolerance) {
-            action = this.actions.Increased;  // Wenn zu niedrig, soll erhöht werden
+            action = this.actions.Increased;
             isUnchanged = false;
-        } 
-        // Wenn der aktuelle VPD über dem Toleranzbereich liegt
-        else if (currentVPD > perfectVPD + tolerance) {
-            action = this.actions.Reduced;  // Wenn zu hoch, soll reduziert werden
-            isUnchanged = false;
-        } 
-        // Wenn der aktuelle VPD im tolerierten Bereich liegt, bleibt er unverändert
-        else {
-            isUnchanged = true;
+        } else if (currentVPD > perfectVPD + tolerance) {
+            action = this.actions.Reduced;
+            isUnchanged = false;        
         }
 
         return {
             tentName: this.tentName,
             tentMode: isUnchanged ? "Unchanged" : this.tentMode, // Wenn unverändert, setzen wir "Unchanged"
-            inMode: "VPD Perfection", // Modus bleibt immer VPD Perfection
+            inMode: "VPD Perfection",
             currentVPD: currentVPD,
             targetVPD: perfectVPD,
             vpdDiffPercent: vpdDiffPercent,
@@ -1177,7 +1175,6 @@ class OpenGrowBox {
             actions: action
         };
     }
-
 
     // Jumper zwishen min und max werten.
     rangeAdjustments(currentVPD = this.vpd.current, targetVPDRange = this.vpd.range, tolerance = this.vpd.rangeTolerance) {
@@ -1223,14 +1220,8 @@ class OpenGrowBox {
             action = this.actions.Increased;
         } else if (currentVPD > targetVPD + tolerance) {
             action = this.actions.Reduced;
-        } else {
-            return {
-                inMode: "Unchanged",
-                tentMode: "Unchanged",
-                action: this.actions.Unchanged,
-            }
         }
-
+        
         return {
             tentName: this.tentName,
             tentMode: this.tentMode,
@@ -1556,13 +1547,15 @@ class OpenGrowBox {
     }
 
     /// ACTIONS ******************************
-    selectAction(context) {
+    selectAction() {
         let preparedDevices = []; // Speicher für Geräteaktionen
         let actionData;
         let limitAdjustments
-
+        
         // Prüfen, ob der Zustand seit der letzten Aktion unverändert ist
-        if (this.checkLastState()) {
+        if (this.checkIfActionNeeded()) {
+            this.needchange = true;
+        } else {
             this.needchange = false;
             actionData = {
                 tentName: this.tentName,
@@ -1581,10 +1574,7 @@ class OpenGrowBox {
                 actions: this.actions.Unchanged,
                 deviceActions: preparedDevices,
             };
-        } else {
-            this.needchange = true;
         }
-
 
         // Modusabhängige Logik
         if (this.needchange) {
@@ -1626,24 +1616,19 @@ class OpenGrowBox {
                 default:
                     throw new Error("Unknown mode: " + this.tentMode);
             }
-
             if (this.isPlantDay.lightOn === false && this.isPlantDay.nightVPDHold === false) {
                 actionData = this.inDontCareMode()
             }
 
-        }
-
-        if (this.needchange) {
+            // Vorzeitige Anpassungen
             limitAdjustments = this.checkLimits();
         }
-        // Vorzeitige Anpassungen
 
         // Kombiniere alle Aktionen
         const finalActions = {
             ...actionData.actions || null,
             ...limitAdjustments || null,
         };
-        //let absolutActions = this.evaluateDeviceEnvironment(finalActions)
 
         this.devices.forEach((device) => {
 
@@ -1654,12 +1639,12 @@ class OpenGrowBox {
 
                 device = device.prepareAction(finalActions);
 
-                let actions = device.runAction(context)
+                let actions = device.runAction()
 
                 //node.warn(`FinalAction: ${JSON.stringify(actions, null, 2)}`);
 
                 preparedDevices.push(actions)
-                //preparedDevices.push(device)
+
             } else {
                 // Falls Gerät nicht korrekt initialisiert ist, Warnung ausgeben
                 node.warn(`Device ${device?.name || "undefined"} konnte nicht verarbeitet werden.`);
@@ -1669,14 +1654,14 @@ class OpenGrowBox {
 
         if(this.needchange){
             // Aktion speichern
-            this.dataSetter({
+        this.dataSetter({
                 ...actionData || null,
                 actions: finalActions || null,
                 devices: this.devices || null,
                 deviceActions: preparedDevices || null,
             });
+            // Rückgabe der Aktion mit den angepassten Geräten
         }
-
 
         // Rückgabe der Aktion mit den angepassten Geräten
         return {
@@ -1684,7 +1669,18 @@ class OpenGrowBox {
             actions: finalActions || null,
             devices: this.devices || null,
             deviceActions: preparedDevices || null,
+            Temps: {
+                Temperature: this.tentData.temperature,
+                MinTemperature: this.tentData.minTemp,
+                MaxTemperature: this.tentData.maxTemp,
+            },
+            Humidities: {
+                Humidity: this.tentData.humidity,
+                MinHumidity: this.tentData.minHumidity,
+                MaxHumidity: this.tentData.maxHumidity,
+                },
         };
+
     }
 
     checkLimits() {
@@ -1729,14 +1725,6 @@ class OpenGrowBox {
             humDeviation = (this.tentData.humidity - this.tentData.minHumidity) * humidityWeight;
         }
 
-
-        // **Initialisiere climate innerhalb von adjustments**
-        adjustments.climate = {
-            cool: "unchanged",
-            heat: "unchanged",
-            dry: "unchanged",
-        };
-
         // **1. Hohe Temperatur + Hohe Feuchtigkeit**
         if (tempDeviation > 0 && humDeviation > 0 && this.isPlantDay.lightOn) {
             adjustments.dehumidifier = "increased";
@@ -1744,7 +1732,7 @@ class OpenGrowBox {
             adjustments.exhaust = "increased";
             adjustments.climate.cool = "increased";
             adjustments.ventilation = "increased";
-
+            adjustments.light = this.vpd.lightControl ? "reduced" : "unchanged"
             // Ambient-Integration
             const ambientInfluence = this.analyzeAmbientInfluence();
             adjustments = { ...adjustments, ...ambientInfluence };
@@ -1758,6 +1746,7 @@ class OpenGrowBox {
             adjustments.exhaust = "increased";
             adjustments.ventilation = "increased";
             adjustments.climate.cool = "increased";
+            adjustments.light = this.vpd.lightControl ? "reduced" : "unchanged"
 
             // Ambient-Integration
             const ambientInfluence = this.analyzeAmbientInfluence();
@@ -1772,6 +1761,7 @@ class OpenGrowBox {
             adjustments.exhaust = "increased";
             adjustments.climate.dry = "increased";
             adjustments.ventilation = "increased";
+            adjustments.light = this.vpd.lightControl ? "increased" : "unchanged"
 
             // Ambient-Integration
             const ambientInfluence = this.analyzeAmbientInfluence();
@@ -1786,7 +1776,8 @@ class OpenGrowBox {
             adjustments.exhaust = "reduced";
             adjustments.climate.heat = "increased";
             adjustments.ventilation = "reduced";
-            
+            adjustments.light = this.vpd.lightControl ? "increased" : "unchanged"
+
             // Ambient-Integration
             const ambientInfluence = this.analyzeAmbientInfluence();
             adjustments = { ...adjustments, ...ambientInfluence };
@@ -1800,7 +1791,7 @@ class OpenGrowBox {
             adjustments.ventilation = "increased";
             adjustments.cooler = "increased";
             adjustments.climate.cool = "increased";
-            adjustments.light = "reduced";
+            adjustments.light = this.vpd.lightControl ? "reduced" : "unchanged"
 
             // Ambient-Integration
             const ambientInfluence = this.analyzeAmbientInfluence();
@@ -1815,8 +1806,7 @@ class OpenGrowBox {
             adjustments.exhaust = "reduced";
             adjustments.ventilation = "increased";
             adjustments.climate.heat = "increased";
-            adjustments.light = "maximum"
-
+            adjustments.light = this.vpd.lightControl ? "increased" : "unchanged"
             
             // Ambient-Integration
             const ambientInfluence = this.analyzeAmbientInfluence();
@@ -1828,7 +1818,7 @@ class OpenGrowBox {
 
         // **7. Lichtsteuerung basierend auf Temperatur**
         if (this.tentData.temperature > this.tentData.maxTemp && this.isPlantDay.lightOn) {
-            adjustments.light = "reduced";
+            adjustments.light = this.vpd.lightControl ? "reduced" : "unchanged"
             node.warn(`${this.tentName} Lichtleistung reduziert aufgrund hoher Temperatur`);
             
             // Ambient-Integration
@@ -1838,13 +1828,13 @@ class OpenGrowBox {
 
         // **8. CO₂-Management**
         if (this.tentData.co2Level < 400 && this.isPlantDay.lightOn) {
-            adjustments.light = "increased"
+            adjustments.light = this.vpd.lightControl ? "increased" : "unchanged"
             adjustments.co2 = "increased";
             adjustments.exhaust = "minimum";
             node.warn("CO₂-Level zu niedrig, CO₂-Zufuhr erhöht");
 
         } else if (this.tentData.co2Level > 1200 && this.isPlantDay.lightOn) {
-            adjustments.light = "increased"
+            adjustments.light = this.vpd.lightControl ? "increased" : "unchanged"
             adjustments.co2 = "reduced";
             adjustments.exhaust = "increased";
             node.warn(`${this.tentName} CO₂-Level zu hoch, Abluft erhöht`);
@@ -1881,7 +1871,6 @@ class OpenGrowBox {
 
         return adjustments;
     }
-
 
     checkLimits2() {
         let adjustments = {};
@@ -2115,10 +2104,9 @@ class OpenGrowBox {
         // Definiere eine Schwelle für Änderungen
         const vpdThreshold = 0.005;
 
-        if (this.tentMode === "Unchanged" || this.tentMode === "Disabled" || this.tentMode === "I DONT CARE MODE") {
+        if (data.tentMode === "Unchanged" || this.tentMode === "Unchanged" || this.tentMode === "Disabled" || this.tentMode === "I DONT CARE MODE") {
             return;
         }
-
 
         // Filter für aktive oder relevante Geräte
         // Filter für aktive oder relevante Geräte
@@ -2126,13 +2114,13 @@ class OpenGrowBox {
             (device) => (device.switches.length > 0) || device.isRunning
         );
 
-
         // Erstelle das Datenobjekt
         const enrichedData = {
             time,
             tentName: this.tentName,
             tentMode: this.tentMode,
             currentVPD: this.vpd.current,
+            targetVPD: data.targetVPD,
             targetVPDMin: this.vpd.range[0],
             targetVPDMax: this.vpd.range[1],
             vpdDiffPercent: data.vpdDiffPercent || 0,
@@ -2147,7 +2135,6 @@ class OpenGrowBox {
                 MaxHumidity: this.tentData.maxHumidity,
             },
             Dewpoint: this.tentData.dewpoint,
-            actions: data.actions,
             Environment: {
                 ambientTemp: this.enviorment.ambientTemp,
                 ambientHumidity: this.enviorment.ambientHumidity,
@@ -2158,17 +2145,9 @@ class OpenGrowBox {
                 outsiteHumidity: this.enviorment.outsiteHumidity,
                 outsiteDewpoint: this.enviorment.outsiteDewpoint,
             },
+            actions: data.actions,
             devices: relevantDevices.map((device) => ({
-                name: device.name,
-                deviceType: device.deviceType,
-                isRunning: device.isRunning,
-                needChange: device.needChange,
-                action: device.action,
-                hasDuty: device.hasDuty,
-                dutyCycle: device.dutyCycle,
-                switches: device.switches,
-                sensors: device.sensors,
-                data: device.data,
+                ...device
             })),
             deviceActions: data.deviceActions
         };
@@ -2184,6 +2163,7 @@ class OpenGrowBox {
         if (significantChange) {
             this.previousActions.push(enrichedData);
             node.log(`Neue Aktion gespeichert:", ${enrichedData}`);
+            return enrichedData
         } else {
             node.log("Änderung nicht signifikant - Keine Aktion gespeichert.");
         }
@@ -2192,21 +2172,26 @@ class OpenGrowBox {
         if (this.previousActions.length > 250) {
             this.previousActions = this.previousActions.slice(-250);
         }
+
     }
 
     // Check if action is needed to chagnes in vpd 
-    checkLastState() {
-        if (this.previousActions.length === 0) return false;
+    checkIfActionNeeded() {
+        if (this.previousActions.length === 0) return true;
 
         const lastAction = this.previousActions[this.previousActions.length - 1];
 
+       
+
         // Prüfen, ob der aktuelle Zustand identisch mit dem letzten gespeicherten Zustand ist
         if (lastAction && lastAction.currentVPD === this.vpd.current) {
-            node.log("VPD hat sich nicht geändert. Keine Aktion notwendig.");
+            //node.warn("VPD hat sich nicht geändert. Keine Aktion notwendig.");
+            return false;
+        }else{
+            node.warn(`CurrentVPD:${this.vpd.current}, LastActionVPD:${lastAction.currentVPD}`)
             return true;
         }
 
-        return false;
     }
 }
 
@@ -2408,13 +2393,14 @@ class Device{
                 } else if (
                     ["maximum", "reduced", "increased", "minimum", "on", "off"].includes(actionValue)
                 ) {
+                    node.warn(`FoundAction: ${actionValue} for ${this.name} in ${this.inRoomName}`);
                     this.needChange = true;
                     this.action = actionValue;
                 }
             }
         } else {
             // Falls keine Aktion definiert ist, logge Warnung
-            //node.warn(`No actions defined for device type: ${this.deviceType}`);
+            node.warn(`No actions defined for device type: ${this.deviceType}`);
             this.needChange = false;
             this.action = "unchanged";
         }
@@ -2555,530 +2541,6 @@ class Device{
         }
 
     }
-}
-
-class Light extends Device {
-    constructor(name) {
-        super(name, "light");
-        this.hasDuty = false;
-        this.dutyCycle = null;
-        this.minDuty = 20;
-        this.maxDuty = 100;
-        this.lastSentDutyCycle = null;
-        this.voltage = 0.0;
-        this.sunriseMin = 0.5;
-        this.sunsetMin = 0.5;
-        this.stepSize = 1; // Schrittweite für Änderungen
-        this.sunRiseTime = "";
-        this.sunSetTime = "";
-        this.lightOnTime = ""; // Startzeit des Lichts
-        this.lightOffTime = ""; // Endzeit des Lichts
-        this.isScheduled = false; // Ob das Licht Zeitpläne berücksichtigt
-        this.controlOverVoltage = false;
-        this.controledOverOGB = true
-        this.worksWithCO2 = false;
-        this.currentPlantPhase = {
-            min: 0,
-            max: 0,
-        };
-        this.PlantStageMinMax = {
-            Germ: {
-                min: 20,
-                max: 30,
-            },
-            Veg: {
-                min: 30,
-                max: 50,
-            },
-            Flower: {
-                min: 70,
-                max: 100,
-            },
-        };
-    }
-
-    setData(data, context) {
-        this.setFromtent(context.tentName);
-        this.identifyIfFromAmbient();
-        //this.data = { ...this.data, ...data };
-        this.updateChangedData(this.data, data);
-        this.identifySwitchesAndSensors();
-        this.updateIsRunningState();
-        this.setCurrenPlantPhaseName(context);
-        this.findDutyCycle(); // Initialisiere den Duty-Cycle, falls vorhanden
-        this.identifyIfControledByOGB(context.isPlantDay.lightbyOGBControl)
-        this.setLightTimes(context);
-        this.setSunTimes(context.isPlantDay.sunRiseTimes, context.isPlantDay.sunSetTimes);
-    }
-
-    identifyIfControledByOGB(controledBY) {
-        if (typeof controledBY !== "boolean") {
-            console.log(`${this.name}: Ungültiger Wert für controledBY.`);
-            return;
-        }
-
-        if (this.controlOverVoltage !== controledBY) {
-            this.controlOverVoltage = controledBY;
-            console.log(`${this.name}: controlOverVoltage wurde auf ${controledBY} gesetzt.`);
-        }
-    }
-
-    voltageFactorToDutyCycle(voltage) {
-        return Math.floor(voltage * 10);
-    }
-
-    findDutyCycle() {
-        if (!this.data) {
-            console.log(`${this.name}: Keine Gerätedaten gefunden.`);
-            return;
-        }
-
-        const voltageKey = Object.keys(this.data).find((key) =>
-            key.toLowerCase().includes("voltage") && !key.toLowerCase().startsWith("sensor.")
-        );
-
-        if (voltageKey) {
-            const voltageValue = parseFloat(this.data[voltageKey]);
-            console.log(`DEBUG: VoltageKey gefunden: ${voltageKey}, VoltageValue: ${voltageValue}`);
-            if (!isNaN(voltageValue)) {
-                const calculatedDuty = this.voltageFactorToDutyCycle(voltageValue);
-
-                // Beschränke den Duty-Cycle auf Min- und Max-Werte
-                this.dutyCycle = Math.max(this.minDuty, Math.min(this.maxDuty, calculatedDuty));
-                this.voltage = voltageValue;
-                this.hasDuty = true;
-
-                console.log(`${this.name}: Duty-Cycle berechnet: ${this.dutyCycle}, Voltage: ${this.voltage}`);
-            } else {
-                this.hasDuty = false;
-                console.log(`${this.name}: Voltage-Wert ist ungültig.`);
-            }
-        } else {
-            console.log(`${this.name}: Kein Voltage-Key gefunden.`);
-            this.hasDuty = false;
-        }
-    }
-
-    setCurrenPlantPhaseName(context) {
-        if (!context) return;
-        if (context.plantStage !== this.currentPlantPhase) {
-            this.currentPlantPhase = context.plantStage;
-            this.setForPlantLightPhase();
-        }
-    }
-
-    setForPlantLightPhase() {
-        const phase = this.currentPlantPhase;
-        if (phase.includes("Germination") || phase.includes("Clones")) {
-            this.currentPlantPhase = { ...this.PlantStageMinMax.Germ };
-        } else if (phase.includes("Veg")) {
-            this.currentPlantPhase = { ...this.PlantStageMinMax.Veg };
-        } else if (phase.includes("Flower")) {
-            this.currentPlantPhase = { ...this.PlantStageMinMax.Flower };
-        }
-        this.minDuty = this.currentPlantPhase.min;
-        this.maxDuty = this.currentPlantPhase.max;
-    }
-
-    setLightTimes(context) {
-        if (!context) return;
-        const { lightOnTime, lightOffTime } = context.isPlantDay || {};
-        this.lightOnTime = lightOnTime;
-        this.lightOffTime = lightOffTime;
-
-        if (this.lightOnTime && this.lightOffTime !== "") {
-            this.isScheduled = true;
-        }
-    }
-
-    setSunTimes(sunRiseTime, sunSetTime) {
-        if (this.hasDuty) {
-            if (sunRiseTime || sunSetTime !== "") {
-                this.sunRiseTime = sunRiseTime;
-                this.sunSetTime = sunSetTime;
-            }
-        } else {
-            return { ERROR: "NoDuty" }
-        }
-
-    }
-
-    parseTime(timeString) {
-        if (!timeString || typeof timeString !== "string") {
-            console.log("DEBUG: Invalid time string provided:", timeString);
-            return 0; // Fallback auf Mitternacht
-        }
-
-        const [hours, minutes, seconds = 0] = timeString.split(":").map(Number);
-        return (hours * 3600) + (minutes * 60) + seconds;
-    }
-
-    checkforStartStop() {
-        const currentTime = new Date();
-        const currentSeconds = this.parseTime(currentTime.toTimeString().split(" ")[0]);
-        const startTime = this.parseTime(this.lightOnTime);
-        const endTime = this.parseTime(this.lightOffTime);
-    
-        console.log(`DEBUG: Current Time: ${currentSeconds}, Start Time: ${startTime}, End Time: ${endTime}`);
-    
-        let isLightOn;
-    
-        if (endTime < startTime) {
-            isLightOn = currentSeconds >= startTime || currentSeconds <= endTime;
-        } else {
-            isLightOn = currentSeconds >= startTime && currentSeconds <= endTime;
-        }
-    
-        console.log(`DEBUG: Is Light On: ${isLightOn}, Is Running: ${this.isRunning}`);
-    
-        if (!isLightOn && this.isRunning) {
-            console.log(`${this.name}: Turning light OFF as current time is outside schedule.`);
-            this.action = "off";
-            return this.turnOFF();
-        }
-    
-        if (isLightOn && !this.isRunning) {
-            console.log(`${this.name}: Turning light ON as current time is within schedule.`);
-            this.action = "on";
-            return this.turnON();
-        }
-    
-        console.log(`${this.name}: No changes needed for light schedule.`);
-        return null;
-    }
-    
-    checkforPhase() {
-        const currentTime = new Date();
-        const currentSeconds = this.parseTime(currentTime.toTimeString().split(" ")[0]);
-    
-        const lightOnSeconds = this.parseTime(this.lightOnTime);
-        const lightOffSeconds = this.parseTime(this.lightOffTime);
-        const sunRiseSeconds = this.parseTime(this.sunRiseTime);
-        const sunSetSeconds = this.parseTime(this.sunSetTime);
-        const sunriseEndSeconds = lightOnSeconds + sunRiseSeconds;
-        const sunsetStartSeconds = lightOffSeconds - sunSetSeconds;
-    
-        const actions = [];
-    
-        console.log(`DEBUG: Current Time (Seconds): ${currentSeconds}`);
-        console.log(`DEBUG: Light On Time: ${lightOnSeconds}, Light Off Time: ${lightOffSeconds}`);
-        console.log(`DEBUG: Sunrise Duration (Seconds): ${sunRiseSeconds}, Sunset Duration (Seconds): ${sunSetSeconds}`);
-        console.log(`DEBUG: Sunrise End: ${sunriseEndSeconds}, Sunset Start: ${sunsetStartSeconds}`);
-        console.log(`DEBUG: Current Duty Cycle: ${this.dutyCycle}, Sunrise Min: ${this.sunriseMin}, Sunset Min: ${this.sunsetMin}, Max Phase Duty: ${this.currentPlantPhase.max}`);
-    
-        // **Sonnenaufgang (Sunrise Phase)**
-        if (currentSeconds >= lightOnSeconds && currentSeconds < sunriseEndSeconds) {
-            console.log(`${this.name}: Sunrise phase active.`);
-    
-            const elapsedSunrise = currentSeconds - lightOnSeconds;
-            const totalSunriseDuration = sunRiseSeconds;
-    
-            console.log(`DEBUG: Elapsed Sunrise Seconds: ${elapsedSunrise}, Total Sunrise Duration: ${totalSunriseDuration}`);
-    
-            // Berechne den Duty Increment von `sunriseMin`
-            const totalIncrement = this.currentPlantPhase.max - this.sunriseMin * 10;
-            const incrementFactor = elapsedSunrise / totalSunriseDuration;
-    
-            console.log(`DEBUG: Increment Factor: ${incrementFactor}, Total Increment: ${totalIncrement}`);
-    
-            const dutyIncrement = totalIncrement * incrementFactor;
-    
-            // Beginne immer mit `sunriseMin`
-            const newDuty = this.sunriseMin * 10 + dutyIncrement;
-            const clampedDuty = Math.min(this.currentPlantPhase.max, Math.floor(newDuty));
-    
-            console.log(`DEBUG: Calculated Duty Cycle: ${newDuty}, Clamped Duty Cycle: ${clampedDuty}`);
-    
-            if (this.dutyCycle !== clampedDuty) {
-                this.dutyCycle = clampedDuty;
-                const newVoltage = parseFloat((this.dutyCycle / 10).toFixed(1)); // Voltage ist Faktor 10 kleiner
-    
-                actions.push({
-                    entity_id: this.switches[0],
-                    action: "dutycycle",
-                    dutycycle: this.dutyCycle,
-                });
-                actions.push({
-                    entity_id: this.sensors.find((key) => key.toLowerCase().includes("voltage")),
-                    action: "number",
-                    value: newVoltage,
-                });
-    
-                console.log(`DEBUG: Sunrise Phase - New Duty Cycle: ${this.dutyCycle}, Voltage: ${newVoltage}`);
-            } else {
-                console.log(`DEBUG: No changes to Duty Cycle during Sunrise Phase.`);
-            }
-        }
-    
-        // Sonnenuntergang (Sunset Phase)
-        else if (currentSeconds >= sunsetStartSeconds && currentSeconds <= lightOffSeconds) {
-            console.log(`${this.name}: Sunset phase active.`);
-
-            const elapsedSunset = currentSeconds - sunsetStartSeconds;
-            const totalSunsetDuration = sunSetSeconds;
-
-            console.log(`DEBUG: Elapsed Sunset Seconds: ${elapsedSunset}, Total Sunset Duration: ${totalSunsetDuration}`);
-
-            // Berechne den Duty-Decrement korrekt bis zum Ende der Phase
-            const initialDuty = this.currentPlantPhase.max;
-            const totalDecrement = initialDuty - this.sunsetMin * 10; // Ziel ist sunsetMin
-            const decrementFactor = Math.min(elapsedSunset / totalSunsetDuration, 1); // Sicherstellen, dass wir nicht über 1 hinausgehen
-
-            console.log(`DEBUG: Decrement Factor: ${decrementFactor}, Total Decrement: ${totalDecrement}`);
-
-            const newDuty = initialDuty - totalDecrement * decrementFactor; // Subtrahiere inkrementell
-            const clampedDuty = Math.max(this.sunsetMin * 10, Math.floor(newDuty)); // Clamp bis sunsetMin
-
-            console.log(`DEBUG: Calculated Duty Cycle: ${newDuty}, Clamped Duty Cycle: ${clampedDuty}`);
-
-            if (this.dutyCycle !== clampedDuty) {
-                this.dutyCycle = clampedDuty;
-                const newVoltage = parseFloat((this.dutyCycle / 10).toFixed(1)); // Voltage ist Faktor 10 kleiner
-
-                actions.push({
-                    entity_id: this.switches[0],
-                    action: "dutycycle",
-                    dutycycle: this.dutyCycle,
-                });
-                actions.push({
-                    entity_id: this.sensors.find((key) => key.toLowerCase().includes("voltage")),
-                    action: "number",
-                    value: newVoltage,
-                });
-
-                console.log(`DEBUG: Sunset Phase - New Duty Cycle: ${this.dutyCycle}, Voltage: ${newVoltage}`);
-            } else {
-                console.log(`DEBUG: No changes to Duty Cycle during Sunset Phase.`);
-            }
-        }
-
-    
-        return actions;
-    }
-    
-    throttledUpdate(intervalInMs) {
-        const now = Date.now();
-        if (this.lastActionTime && now - this.lastActionTime < intervalInMs) {
-            console.log(`${this.name}: Übersprungen, da weniger als ${intervalInMs} ms vergangen sind.`);
-            return false;
-        }
-        this.lastActionTime = now;
-        return true;
-    }
-
-    resetPhaseAndTimes() {
-        this.action = "Unchanged"
-        this.currentPlantPhase.max = 0
-        this.currentPlantPhase.min = 0
-        this.dutyCycle = null
-        this.minDuty = null
-        this.maxDuty = null
-        this.lightOnTime = ""
-        this.lightOffTime = ""
-        this.sunRiseTime = ""
-        this.sunSetTime = ""
-
-        this.sunsetMin = null
-        this.sunriseMin = null
-    }
-
-
-    handleGeneralControl() {
-        if (!this.hasDuty) {
-            // Kein Duty-Modus: Schalte das Gerät einfach ein oder aus
-            if (this.action === "on" && !this.isRunning) {
-                return this.turnLightON();
-            } else if (this.action === "off" && this.isRunning) {
-                return this.turnLightOFF();
-            }
-        } else {
-            // Duty-Modus: Verwalte Duty-Cycle
-            let newDuty;
-            switch (this.action) {
-                case "increased":
-                    newDuty = Math.min(this.maxDuty, this.dutyCycle + this.stepSize);
-                    break;
-                case "reduced":
-                    newDuty = Math.max(this.minDuty, this.dutyCycle - this.stepSize);
-                    break;
-                case "reset":
-                    newDuty = this.minDuty;
-                    break;
-                default:
-                    return null; // Unbekannte Aktion
-            }
-    
-            if (newDuty !== this.dutyCycle) {
-                return this.changeDuty(newDuty);
-            }
-        }
-    
-        return null; // Keine Änderungen notwendig
-    }
-    
-
-    handleGeneralControl2() {
-        if (!this.hasDuty) {
-            // Kein Duty-Modus: Schalte das Gerät einfach ein oder aus
-            if (this.action === "on" && !this.isRunning) {
-                return this.turnLightON();
-            } else if (this.action === "off" && this.isRunning) {
-                return this.turnLightOFF();
-            }
-        } else {
-            // Duty-Modus: Verwalte Duty-Cycle
-            let newDuty;
-            switch (this.action) {
-                case "increased":
-                    newDuty = Math.min(this.maxDuty, this.dutyCycle + this.stepSize);
-                    break;
-                case "reduced":
-                    newDuty = Math.max(this.minDuty, this.dutyCycle - this.stepSize);
-                    break;
-                case "maximum":
-                    newDuty = this.maxDuty;
-                    break;
-                case "minimum":
-                    newDuty = this.minDuty;
-                    break;
-                default:
-                    return null; // Unbekannte Aktion
-            }
-
-            if (newDuty !== this.dutyCycle) {
-                return this.changeDuty(newDuty);
-            }
-        }
-
-        return null; // Keine Änderungen notwendig
-    }
-
-    runAction() {
-        if (!this.controledOverOGB) {
-            console.log(`${this.name}: Steuerung durch OGB deaktiviert.`);
-            return { Light: `${this.switches[0]}`, Action: "NoControlForOGB" };
-        }
-    
-        // Prüfen, ob Start/Stop-Logik angewendet werden muss
-        const startStopAction = this.checkforStartStop();
-        if (startStopAction) {
-            return [startStopAction]; // Priorisiere Start/Stop
-        }
-    
-        const actions = [];
-    
-        // Sunrise/Sunset-Logik prüfen
-        const phaseActions = this.checkforPhase();
-        if (phaseActions && phaseActions.length > 0) {
-            console.log("DEBUG: Phase actions found, skipping general actions.");
-            actions.push(...phaseActions);
-        }
-    
-        // Allgemeine Steuerung ausführen, wenn keine Phase aktiv ist
-        if (!phaseActions || phaseActions.length === 0) {
-            console.log("DEBUG: No active phase. Executing general control.");
-            const generalAction = this.handleGeneralControl();
-            if (generalAction) {
-                actions.push(generalAction);
-            }
-        }
-    
-        // Entfernen redundanter Aktionen
-        const filteredActions = actions.filter((action, index, self) =>
-            self.findIndex(a => a.entity_id === action.entity_id && a.action === action.action) === index
-        );
-    
-        console.log(`DEBUG: Actions nach Verarbeitung: ${JSON.stringify(filteredActions, null, 2)}`);
-        return filteredActions.length > 0 ? filteredActions : [];
-    }
-    
-    changeDuty(newDuty) {
-        if (!this.hasDuty) {
-            return { entity_id: this.switches[0], action: "NoDutyCycle" };
-        }
-
-        const clampedDuty = Math.max(this.minDuty, Math.min(this.maxDuty, newDuty));
-        const newVoltage = parseFloat((clampedDuty / 10).toFixed(1)); // Voltage ist Faktor 10 kleiner als DutyCycle
-
-        console.log(`DEBUG: Current DutyCycle: ${this.dutyCycle}, New DutyCycle: ${clampedDuty}`);
-        console.log(`DEBUG: Current Voltage: ${this.voltage}, New Voltage: ${newVoltage}`);
-
-        // **Fall 1: Kontrolle nur über Voltage**
-        if (this.controlOverVoltage) {
-            if (this.voltage !== newVoltage) {
-                this.voltage = newVoltage;
-                console.log(`${this.name}: Nur Voltage wird gesendet, da controlOverVoltage aktiviert ist.`);
-                const voltageEntity = this.sensors.find(key =>
-                    key.toLowerCase().includes("voltage")
-                );
-                return [
-                    { entity_id: voltageEntity, action: "number", value: newVoltage }
-                ];
-            }
-            return { entity_id: this.switches[0], action: "NoChangeNeeded" };
-        }
-
-        // **Fall 2: Kontrolle über DutyCycle**
-        if (this.lastSentDutyCycle === clampedDuty && this.voltage === newVoltage) {
-            console.log(`${this.name}: Keine Änderung nötig. Duty-Cycle und Voltage bleiben gleich.`);
-            return { entity_id: this.switches[0], action: "NoChangeNeeded" };
-        }
-
-        // Aktualisiere Werte
-        this.dutyCycle = clampedDuty;
-        this.voltage = newVoltage;
-        this.lastSentDutyCycle = clampedDuty;
-
-        const voltageEntity = this.sensors.find(key =>
-            key.toLowerCase().includes("voltage")
-        );
-
-        return [
-            { entity_id: this.switches[0], action: "dutycycle", dutycycle: clampedDuty }
-        ];
-    }
-
-    turnLightON() {
-        const entity = this.switches[0];
-
-        if (!this.isRunning) {
-            this.isRunning = true;
-            console.log(`${this.name}: Gerät wurde eingeschaltet in ${this.inRoomName}.`);
-
-            if (this.hasDuty) {
-                const newVoltage = parseFloat((this.dutyCycle / 10).toFixed(1));
-                this.voltage = newVoltage;
-
-                const voltageEntity = this.sensors.find(key =>
-                    key.toLowerCase().includes("voltage")
-                );
-
-                console.log(`${this.name}: Voltage auf ${newVoltage}V gesetzt basierend auf Duty-Cycle ${this.dutyCycle}.`);
-                return [
-                    { entity_id: entity, action: "on" },
-                    { entity_id: voltageEntity, action: "number", value: newVoltage }
-                ];
-            }
-
-            return { entity_id: entity, action: "on" };
-        } else {
-            console.log(`${this.name}: Gerät ist bereits eingeschaltet in ${this.inRoomName}.`);
-            return { entity_id: entity, action: "AlreadyON" };
-        }
-    }
-
-    turnLightOFF() {
-        const entity = this.switches[0]; // Dynamische Entität
-        if (this.isRunning) {
-            this.isRunning = false;
-            console.log(`${this.name}: Gerät wurde ausgeschaltet in ${this.inRoomName}.`);
-            return { entity_id: entity, action: "off" };
-        } else {
-            console.log(`${this.name}: Gerät ist bereits ausgeschaltet in ${this.inRoomName}.`);
-            return { entity_id: entity, action: "AlreadyOFF" };
-        }
-    }
-
 }
 
 class Exhaust extends Device {
@@ -3248,8 +2710,8 @@ class Exhaust extends Device {
 class Ventilation extends Device {
     constructor(name) {
         super(name, "ventilation");
-        this.dutyCycle = 70; // Startwert 65%
-        this.dutyMin = 70;   // Minimalwert
+        this.dutyCycle = 75; // Startwert
+        this.dutyMin = 75;   // Minimalwert
         this.dutyMax = 100;  // Maximalwert
         this.hasDuty = true; // Immer Duty Cycle verfügbar
         this.isTasmota = false;
@@ -3520,99 +2982,539 @@ class Climate extends Device {
     }
 }
 
-class Heater extends Device {
+class Light extends Device {
     constructor(name) {
-        super(name, "heater");
+        super(name, "light");
+        this.hasDuty = false;
+        this.dutyCycle = null;
+        this.minDuty = 20;
+        this.maxDuty = 100;
+        this.lastSentDutyCycle = null;
+        this.voltage = 0.0;
+        this.sunriseMin = 2.0;
+        this.sunsetMin = 2.0;
+        this.stepSize = 1; // Schrittweite für Änderungen
+        this.sunRiseTime = "";
+        this.sunSetTime = "";
+        this.isSunrise = false;
+        this.isSunset = false;
+        this.lightOnTime = ""; // Startzeit des Lichts
+        this.lightOffTime = ""; // Endzeit des Lichts
+        this.isScheduled = false; // Ob das Licht Zeitpläne berücksichtigt
+        this.controlOverVoltage = false;
+        this.controledOverOGB = true
+        this.worksWithCO2 = false;
+        this.currentPlantPhase = {
+            min: 0,
+            max: 0,
+        };
+        this.PlantStageMinMax = {
+            Germ: {
+                min: 20,
+                max: 30,
+            },
+            Veg: {
+                min: 30,
+                max: 50,
+            },
+            Flower: {
+                min: 70,
+                max: 100,
+            },
+        };
     }
+
+    setData(data, context) {
+        this.setFromtent(context.tentName);
+        this.identifyIfFromAmbient();
+        //this.data = { ...this.data, ...data };
+        this.updateChangedData(this.data, data);
+        this.identifySwitchesAndSensors();
+        this.updateIsRunningState();
+        this.setCurrenPlantPhaseName(context);
+        this.findDutyCycle(); // Initialisiere den Duty-Cycle, falls vorhanden
+        this.identifyIfControledByOGB(context.isPlantDay.lightbyOGBControl)
+        this.setLightTimes(context);
+        this.setSunTimes(context.isPlantDay.sunRiseTimes, context.isPlantDay.sunSetTimes);
+    }
+
+    identifyIfControledByOGB(controledBY) {
+        if (typeof controledBY !== "boolean") {
+            console.log(`${this.name}: Ungültiger Wert für controledBY.`);
+            return;
+        }
+
+        if (this.controlOverVoltage !== controledBY) {
+            this.controlOverVoltage = controledBY;
+            console.log(`${this.name}: controlOverVoltage wurde auf ${controledBY} gesetzt.`);
+        }
+    }
+
+    voltageFactorToDutyCycle(voltage) {
+        return Math.floor(voltage * 10);
+    }
+
+    findDutyCycle() {
+        if (!this.data) {
+            console.log(`${this.name}: Keine Gerätedaten gefunden.`);
+            return;
+        }
+
+        const voltageKey = Object.keys(this.data).find((key) =>
+            key.toLowerCase().includes("voltage") && !key.toLowerCase().startsWith("sensor.")
+        );
+
+        if (voltageKey) {
+            const voltageValue = parseFloat(this.data[voltageKey]);
+            console.log(`DEBUG: VoltageKey gefunden: ${voltageKey}, VoltageValue: ${voltageValue}`);
+            if (!isNaN(voltageValue)) {
+                const calculatedDuty = this.voltageFactorToDutyCycle(voltageValue);
+
+                // Beschränke den Duty-Cycle auf Min- und Max-Werte
+                this.dutyCycle = Math.max(this.minDuty, Math.min(this.maxDuty, calculatedDuty));
+                this.voltage = voltageValue;
+                this.hasDuty = true;
+
+                console.log(`${this.name}: Duty-Cycle berechnet: ${this.dutyCycle}, Voltage: ${this.voltage}`);
+            } else {
+                this.hasDuty = false;
+                console.log(`${this.name}: Voltage-Wert ist ungültig.`);
+            }
+        } else {
+            console.log(`${this.name}: Kein Voltage-Key gefunden.`);
+            this.hasDuty = false;
+        }
+    }
+
+    setCurrenPlantPhaseName(context) {
+        if (!context) return;
+        if (context.plantStage !== this.currentPlantPhase) {
+            this.currentPlantPhase = context.plantStage;
+            this.setForPlantLightPhase();
+        }
+    }
+
+    setForPlantLightPhase() {
+        const phase = this.currentPlantPhase;
+        if (phase.includes("Germination") || phase.includes("Clones")) {
+            this.currentPlantPhase = { ...this.PlantStageMinMax.Germ };
+        } else if (phase.includes("Veg")) {
+            this.currentPlantPhase = { ...this.PlantStageMinMax.Veg };
+        } else if (phase.includes("Flower")) {
+            this.currentPlantPhase = { ...this.PlantStageMinMax.Flower };
+        }
+        this.minDuty = this.currentPlantPhase.min;
+        this.maxDuty = this.currentPlantPhase.max;
+    }
+
+    setLightTimes(context) {
+        if (!context) return;
+        const { lightOnTime, lightOffTime } = context.isPlantDay || {};
+        this.lightOnTime = lightOnTime;
+        this.lightOffTime = lightOffTime;
+
+        if (this.lightOnTime && this.lightOffTime !== "") {
+            this.isScheduled = true;
+        }
+    }
+
+    setSunTimes(sunRiseTime, sunSetTime) {
+        if (this.hasDuty) {
+            if (sunRiseTime || sunSetTime !== "") {
+                this.sunRiseTime = sunRiseTime;
+                this.sunSetTime = sunSetTime;
+            }
+        } else {
+            return { ERROR: "NoDuty" }
+        }
+
+    }
+
+    parseTime(timeString) {
+        if (!timeString || typeof timeString !== "string") {
+            console.log("DEBUG: Invalid time string provided:", timeString);
+            return 0; // Fallback auf Mitternacht
+        }
+
+        const [hours, minutes, seconds = 0] = timeString.split(":").map(Number);
+        return (hours * 3600) + (minutes * 60) + seconds;
+    }
+
+    checkforStartStop() {
+        const currentTime = new Date();
+        const currentSeconds = this.parseTime(currentTime.toTimeString().split(" ")[0]);
+        const startTime = this.parseTime(this.lightOnTime);
+        const endTime = this.parseTime(this.lightOffTime);
+    
+        console.log(`DEBUG: Current Time: ${currentSeconds}, Start Time: ${startTime}, End Time: ${endTime}`);
+    
+        let isLightOn;
+    
+        if (endTime < startTime) {
+            isLightOn = currentSeconds >= startTime || currentSeconds <= endTime;
+        } else {
+            isLightOn = currentSeconds >= startTime && currentSeconds <= endTime;
+        }
+    
+        console.log(`DEBUG: Is Light On: ${isLightOn}, Is Running: ${this.isRunning}`);
+    
+        if (!isLightOn && this.isRunning) {
+            console.log(`${this.name}: Turning light OFF as current time is outside schedule.`);
+            this.action = "off";
+            return this.turnOFF();
+        }
+    
+        if (isLightOn && !this.isRunning) {
+            console.log(`${this.name}: Turning light ON as current time is within schedule.`);
+            this.action = "on";
+            return this.turnON();
+        }
+    
+        console.log(`${this.name}: No changes needed for light schedule.`);
+        return null;
+    }
+    
+
+    checkforPhase() {
+        const currentTime = new Date();
+        const currentSeconds = this.parseTime(currentTime.toTimeString().split(" ")[0]);
+    
+        const lightOnSeconds = this.parseTime(this.lightOnTime);
+        const lightOffSeconds = this.parseTime(this.lightOffTime);
+        const sunRiseSeconds = this.parseTime(this.sunRiseTime);
+        const sunSetSeconds = this.parseTime(this.sunSetTime);
+        const sunriseEndSeconds = lightOnSeconds + sunRiseSeconds;
+        const sunsetStartSeconds = lightOffSeconds - sunSetSeconds;
+    
+        const actions = [];
+        const tolerance = 1; // Kleiner Puffer (1% oder 0.1 bei Voltage)
+    
+        console.log(`DEBUG: Current Time (Seconds): ${currentSeconds}`);
+        console.log(`DEBUG: Light On Time: ${lightOnSeconds}, Light Off Time: ${lightOffSeconds}`);
+        console.log(`DEBUG: Sunrise End: ${sunriseEndSeconds}, Sunset Start: ${sunsetStartSeconds}`);
+        console.log(`DEBUG: Current Duty Cycle: ${this.dutyCycle}, Last Sent Duty Cycle: ${this.lastSentDutyCycle}`);
+        console.log(`DEBUG: Current Voltage: ${this.voltage}, Last Sent Voltage: ${this.lastSentVoltage}`);
+    
+        // **Sonnenaufgang (Sunrise Phase)**
+        if (currentSeconds >= lightOnSeconds && currentSeconds < sunriseEndSeconds) {
+            console.log(`${this.name}: Sunrise phase active.`);
+    
+            const elapsedSunrise = currentSeconds - lightOnSeconds;
+            const totalSunriseDuration = sunRiseSeconds;
+    
+            console.log(`DEBUG: Elapsed Sunrise Seconds: ${elapsedSunrise}, Total Sunrise Duration: ${totalSunriseDuration}`);
+    
+            // **Berechnung des Anstiegs der Helligkeit (Duty-Cycle)**:
+            const totalIncrement = (this.currentPlantPhase.max || this.maxDuty) - this.sunriseMin * 10; // Maximal bis zur Phasen-Maximum
+            const incrementFactor = Math.min(elapsedSunrise / totalSunriseDuration, 1); // Verhindere Überschreitung
+    
+            console.log(`DEBUG: Increment Factor: ${incrementFactor}, Total Increment: ${totalIncrement}`);
+    
+            let dutyIncrement = totalIncrement * incrementFactor;
+    
+            // Füge einen minimalen Puffer hinzu, wenn wir am Ende der Sunrise-Phase sind:
+            if (elapsedSunrise >= totalSunriseDuration - 1) {
+                dutyIncrement += tolerance; // Erhöhe minimal
+            }
+    
+            const newDuty = Math.min(this.currentPlantPhase.max || this.maxDuty, Math.floor(this.sunriseMin * 10 + dutyIncrement)); // Clamp auf Maximalwert
+            const newVoltage = parseFloat((newDuty / 10).toFixed(1)); // Voltage = DutyCycle / 10
+    
+            if (this.lastSentDutyCycle !== newDuty || this.lastSentVoltage !== newVoltage) {
+                this.dutyCycle = newDuty;
+                this.voltage = newVoltage;
+                this.lastSentDutyCycle = newDuty;
+                this.lastSentVoltage = newVoltage;
+    
+                if (this.controlOverVoltage) {
+                    actions.push({
+                        entity_id: this.sensors.find((key) => key.toLowerCase().includes("voltage")),
+                        action: "number",
+                        value: newVoltage,
+                    });
+                } else if (this.hasDuty && !this.controlOverVoltage) {
+                    actions.push({
+                        entity_id: this.switches[0],
+                        action: "dutycycle",
+                        dutycycle: this.dutyCycle,
+                    });
+                }
+    
+                console.log(`DEBUG: Sunrise Phase - New Duty Cycle: ${this.dutyCycle}, Voltage: ${newVoltage}`);
+            } else {
+                console.log(`DEBUG: No changes to Duty Cycle during Sunrise Phase.`);
+            }
+        }
+    
+        // **Sonnenuntergang (Sunset Phase)** - Unverändert
+        else if (currentSeconds >= sunsetStartSeconds && currentSeconds <= lightOffSeconds) {
+            console.log(`${this.name}: Sunset phase active.`);
+    
+            const elapsedSunset = currentSeconds - sunsetStartSeconds;
+            const totalSunsetDuration = sunSetSeconds;
+    
+            console.log(`DEBUG: Elapsed Sunset Seconds: ${elapsedSunset}, Total Sunset Duration: ${totalSunsetDuration}`);
+    
+            const totalDecrement = this.dutyCycle - this.sunsetMin * 10; // Bis zum `sunsetMin`
+            const decrementFactor = Math.min(elapsedSunset / totalSunsetDuration, 1); // Verhindere Überschreitung
+    
+            console.log(`DEBUG: Decrement Factor: ${decrementFactor}, Total Decrement: ${totalDecrement}`);
+    
+            const newDuty = Math.max(this.sunsetMin * 10, Math.floor(this.dutyCycle - totalDecrement * decrementFactor)); // Clamp auf sunsetMin
+            const newVoltage = parseFloat((newDuty / 10).toFixed(1)); // Voltage = DutyCycle / 10
+    
+            if (this.lastSentDutyCycle !== newDuty || this.lastSentVoltage !== newVoltage) {
+                this.dutyCycle = newDuty;
+                this.voltage = newVoltage;
+                this.lastSentDutyCycle = newDuty;
+                this.lastSentVoltage = newVoltage;
+    
+                if (this.controlOverVoltage) {
+                    actions.push({
+                        entity_id: this.sensors.find((key) => key.toLowerCase().includes("voltage")),
+                        action: "number",
+                        value: newVoltage,
+                    });
+                } else if (this.hasDuty && !this.controlOverVoltage) {
+                    actions.push({
+                        entity_id: this.switches[0],
+                        action: "dutycycle",
+                        dutycycle: this.dutyCycle,
+                    });
+                }
+    
+                console.log(`DEBUG: Sunset Phase - New Duty Cycle: ${this.dutyCycle}, Voltage: ${newVoltage}`);
+            } else {
+                console.log(`DEBUG: No changes to Duty Cycle during Sunset Phase.`);
+            }
+        }
+    
+        return actions;
+    }
+    
+    throttledUpdate(intervalInMs) {
+        const now = Date.now();
+        if (this.lastActionTime && now - this.lastActionTime < intervalInMs) {
+            console.log(`${this.name}: Übersprungen, da weniger als ${intervalInMs} ms vergangen sind.`);
+            return false;
+        }
+        this.lastActionTime = now;
+        return true;
+    }
+
+    resetPhaseAndTimes() {
+        this.action = "Unchanged"
+        this.currentPlantPhase.max = 0
+        this.currentPlantPhase.min = 0
+        this.dutyCycle = null
+        this.minDuty = null
+        this.maxDuty = null
+        this.lightOnTime = ""
+        this.lightOffTime = ""
+        this.sunRiseTime = ""
+        this.sunSetTime = ""
+
+        this.sunsetMin = null
+        this.sunriseMin = null
+    }
+
+
+    handleGeneralControl() {
+        if (!this.hasDuty) {
+            // Kein Duty-Modus: Schalte das Gerät einfach ein oder aus
+            if (this.action === "on" && !this.isRunning) {
+                return this.turnLightON();
+            } else if (this.action === "off" && this.isRunning) {
+                return this.turnLightOFF();
+            }
+        } else {
+            // Duty-Modus: Verwalte Duty-Cycle
+            let newDuty;
+            switch (this.action) {
+                case "increased":
+                    newDuty = Math.min(this.maxDuty, this.dutyCycle + this.stepSize);
+                    break;
+                case "reduced":
+                    newDuty = Math.max(this.minDuty, this.dutyCycle - this.stepSize);
+                    break;
+                case "reset":
+                    newDuty = this.minDuty;
+                    break;
+                default:
+                    return null; // Unbekannte Aktion
+            }
+    
+            if (newDuty !== this.dutyCycle) {
+                return this.changeDuty(newDuty);
+            }
+        }
+    
+        return null; // Keine Änderungen notwendig
+    }
+    
+
+    handleGeneralControl2() {
+        if (!this.hasDuty) {
+            // Kein Duty-Modus: Schalte das Gerät einfach ein oder aus
+            if (this.action === "on" && !this.isRunning) {
+                return this.turnLightON();
+            } else if (this.action === "off" && this.isRunning) {
+                return this.turnLightOFF();
+            }
+        } else {
+            // Duty-Modus: Verwalte Duty-Cycle
+            let newDuty;
+            switch (this.action) {
+                case "increased":
+                    newDuty = Math.min(this.maxDuty, this.dutyCycle + this.stepSize);
+                    break;
+                case "reduced":
+                    newDuty = Math.max(this.minDuty, this.dutyCycle - this.stepSize);
+                    break;
+                case "maximum":
+                    newDuty = this.maxDuty;
+                    break;
+                case "minimum":
+                    newDuty = this.minDuty;
+                    break;
+                default:
+                    return null; // Unbekannte Aktion
+            }
+
+            if (newDuty !== this.dutyCycle) {
+                return this.changeDuty(newDuty);
+            }
+        }
+
+        return null; // Keine Änderungen notwendig
+    }
+
     runAction() {
-        if (!this.needChange) {
-            return { entity_id: this.switches[0], action: "noChangesNeeded" };
+        if (!this.controledOverOGB) {
+            console.log(`${this.name}: Steuerung durch OGB deaktiviert.`);
+            return { Light: `${this.switches[0]}`, Action: "NoControlForOGB" };
+        }
+    
+        // Prüfen, ob Start/Stop-Logik angewendet werden muss
+        const startStopAction = this.checkforStartStop();
+        if (startStopAction) {
+            return [startStopAction]; // Priorisiere Start/Stop
+        }
+    
+        const actions = [];
+    
+        // Sunrise/Sunset-Logik prüfen
+        const phaseActions = this.checkforPhase();
+        if (phaseActions && phaseActions.length > 0) {
+            console.log("DEBUG: Phase actions found, skipping general actions.");
+            actions.push(...phaseActions);
+        }
+    
+        // Allgemeine Steuerung ausführen, wenn keine Phase aktiv ist
+        if (!phaseActions || phaseActions.length === 0) {
+            console.log("DEBUG: No active phase. Executing general control.");
+            const generalAction = this.handleGeneralControl();
+            if (generalAction) {
+                actions.push(generalAction);
+            }
+        }
+    
+        // Entfernen redundanter Aktionen
+        const filteredActions = actions.filter((action, index, self) =>
+            self.findIndex(a => a.entity_id === action.entity_id && a.action === action.action) === index
+        );
+    
+        console.log(`DEBUG: Actions nach Verarbeitung: ${JSON.stringify(filteredActions, null, 2)}`);
+        return filteredActions.length > 0 ? filteredActions : [];
+    }
+    
+    changeDuty(newDuty) {
+        if (!this.hasDuty) {
+            return { entity_id: this.switches[0], action: "NoDutyCycle" };
         }
 
-        switch (this.action) {
-            case "off":
-                return this.turnOFF();
-            case "on":
-                return this.turnON();
-            case "increased":
-                return this.turnON();
-            case "reduced":
-                return this.turnOFF();
-            case "unchanged":
-                return { entity_id: this.switches[0], action: "UNCHANGED" };
-            default:
-                node.warn(`${this.name}: Unbekannte Aktion "${this.action}".`);
-                return { entity_id: this.switches[0], action: "Unknown Action" };
+        const clampedDuty = Math.max(this.minDuty, Math.min(this.maxDuty, newDuty));
+        const newVoltage = parseFloat((clampedDuty / 10).toFixed(1)); // Voltage ist Faktor 10 kleiner als DutyCycle
+
+        console.log(`DEBUG: Current DutyCycle: ${this.dutyCycle}, New DutyCycle: ${clampedDuty}`);
+        console.log(`DEBUG: Current Voltage: ${this.voltage}, New Voltage: ${newVoltage}`);
+
+        // **Fall 1: Kontrolle nur über Voltage**
+        if (this.controlOverVoltage) {
+            if (this.voltage !== newVoltage) {
+                this.voltage = newVoltage;
+                console.log(`${this.name}: Nur Voltage wird gesendet, da controlOverVoltage aktiviert ist.`);
+                const voltageEntity = this.sensors.find(key =>
+                    key.toLowerCase().includes("voltage")
+                );
+                return [
+                    { entity_id: voltageEntity, action: "number", value: newVoltage }
+                ];
+            }
+            return { entity_id: this.switches[0], action: "NoChangeNeeded" };
         }
+
+        // **Fall 2: Kontrolle über DutyCycle**
+        if (this.lastSentDutyCycle === clampedDuty && this.voltage === newVoltage) {
+            console.log(`${this.name}: Keine Änderung nötig. Duty-Cycle und Voltage bleiben gleich.`);
+            return { entity_id: this.switches[0], action: "NoChangeNeeded" };
+        }
+
+        // Aktualisiere Werte
+        this.dutyCycle = clampedDuty;
+        this.voltage = newVoltage;
+        this.lastSentDutyCycle = clampedDuty;
+
+        const voltageEntity = this.sensors.find(key =>
+            key.toLowerCase().includes("voltage")
+        );
+
+        return [
+            { entity_id: this.switches[0], action: "dutycycle", dutycycle: clampedDuty }
+        ];
     }
 
-    turnON() {
+    turnLightON() {
         const entity = this.switches[0];
+
         if (!this.isRunning) {
             this.isRunning = true;
-            node.warn(`${this.name}: Luftentfeuchter eingeschaltet in ${this.inRoomName}`);
+            console.log(`${this.name}: Gerät wurde eingeschaltet in ${this.inRoomName}.`);
+
+            if (this.hasDuty) {
+                const newVoltage = parseFloat((this.dutyCycle / 10).toFixed(1));
+                this.voltage = newVoltage;
+
+                const voltageEntity = this.sensors.find(key =>
+                    key.toLowerCase().includes("voltage")
+                );
+
+                console.log(`${this.name}: Voltage auf ${newVoltage}V gesetzt basierend auf Duty-Cycle ${this.dutyCycle}.`);
+                return [
+                    { entity_id: entity, action: "on" },
+                    { entity_id: voltageEntity, action: "number", value: newVoltage }
+                ];
+            }
+
             return { entity_id: entity, action: "on" };
+        } else {
+            console.log(`${this.name}: Gerät ist bereits eingeschaltet in ${this.inRoomName}.`);
+            return { entity_id: entity, action: "AlreadyON" };
         }
-        return { entity_id: entity, action: "Already ON" };
     }
 
-    turnOFF() {
-        const entity = this.switches[0];
+    turnLightOFF() {
+        const entity = this.switches[0]; // Dynamische Entität
         if (this.isRunning) {
             this.isRunning = false;
-            node.warn(`${this.name}: Luftentfeuchter ausgeschaltet in ${this.inRoomName}`);
+            console.log(`${this.name}: Gerät wurde ausgeschaltet in ${this.inRoomName}.`);
             return { entity_id: entity, action: "off" };
-        }
-        return { entity_id: entity, action: "Already OFF" };
-    }
-}
-
-class Cooler extends Device {
-    constructor(name) {
-        super(name, "cooler");
-    }
-
-    runAction() {
-        if (!this.needChange) {
-            return { entity_id: this.switches[0], action: "noChangesNeeded" };
-        }
-
-        switch (this.action) {
-            case "off":
-                return this.turnOFF();
-            case "on":
-                return this.turnON();
-            case "increased":
-                return this.turnON();
-            case "reduced":
-                return this.turnOFF();
-            case "unchanged":
-                return { entity_id: this.switches[0], action: "UNCHANGED" };
-            default:
-                node.warn(`${this.name}: Unbekannte Aktion "${this.action}".`);
-                return { entity_id: this.switches[0], action: "Unknown Action" };
+        } else {
+            console.log(`${this.name}: Gerät ist bereits ausgeschaltet in ${this.inRoomName}.`);
+            return { entity_id: entity, action: "AlreadyOFF" };
         }
     }
 
-    turnON() {
-        const entity = this.switches[0];
-        if (!this.isRunning) {
-            this.isRunning = true;
-            node.warn(`${this.name}: Luftentfeuchter eingeschaltet in ${this.inRoomName}`);
-            return { entity_id: entity, action: "on" };
-        }
-        return { entity_id: entity, action: "Already ON" };
-    }
-
-    turnOFF() {
-        const entity = this.switches[0];
-        if (this.isRunning) {
-            this.isRunning = false;
-            node.warn(`${this.name}: Luftentfeuchter ausgeschaltet in ${this.inRoomName}`);
-            return { entity_id: entity, action: "off" };
-        }
-        return { entity_id: entity, action: "Already OFF" };
-    }
 }
 
 class Humidifier extends Device {
@@ -3628,7 +3530,7 @@ class Humidifier extends Device {
         this.hasModes = false; // Erkennung von Modis
         this.isSimpleSwitch = true; // Gerät ist nur ein einfacher Schalter
         this.modes = {
-            interval: false,
+            interval: true,
             small: false,
             large: false,
         };
@@ -3637,29 +3539,44 @@ class Humidifier extends Device {
     setData(data, context) {
         this.setFromtent(context.tentName);
         this.identifyIfFromAmbient();
+        //this.data = { ...this.data, ...data };
         this.updateChangedData(this.data, data);
         this.identifySwitchesAndSensors();
         this.updateIsRunningState();
         this.identifyHumidifierType();
-        this.identifyMode(); // Statt identifyIfHasModes
+        this.identifyIfHasModes();
     }
 
-
     identifyMode() {
+        if (!this.sensors || !Array.isArray(this.sensors)) {
+            console.log(`${this.name}: Keine Sensoren definiert.`);
+            return;
+        }
+
+        // Suche nach einem passenden Sensor (select.* und mode im Namen)
         const modeSensor = this.sensors.find(sensor => sensor.startsWith("select.") && sensor.includes("mode"));
+
         if (!modeSensor) {
-            node.warn(`${this.name}: Kein passender Modus-Sensor gefunden.`);
+            console.log(`${this.name}: Kein passender Modus-Sensor gefunden.`);
             return;
         }
 
+        // Moduswert aus den Daten extrahieren
         const modeValue = this.data[modeSensor];
+
         if (!modeValue || modeValue === "unavailable") {
-            node.warn(`${this.name}: Kein gültiger Moduswert verfügbar für Sensor "${modeSensor}".`);
+            console.log(`${this.name}: Kein gültiger Moduswert verfügbar für Sensor "${modeSensor}".`);
             return;
         }
 
-        this.modes = { interval: false, small: false, large: false };
+        // Alle Modi zurücksetzen
+        this.modes = {
+            interval: false,
+            small: false,
+            large: false,
+        };
 
+        // Modus basierend auf dem Wert setzen
         switch (modeValue) {
             case "interval":
                 this.modes.interval = true;
@@ -3671,9 +3588,11 @@ class Humidifier extends Device {
                 this.modes.large = true;
                 break;
             default:
-                node.warn(`${this.name}: Unbekannter Moduswert "${modeValue}" für Sensor "${modeSensor}".`);
+                console.log(`${this.name}: Unbekannter Moduswert "${modeValue}" für Sensor "${modeSensor}".`);
                 break;
         }
+
+        //console.log(`${this.name}: Modus erkannt: ${modeValue}`);
     }
 
     identifyHumidifierType() {
@@ -3681,24 +3600,55 @@ class Humidifier extends Device {
             if (Object.keys(this.data).some(key => key.startsWith("humidifier."))) {
                 this.realHumidifier = true;
                 this.isSimpleSwitch = false;
+            } else if (Object.keys(this.data).some(key => key.startsWith("switch."))) {
+                this.isSimpleSwitch = true;
+                this.realHumidifier = false;
+            } else {
+                this.realHumidifier = false;
+                this.isSimpleSwitch = true;
             }
+        } else {
+            console.log(`${this.name}: Keine Daten vorhanden, Standard: Einfacher Schalter.`);
+            this.realHumidifier = false;
+            this.isSimpleSwitch = true;
+        }
+    }
+
+    identifyIfHasModes() {
+        if (this.data && this.data["select.humidifier_mode"]) {
+            this.realHumidifier = true;
+            this.hasModes = true;
+            this.isSimpleSwitch = false;
+            this.identifyMode()
+        } else {
+            this.hasModes = false;
         }
     }
 
     setHumidityLevel(humlevel) {
-        if (!this.realHumidifier) return { entity_id: this.switches[0], action: "Unsupported" };
+        if (!this.realHumidifier) {
+            return { entity_id: this.switches[0], action: "Unsupported" };
+        }
         const entity = this.sensors[0];
         this.targetHumidity = humlevel;
-        node.warn(`${this.name}: Luftfeuchtigkeit auf ${humlevel}% gesetzt in ${this.inRoomName}`);
+        console.log(`${this.name}: Luftfeuchtigkeit auf ${humlevel}% gesetzt in ${this.inRoomName}`);
         return { entity_id: entity, action: "setHumidity", value: humlevel };
     }
 
     runAction() {
-        if (!this.needChange) return { entity_id: this.switches[0], action: "noChangesNeeded" };
+        if (!this.needChange) {
+            return { entity_id: this.switches[0], action: "noChangesNeeded" };
+        }
 
+        // Wenn es ein einfacher Schalter ist
         if (this.isSimpleSwitch) {
-            return this.action === "increased" || this.action === "on" ? this.turnON() : this.turnOFF();
-        }   if (this.hasModes && this.realHumidifier) {
+            return this.action === "increased" || this.action === "on"
+                ? this.turnON()
+                : this.turnOFF();
+        }
+
+        // Für komplexe Geräte mit Modi
+        if (this.hasModes && this.realHumidifier) {
             const actions = [];
 
             // Gerät einschalten, falls es aus ist
@@ -3710,28 +3660,28 @@ class Humidifier extends Device {
             // Modusänderung basierend auf der Aktion
             if (this.action === "increased") {
                 const modeActions = this.changeMode("increase");
-                actions.push(...modeActions); // Überprüfe, dass `modeActions` korrekt ist
+                actions.push(...(Array.isArray(modeActions) ? modeActions : [modeActions]));
             } else if (this.action === "reduced") {
                 const modeActions = this.changeMode("decrease");
-                actions.push(...modeActions); // Überprüfe, dass `modeActions` korrekt ist
+                actions.push(...(Array.isArray(modeActions) ? modeActions : [modeActions]));
             } else if (this.action === "off") {
                 const turnOffAction = this.turnOFF();
                 actions.push(turnOffAction);
             }
 
             return actions.length > 0 ? actions : { entity_id: this.switches[0], action: "No Action Found" };
-            }
+        }
 
-
-            node.warn(`${this.name}: Keine passenden Aktionen gefunden.`);
-            return { entity_id: this.switches[0], action: "No Action Found" };
+        console.log(`${this.name}: Keine passenden Aktionen gefunden.`);
+        return { entity_id: this.switches[0], action: "No Action Found" };
     }
+
 
     turnON() {
         const entity = this.switches[0];
         if (!this.isRunning) {
             this.isRunning = true;
-            node.warn(`${this.name}: Luftbefeuchter eingeschaltet in ${this.inRoomName}`);
+            console.log(`${this.name}: Luftbefeuchter eingeschaltet in ${this.inRoomName}`);
             return { entity_id: entity, action: "on" };
         }
         return { entity_id: entity, action: "Already ON" };
@@ -3741,66 +3691,116 @@ class Humidifier extends Device {
         const entity = this.switches[0];
         if (this.isRunning) {
             this.isRunning = false;
-            this.closeModes();
-            node.warn(`${this.name}: Luftbefeuchter ausgeschaltet in ${this.inRoomName}`);
+            this.closeModes()
+            console.log(`${this.name}: Luftbefeuchter ausgeschaltet in ${this.inRoomName}`);
             return { entity_id: entity, action: "off" };
         }
         return { entity_id: entity, action: "Already OFF" };
     }
 
-    closeModes() {
-        this.modes.small = true;
-        this.modes.interval = false;
-        this.modes.large = false;
+    closeModes(){
+        this.modes.small = true
+        this.modes.interval = false
+        this.modes.large = false
     }
 
     changeMode(direction) {
         if (!this.hasModes) {
-            node.warn(`${this.name}: Moduswechsel nicht unterstützt.`);
-            return [{ entity_id: this.switches[0], action: "Unsupported" }];
+            console.log(`${this.name}: Moduswechsel nicht unterstützt.`);
+            return { entity_id: this.switches[0], action: "Unsupported" };
         }
-
+    
         const actions = [];
-
-        // Gerät einschalten, wenn es aus ist
-        if (!this.isRunning) {
-            this.isRunning = true;
-            actions.push({ entity_id: this.switches[0], action: "on" });
-            node.warn(`${this.name}: Luftbefeuchter wird eingeschaltet.`);
-        }
-
+    
         // Modusänderung basierend auf der Richtung
         if (direction === "increase") {
-            if (!this.modes.interval) {
+            // Wenn das Gerät aus ist und der Modus "small" ist, setze "interval"
+            if (!this.isRunning && this.modes.small) {
                 this.modes.interval = true;
+                this.modes.small = false;
+                this.modes.large = false;
                 actions.push({ entity_id: "select.humidifier_mode", action: "select", option: "interval" });
             }
-            if (!this.modes.small) {
-                this.modes.small = true;
-                actions.push({ entity_id: "select.humidifier_mode", action: "select", option: "small" });
-            }
-            if (!this.modes.large) {
+            // Wenn das Gerät läuft und im Modus "small" ist, wechsle direkt zu "large"
+            else if (this.isRunning && this.modes.small) {
+                this.modes.interval = false;
+                this.modes.small = false;
                 this.modes.large = true;
                 actions.push({ entity_id: "select.humidifier_mode", action: "select", option: "large" });
             }
-        } else if (direction === "decrease") {
-            if (this.modes.large) {
+            // Wenn der Modus "interval" ist, setze ihn auf "small"
+            else if (this.modes.interval) {
+                this.modes.interval = false;
+                this.modes.small = true;
                 this.modes.large = false;
                 actions.push({ entity_id: "select.humidifier_mode", action: "select", option: "small" });
             }
-            if (this.modes.small) {
+            // Wenn der Modus "small" ist, setze ihn auf "large"
+            else if (this.modes.small) {
+                this.modes.small = false;
+                this.modes.large = true;
+                this.modes.interval = false;
+                actions.push({ entity_id: "select.humidifier_mode", action: "select", option: "large" });
+            }
+        } else if (direction === "decrease") {
+            // Wenn der Modus "large" ist, setze ihn auf "small"
+            if (this.modes.large) {
+                this.modes.large = false;
+                this.modes.small = true;
+                this.modes.interval = false;
+                actions.push({ entity_id: "select.humidifier_mode", action: "select", option: "small" });
+            }
+            // Wenn der Modus "small" ist, setze ihn auf "interval"
+            else if (this.modes.small) {
                 this.modes.small = false;
                 this.modes.interval = true;
+                this.modes.large = false;
                 actions.push({ entity_id: "select.humidifier_mode", action: "select", option: "interval" });
             }
+            // Wenn der Modus "interval" ist, schalte das Gerät aus
+            else if (this.modes.interval) {
+                this.modes.small = false;
+                this.modes.interval = true;
+                this.modes.large = false;
+                actions.unshift({ entity_id: this.switches[0], action: "off" });
+                console.log(`${this.name}: Luftbefeuchter wird ausgeschaltet.`);
+            }
+        }
+    
+        // Gerät einschalten, wenn es aus ist
+        if (!this.isRunning) {
+            this.isRunning = true;
+            actions.unshift({ entity_id: this.switches[0], action: "on" });
+            console.log(`${this.name}: Luftbefeuchter wird eingeschaltet.`);
+        }
+    
+        // Rückgabe der Aktionen
+        return actions.length > 0 ? actions : { entity_id: this.switches[0], action: "No Change" };
+    }
+    
+
+    changeHumidity(delta) {
+        if (!this.realHumidifier) {
+            console.log(`${this.name}: Luftfeuchtigkeit kann nicht geändert werden, da es sich um einen einfachen Schalter handelt.`);
+            return { entity_id: this.switches[0], action: "Unsupported" };
         }
 
-        return actions.length > 0 ? actions : [{ entity_id: this.switches[0], action: "No Change" }];
+        const entity = this.switches[0];
+        const newHumidity = Math.max(
+            this.minHumidity,
+            Math.min(this.maxHumidity, this.currentHumidity + delta)
+        );
+        if (newHumidity === this.currentHumidity) {
+            console.log(`${this.name}: Luftfeuchtigkeit ist bereits auf Grenzwert (${this.currentHumidity}%) in ${this.inRoomName}`);
+            return { entity_id: entity, action: "No Change" };
+        }
+        this.currentHumidity = newHumidity;
+        console.log(`${this.name}: Luftfeuchtigkeit geändert auf ${newHumidity}% in ${this.inRoomName}`);
+        return { entity_id: entity, action: "number", value: newHumidity };
     }
-
 }
-
 //NEED TO TEST THIS 
+
 class Dehumidifier extends Device {
     constructor(name) {
         super(name, "dehumidifier");
@@ -3941,6 +3941,101 @@ class Dehumidifier extends Device {
         return { entity_id: entity, action: "Already OFF" };
     }
 
+}
+
+class Heater extends Device {
+    constructor(name) {
+        super(name, "heater");
+    }
+    runAction() {
+        if (!this.needChange) {
+            return { entity_id: this.switches[0], action: "noChangesNeeded" };
+        }
+
+        switch (this.action) {
+            case "off":
+                return this.turnOFF();
+            case "on":
+                return this.turnON();
+            case "increased":
+                return this.turnON();
+            case "reduced":
+                return this.turnOFF();
+            case "unchanged":
+                return { entity_id: this.switches[0], action: "UNCHANGED" };
+            default:
+                node.warn(`${this.name}: Unbekannte Aktion "${this.action}".`);
+                return { entity_id: this.switches[0], action: "Unknown Action" };
+        }
+    }
+
+    turnON() {
+        const entity = this.switches[0];
+        if (!this.isRunning) {
+            this.isRunning = true;
+            node.warn(`${this.name}: Luftentfeuchter eingeschaltet in ${this.inRoomName}`);
+            return { entity_id: entity, action: "on" };
+        }
+        return { entity_id: entity, action: "Already ON" };
+    }
+
+    turnOFF() {
+        const entity = this.switches[0];
+        if (this.isRunning) {
+            this.isRunning = false;
+            node.warn(`${this.name}: Luftentfeuchter ausgeschaltet in ${this.inRoomName}`);
+            return { entity_id: entity, action: "off" };
+        }
+        return { entity_id: entity, action: "Already OFF" };
+    }
+}
+
+class Cooler extends Device {
+    constructor(name) {
+        super(name, "cooler");
+    }
+
+    runAction() {
+        if (!this.needChange) {
+            return { entity_id: this.switches[0], action: "noChangesNeeded" };
+        }
+
+        switch (this.action) {
+            case "off":
+                return this.turnOFF();
+            case "on":
+                return this.turnON();
+            case "increased":
+                return this.turnON();
+            case "reduced":
+                return this.turnOFF();
+            case "unchanged":
+                return { entity_id: this.switches[0], action: "UNCHANGED" };
+            default:
+                node.warn(`${this.name}: Unbekannte Aktion "${this.action}".`);
+                return { entity_id: this.switches[0], action: "Unknown Action" };
+        }
+    }
+
+    turnON() {
+        const entity = this.switches[0];
+        if (!this.isRunning) {
+            this.isRunning = true;
+            node.warn(`${this.name}: Luftentfeuchter eingeschaltet in ${this.inRoomName}`);
+            return { entity_id: entity, action: "on" };
+        }
+        return { entity_id: entity, action: "Already ON" };
+    }
+
+    turnOFF() {
+        const entity = this.switches[0];
+        if (this.isRunning) {
+            this.isRunning = false;
+            node.warn(`${this.name}: Luftentfeuchter ausgeschaltet in ${this.inRoomName}`);
+            return { entity_id: entity, action: "off" };
+        }
+        return { entity_id: entity, action: "Already OFF" };
+    }
 }
 
 class Pump extends Device {
