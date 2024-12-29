@@ -5,13 +5,22 @@
   "data": {
     "items": [
       {
-        "id": "dashboard_opengrowview",
+        "id": "map",
+        "icon": "mdi:map",
+        "title": "Karte",
+        "url_path": "map",
+        "mode": "storage",
         "show_in_sidebar": true,
-        "title": "OpenGrowView",
+        "require_admin": false
+      },
+      {
+        "id": "dashboard_opengrowbox",
+        "show_in_sidebar": true,
+        "icon": "mdi:flower",
+        "title": "OpenGrowBox",
         "require_admin": false,
         "mode": "storage",
-        "url_path": "dashboard-opengrowview",
-        "icon": "mdi:flower-outline"
+        "url_path": "dashboard-opengrowbox"
       }
     ]
   }

@@ -1,0 +1,2348 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_opengrowbox",
+  "data": {
+    "config": {
+      "title": "Dynamische Räume",
+      "views": [
+        {
+          "title": "Select",
+          "path": "select",
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Auswahl",
+                  "badges": [
+                    {
+                      "type": "entity",
+                      "entity": "select.ogb_rooms"
+                    }
+                  ]
+                },
+                {
+                  "type": "custom:bubble-card",
+                  "entity": "select.ogb_rooms",
+                  "button_type": "switch",
+                  "show_icon": true,
+                  "force_icon": true,
+                  "show_name": true,
+                  "show_state": true,
+                  "show_attribute": true,
+                  "scrolling_effect": true,
+                  "card_layout": "large-2-rows",
+                  "button_action": {
+                    "tap_action": {
+                      "action": "toggle"
+                    }
+                  },
+                  "tap_action": {
+                    "action": "more-info"
+                  },
+                  "card_type": "select",
+                  "icon": "mdi:flower-outline",
+                  "sub_button": [],
+                  "name": "Rooms",
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "markdown",
+                  "content": "Aktueller Raum im Select: **{{ states('select.ogb_rooms') }}**\nVerfügbare Räume {% for option in state_attr('select.ogb_rooms', 'options') %} / {{ option }} {% endfor %}\n"
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "type": "button",
+                  "name": "Gehe zu Raumdetails",
+                  "tap_action": {
+                    "action": "navigate",
+                    "navigation_path": "/dashboard-opengrowbox/roomdetails"
+                  },
+                  "show_state": false,
+                  "icon": "mdi:door-closed",
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": 2
+                  }
+                },
+                {
+                  "type": "heading",
+                  "heading": "VPDS",
+                  "heading_style": "subtitle",
+                  "badges": []
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "vertical-stack"
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "domain": "sensor",
+                        "name": "*VPD*",
+                        "options": {
+                          "type": "custom:mini-graph-card",
+                          "name": "Sensor: this.entity_id",
+                          "entities": [
+                            "this.entity_id"
+                          ],
+                          "hours_to_show": 24,
+                          "points_per_hour": 30,
+                          "group_by": "minute",
+                          "align_header": "center",
+                          "align_state": "center",
+                          "show": {
+                            "name": true,
+                            "legend": true,
+                            "icon": false,
+                            "labels": true
+                          },
+                          "color_thresholds": [
+                            {
+                              "value": 0,
+                              "color": "#0007DC"
+                            },
+                            {
+                              "value": 0.4,
+                              "color": "#10BCDF"
+                            },
+                            {
+                              "value": 0.8,
+                              "color": "#22CF9D"
+                            },
+                            {
+                              "value": 1,
+                              "color": "#29DF10"
+                            },
+                            {
+                              "value": 1.25,
+                              "color": "#C3DF10"
+                            },
+                            {
+                              "value": 1.5,
+                              "color": "#DB8800"
+                            },
+                            {
+                              "value": 1.61,
+                              "color": "#F80707"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "exclude": [
+                      {
+                        "entity_id": "*wish*"
+                      },
+                      {
+                        "entity_id": "*ambientvpd*"
+                      },
+                      {
+                        "state": "unknown"
+                      },
+                      {
+                        "state": "unavailable"
+                      },
+                      {
+                        "state": "undefined"
+                      },
+                      {
+                        "state": "NaN"
+                      },
+                      {
+                        "state": "0.0"
+                      },
+                      {
+                        "state": "0"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "vertical-stack",
+                          "cards": [
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "name": "Other Options",
+                                "title": "Room Optionen\n"
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "select"
+                                  }
+                                ],
+                                "exclude": [
+                                  {
+                                    "name": "*Own*"
+                                  },
+                                  {
+                                    "name": "*GLS*"
+                                  },
+                                  {
+                                    "name": "*LightControl*"
+                                  },
+                                  {
+                                    "name": "*CO2*"
+                                  },
+                                  {
+                                    "name": "*Water*"
+                                  },
+                                  {
+                                    "name": "*Drying*"
+                                  },
+                                  {
+                                    "name": "*Humidi*"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "attributes": {
+                        "label": "Modes",
+                        "icon": "mdi:auto-mode"
+                      }
+                    }
+                  ],
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "vertical-stack",
+                          "cards": [
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "name": "TargetVPD",
+                                "title": ""
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "select",
+                                    "name": "*VPDLight*"
+                                  },
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "number"
+                                  }
+                                ],
+                                "exclude": [
+                                  {
+                                    "name": "*Weight*"
+                                  },
+                                  {
+                                    "name": "*CO2*"
+                                  },
+                                  {
+                                    "name": "*Water*"
+                                  },
+                                  {
+                                    "name": "*Pump*"
+                                  },
+                                  {
+                                    "name": "*Output*"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "attributes": {
+                        "label": "VPD Targets",
+                        "icon": "mdi:target"
+                      }
+                    }
+                  ],
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "vertical-stack",
+                          "cards": [
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "name": "TargetVPD",
+                                "title": ""
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "sensor",
+                                    "name": "*Tank*"
+                                  },
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "switch",
+                                    "name": "*Pump*"
+                                  },
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "number"
+                                  }
+                                ],
+                                "exclude": [
+                                  {
+                                    "name": "*Weight*"
+                                  },
+                                  {
+                                    "name": "*CO2*"
+                                  },
+                                  {
+                                    "name": "*Leaf*"
+                                  },
+                                  {
+                                    "name": "*VPD*"
+                                  },
+                                  {
+                                    "name": "*OGB*"
+                                  },
+                                  {
+                                    "name": "*Light*"
+                                  },
+                                  {
+                                    "name": "*light*"
+                                  },
+                                  {
+                                    "name": "*Output*"
+                                  },
+                                  {
+                                    "name": "*Switch*"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "attributes": {
+                        "label": "Bewässerung",
+                        "icon": "mdi:target"
+                      }
+                    }
+                  ],
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "vertical-stack",
+                          "cards": [
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "name": "TargetVPD",
+                                "title": ""
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "select",
+                                    "name": "*CO2*"
+                                  },
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "number"
+                                  }
+                                ],
+                                "exclude": [
+                                  {
+                                    "name": "*Weight*"
+                                  },
+                                  {
+                                    "name": "*Output*"
+                                  },
+                                  {
+                                    "entity_id": "*vpd*"
+                                  },
+                                  {
+                                    "entity_id": "*leaf*"
+                                  },
+                                  {
+                                    "entity_id": "*wat*"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "attributes": {
+                        "label": "CO2 Control",
+                        "icon": "mdi:target"
+                      }
+                    }
+                  ],
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": "auto"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "vertical-stack",
+                          "cards": [
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "title": ""
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "select",
+                                    "name": "*LightCon*"
+                                  },
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "time",
+                                    "name": "*LightO*"
+                                  },
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "time",
+                                    "name": "*Sun*"
+                                  }
+                                ],
+                                "exclude": [
+                                  {
+                                    "name": "*VPD*"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "attributes": {
+                        "label": "Lichtzeiten",
+                        "icon": "mdi:lightbulb-alert"
+                      }
+                    }
+                  ],
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "vertical-stack",
+                          "cards": [
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "name": "Master",
+                                "title": ""
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "name": "*Weight*"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "attributes": {
+                        "label": "Gewichtungen",
+                        "icon": "mdi:weight-pound"
+                      }
+                    }
+                  ],
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "vertical-stack",
+                          "cards": [
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "title": ""
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "select",
+                                    "name": "*GLS*"
+                                  },
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "time",
+                                    "name": "*GLS*"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "attributes": {
+                        "label": "Experimental",
+                        "icon": "mdi:lightbulb-alert"
+                      }
+                    }
+                  ],
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "vertical-stack",
+                          "cards": [
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "name": "Other Options",
+                                "title": ""
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "select"
+                                  }
+                                ],
+                                "exclude": [
+                                  {
+                                    "name": "*Mode*"
+                                  },
+                                  {
+                                    "name": "*Control*"
+                                  },
+                                  {
+                                    "name": "*Plant*"
+                                  },
+                                  {
+                                    "name": "*Water*"
+                                  },
+                                  {
+                                    "name": "*Night*"
+                                  },
+                                  {
+                                    "name": "*Weigth*"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "attributes": {
+                        "label": "Device Configurator",
+                        "icon": "mdi:comment-flash"
+                      }
+                    }
+                  ],
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": "auto"
+                  }
+                }
+              ]
+            }
+          ],
+          "badges": [
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "green",
+              "state_content": "name",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/roomdetails"
+              },
+              "entity": "select.ogb_rooms",
+              "icon": "mdi:flower-tulip-outline",
+              "name": "To Room"
+            },
+            {
+              "type": "custom:mushroom-template-badge",
+              "content": "NodeRed",
+              "icon": "mdi:mushroom",
+              "color": "red",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/a0d7b954_nodered"
+              }
+            },
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "yellow",
+              "state_content": "name",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/Controlls"
+              },
+              "entity": "select.ogb_rooms",
+              "icon": "mdi:controller",
+              "name": "Controlls"
+            },
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "deep-orange",
+              "state_content": "name",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/devices"
+              },
+              "entity": "select.ogb_rooms",
+              "icon": "mdi:devices",
+              "name": "Devices"
+            }
+          ]
+        },
+        {
+          "title": "Room",
+          "path": "roomdetails",
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "custom:auto-entities",
+                          "card": {
+                            "type": "custom:layout-card",
+                            "layout_type": "grid",
+                            "layout": {
+                              "grid-template-columns": "repeat(auto-fill, minmax(150px, 1fr))"
+                            },
+                            "cards": []
+                          },
+                          "filter": {
+                            "include": [
+                              {
+                                "area": "${ogb_room}",
+                                "domain": "sensor"
+                              }
+                            ],
+                            "exclude": [
+                              {
+                                "domain": "select"
+                              },
+                              {
+                                "domain": "number"
+                              },
+                              {
+                                "entity_id": "*_model*"
+                              },
+                              {
+                                "entity_id": "*ogb*"
+                              },
+                              {
+                                "entity_id": "*wifi*"
+                              },
+                              {
+                                "entity_id": "*ssid*"
+                              },
+                              {
+                                "entity_id": "*mqtt*"
+                              },
+                              {
+                                "entity_id": "*apparentpower*"
+                              },
+                              {
+                                "entity_id": "*factor*"
+                              },
+                              {
+                                "entity_id": "*restart*"
+                              },
+                              {
+                                "entity_id": "*today*"
+                              },
+                              {
+                                "entity_id": "*energy_total*"
+                              },
+                              {
+                                "entity_id": "*energy_voltage*"
+                              },
+                              {
+                                "entity_id": "*energy_current*"
+                              },
+                              {
+                                "entity_id": "*totalstarttime*"
+                              },
+                              {
+                                "entity_id": "*yesterday*"
+                              },
+                              {
+                                "entity_id": "*Model*"
+                              },
+                              {
+                                "entity_id": "*factor*"
+                              },
+                              {
+                                "entity_id": "*restart*"
+                              },
+                              {
+                                "state": "unknown"
+                              },
+                              {
+                                "state": "unavailable"
+                              }
+                            ]
+                          },
+                          "sort": {
+                            "method": "state",
+                            "reverse": true
+                          }
+                        }
+                      },
+                      "attributes": {
+                        "label": "Sensors",
+                        "icon": "mdi:data-matrix"
+                      }
+                    },
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "custom:auto-entities",
+                          "card": {
+                            "type": "custom:layout-card",
+                            "layout_type": "grid",
+                            "layout": {
+                              "grid-template-columns": "repeat(auto-fill, minmax(150px, 1fr))"
+                            },
+                            "cards": []
+                          },
+                          "filter": {
+                            "include": [
+                              {
+                                "area": "${ogb_room}"
+                              }
+                            ],
+                            "exclude": [
+                              {
+                                "name": "*Own*"
+                              },
+                              {
+                                "name": "*Control*"
+                              },
+                              {
+                                "domain": "select"
+                              },
+                              {
+                                "domain": "sensor"
+                              },
+                              {
+                                "domain": "time"
+                              },
+                              {
+                                "entity_id": "*wifi*"
+                              },
+                              {
+                                "entity_id": "*ssid*"
+                              },
+                              {
+                                "entity_id": "*mqtt*"
+                              },
+                              {
+                                "entity_id": "*ApparentPower*"
+                              },
+                              {
+                                "entity_id": "*factor*"
+                              },
+                              {
+                                "entity_id": "*restart*"
+                              },
+                              {
+                                "entity_id": "*Period*"
+                              },
+                              {
+                                "entity_id": "*TotalStartTime*"
+                              },
+                              {
+                                "entity_id": "*Model*"
+                              },
+                              {
+                                "entity_id": "*factor*"
+                              },
+                              {
+                                "entity_id": "*restart*"
+                              },
+                              {
+                                "state": "unknown"
+                              },
+                              {
+                                "state": "unavailable"
+                              }
+                            ]
+                          },
+                          "sort": {
+                            "method": "state",
+                            "reverse": true
+                          }
+                        }
+                      },
+                      "attributes": {
+                        "label": "Aktoren",
+                        "icon": "mdi:switch"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "column_span": 1
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "custom:auto-entities",
+                          "card": {
+                            "type": "custom:layout-card",
+                            "layout_type": "grid",
+                            "layout": {
+                              "grid-template-columns": "repeat(auto-fill, minmax(200px, 1fr))"
+                            },
+                            "cards": []
+                          },
+                          "filter": {
+                            "include": [
+                              {
+                                "area": "${ogb_room}",
+                                "name": "*VPD*",
+                                "options": {
+                                  "type": "custom:mini-graph-card",
+                                  "name": "this.entity_id",
+                                  "entities": [
+                                    "this.entity_id"
+                                  ],
+                                  "hours_to_show": 24,
+                                  "points_per_hour": 30,
+                                  "group_by": "minute",
+                                  "align_header": "center",
+                                  "align_state": "center",
+                                  "show": {
+                                    "name": true,
+                                    "legend": true,
+                                    "icon": false,
+                                    "labels": true
+                                  },
+                                  "color_thresholds": [
+                                    {
+                                      "value": 0,
+                                      "color": "#0007DC"
+                                    },
+                                    {
+                                      "value": 0.4,
+                                      "color": "#10BCDF"
+                                    },
+                                    {
+                                      "value": 0.8,
+                                      "color": "#22CF9D"
+                                    },
+                                    {
+                                      "value": 1,
+                                      "color": "#29DF10"
+                                    },
+                                    {
+                                      "value": 1.25,
+                                      "color": "#C3DF10"
+                                    },
+                                    {
+                                      "value": 1.5,
+                                      "color": "#DB8800"
+                                    },
+                                    {
+                                      "value": 1.61,
+                                      "color": "#F80707"
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "area": "${ogb_room}",
+                                "name": "*AVG*",
+                                "options": {
+                                  "type": "custom:mini-graph-card",
+                                  "name": "this.entity_id",
+                                  "entities": [
+                                    "this.entity_id"
+                                  ],
+                                  "hours_to_show": 24,
+                                  "points_per_hour": 30,
+                                  "group_by": "minute",
+                                  "align_header": "center",
+                                  "align_state": "center",
+                                  "show": {
+                                    "name": true,
+                                    "legend": true,
+                                    "icon": false,
+                                    "labels": true
+                                  },
+                                  "color_thresholds": [
+                                    {
+                                      "value": 0,
+                                      "color": "#deeeef"
+                                    },
+                                    {
+                                      "value": 5,
+                                      "color": "#aae4e6"
+                                    },
+                                    {
+                                      "value": 10,
+                                      "color": "#94eff1"
+                                    },
+                                    {
+                                      "value": 15,
+                                      "color": "#35f0ac"
+                                    },
+                                    {
+                                      "value": 20,
+                                      "color": "#40e55e"
+                                    },
+                                    {
+                                      "value": 25,
+                                      "color": "#f5c012"
+                                    },
+                                    {
+                                      "value": 28,
+                                      "color": "#f56612"
+                                    },
+                                    {
+                                      "value": 30,
+                                      "color": "#f51212"
+                                    },
+                                    {
+                                      "value": 40,
+                                      "color": "#12edf5"
+                                    },
+                                    {
+                                      "value": 50,
+                                      "color": "#1290f5"
+                                    },
+                                    {
+                                      "value": 60,
+                                      "color": "#1227f5"
+                                    },
+                                    {
+                                      "value": 70,
+                                      "color": "#8612f5"
+                                    },
+                                    {
+                                      "value": 80,
+                                      "color": "#eb12f5"
+                                    },
+                                    {
+                                      "value": 85,
+                                      "color": "#f51212"
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "exclude": [
+                              {
+                                "entity_id": "*wish*"
+                              },
+                              {
+                                "entity_id": "*ambientvpd*"
+                              },
+                              {
+                                "entity_id": "*holdvpd*"
+                              },
+                              {
+                                "state": "unknown"
+                              },
+                              {
+                                "state": "unavailable"
+                              },
+                              {
+                                "state": "undefined"
+                              },
+                              {
+                                "state": "NaN"
+                              },
+                              {
+                                "state": "0.0"
+                              },
+                              {
+                                "state": "0"
+                              }
+                            ]
+                          }
+                        },
+                        "show_empty": false
+                      },
+                      "attributes": {
+                        "label": null,
+                        "icon": "mdi:flower"
+                      }
+                    },
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "custom:auto-entities",
+                          "card": {
+                            "type": "custom:layout-card",
+                            "layout_type": "grid",
+                            "layout": {
+                              "grid-template-columns": "repeat(auto-fill, minmax(200px, 1fr))"
+                            },
+                            "cards": []
+                          },
+                          "filter": {
+                            "include": [
+                              {
+                                "area": "${ogb_room}",
+                                "domain": "sensor",
+                                "attributes": {
+                                  "device_class": "temperature"
+                                },
+                                "options": {
+                                  "type": "custom:mini-graph-card",
+                                  "name": "this.entity_id",
+                                  "entities": [
+                                    "this.entity_id"
+                                  ],
+                                  "hours_to_show": 24,
+                                  "points_per_hour": 30,
+                                  "group_by": "minute",
+                                  "align_header": "center",
+                                  "align_state": "center",
+                                  "show": {
+                                    "name": true,
+                                    "legend": true,
+                                    "icon": false,
+                                    "labels": true
+                                  },
+                                  "color_thresholds": [
+                                    {
+                                      "value": 0,
+                                      "color": "#0000ff"
+                                    },
+                                    {
+                                      "value": 20,
+                                      "color": "#00ff00"
+                                    },
+                                    {
+                                      "value": 30,
+                                      "color": "#ff0000"
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "exclude": [
+                              {
+                                "entity_id": "*avg*"
+                              },
+                              {
+                                "entity_id": "*ambient*"
+                              },
+                              {
+                                "entity_id": "*outsite*"
+                              },
+                              {
+                                "entity_id": "*ogb*"
+                              },
+                              {
+                                "state": "unknown"
+                              },
+                              {
+                                "state": "unavailable"
+                              }
+                            ]
+                          }
+                        },
+                        "show_empty": false
+                      },
+                      "attributes": {
+                        "icon": "mdi:thermometer"
+                      }
+                    },
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "custom:auto-entities",
+                          "card": {
+                            "type": "custom:layout-card",
+                            "layout_type": "grid",
+                            "layout": {
+                              "grid-template-columns": "repeat(auto-fill, minmax(200px, 1fr))"
+                            },
+                            "cards": []
+                          },
+                          "filter": {
+                            "include": [
+                              {
+                                "area": "${ogb_room}",
+                                "domain": "sensor",
+                                "attributes": {
+                                  "device_class": "humidity"
+                                },
+                                "options": {
+                                  "type": "custom:mini-graph-card",
+                                  "name": "this.entity_id",
+                                  "entities": [
+                                    "this.entity_id"
+                                  ],
+                                  "hours_to_show": 24,
+                                  "points_per_hour": 30,
+                                  "group_by": "minute",
+                                  "align_header": "center",
+                                  "align_state": "center",
+                                  "show": {
+                                    "name": true,
+                                    "legend": true,
+                                    "icon": false,
+                                    "labels": true
+                                  },
+                                  "color_thresholds": [
+                                    {
+                                      "value": 30,
+                                      "color": "#0000ff"
+                                    },
+                                    {
+                                      "value": 50,
+                                      "color": "#00ff00"
+                                    },
+                                    {
+                                      "value": 70,
+                                      "color": "#ff0000"
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "exclude": [
+                              {
+                                "entity_id": "*avg*"
+                              },
+                              {
+                                "entity_id": "*ambient*"
+                              },
+                              {
+                                "entity_id": "*outsite*"
+                              },
+                              {
+                                "entity_id": "*ogb*"
+                              },
+                              {
+                                "state": "unknown"
+                              },
+                              {
+                                "state": "unavailable"
+                              }
+                            ]
+                          }
+                        },
+                        "show_empty": false
+                      },
+                      "attributes": {
+                        "icon": "mdi:water"
+                      }
+                    },
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "custom:auto-entities",
+                          "card": {
+                            "type": "custom:layout-card",
+                            "layout_type": "grid",
+                            "layout": {
+                              "grid-template-columns": "repeat(auto-fill, minmax(200px, 1fr))"
+                            },
+                            "cards": []
+                          },
+                          "filter": {
+                            "include": [
+                              {
+                                "area": "${ogb_room}",
+                                "name": "*Ambient*",
+                                "options": {
+                                  "type": "custom:mini-graph-card",
+                                  "name": "this.entity_id",
+                                  "entities": [
+                                    "this.entity_id"
+                                  ],
+                                  "hours_to_show": 24,
+                                  "points_per_hour": 30,
+                                  "group_by": "minute",
+                                  "align_header": "center",
+                                  "align_state": "center",
+                                  "show": {
+                                    "name": true,
+                                    "legend": true,
+                                    "icon": false,
+                                    "labels": true
+                                  },
+                                  "color_thresholds": [
+                                    {
+                                      "value": 5,
+                                      "color": "#66ffff"
+                                    },
+                                    {
+                                      "value": 18,
+                                      "color": "#66ffff"
+                                    },
+                                    {
+                                      "value": 19,
+                                      "color": "#80ffaa"
+                                    },
+                                    {
+                                      "value": 23,
+                                      "color": "#80ffaa"
+                                    },
+                                    {
+                                      "value": 24,
+                                      "color": "#00ff55"
+                                    },
+                                    {
+                                      "value": 28,
+                                      "color": "#00ff55"
+                                    },
+                                    {
+                                      "value": 29,
+                                      "color": "#ff0000"
+                                    },
+                                    {
+                                      "value": 32,
+                                      "color": "#ff0000"
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "exclude": [
+                              {
+                                "name": "*VPD*"
+                              }
+                            ]
+                          }
+                        },
+                        "show_empty": false
+                      },
+                      "attributes": {
+                        "label": null,
+                        "icon": "mdi:television-ambient-light"
+                      }
+                    },
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "custom:auto-entities",
+                          "card": {
+                            "type": "custom:layout-card",
+                            "layout_type": "grid",
+                            "layout": {
+                              "grid-template-columns": "repeat(auto-fill, minmax(200px, 1fr))"
+                            },
+                            "cards": []
+                          },
+                          "filter": {
+                            "include": [
+                              {
+                                "area": "${ogb_room}",
+                                "name": "*Outsite*",
+                                "options": {
+                                  "type": "custom:mini-graph-card",
+                                  "name": "this.entity_id",
+                                  "entities": [
+                                    "this.entity_id"
+                                  ],
+                                  "hours_to_show": 24,
+                                  "points_per_hour": 30,
+                                  "group_by": "minute",
+                                  "align_header": "center",
+                                  "align_state": "center",
+                                  "show": {
+                                    "name": true,
+                                    "legend": true,
+                                    "icon": false,
+                                    "labels": true
+                                  },
+                                  "color_thresholds": [
+                                    {
+                                      "value": 35,
+                                      "color": "#b3ffff"
+                                    },
+                                    {
+                                      "value": 40,
+                                      "color": "#b3ffff"
+                                    },
+                                    {
+                                      "value": 45,
+                                      "color": "#80ffd4"
+                                    },
+                                    {
+                                      "value": 50,
+                                      "color": "#80ffd4"
+                                    },
+                                    {
+                                      "value": 55,
+                                      "color": "#66ff99"
+                                    },
+                                    {
+                                      "value": 60,
+                                      "color": "#66ff99"
+                                    },
+                                    {
+                                      "value": 65,
+                                      "color": "#cc33ff"
+                                    },
+                                    {
+                                      "value": 70,
+                                      "color": "#cc33ff"
+                                    },
+                                    {
+                                      "value": 75,
+                                      "color": "#ff0000"
+                                    },
+                                    {
+                                      "value": 80,
+                                      "color": "#ff0000"
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "exclude": [
+                              {
+                                "name": "*VPD*"
+                              }
+                            ]
+                          }
+                        },
+                        "show_empty": false
+                      },
+                      "attributes": {
+                        "label": null,
+                        "icon": "mdi:weather-partly-lightning"
+                      }
+                    }
+                  ],
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": 1
+                  }
+                }
+              ],
+              "column_span": 1
+            }
+          ],
+          "badges": [
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "primary",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/select"
+              },
+              "name": "Hauptmenü",
+              "icon": "mdi:cellphone-information",
+              "entity": "select.ogb_rooms"
+            },
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "yellow",
+              "state_content": "name",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/Controlls"
+              },
+              "entity": "select.ogb_rooms",
+              "icon": "mdi:controller",
+              "name": "Controlls"
+            },
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "deep-orange",
+              "state_content": "name",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/devices"
+              },
+              "entity": "select.ogb_rooms",
+              "icon": "mdi:devices",
+              "name": "Devices"
+            },
+            {
+              "type": "custom:mushroom-template-card",
+              "primary": "{{ states('select.ogb_rooms') }}",
+              "icon": "mdi:flower",
+              "icon_color": "red",
+              "double_tap_action": {
+                "action": "perform-action",
+                "perform_action": ""
+              },
+              "tap_action": {
+                "action": "none"
+              },
+              "hold_action": {
+                "action": "none"
+              },
+              "secondary": ""
+            }
+          ],
+          "max_columns": 4,
+          "icon": "",
+          "cards": [],
+          "subview": false
+        },
+        {
+          "type": "sections",
+          "path": "Controlls",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 2,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "area": "*",
+                        "domain": "select",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "select",
+                          "button_type": "select",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:select-arrow-down",
+                          "show_icon": false,
+                          "show_state": true,
+                          "styles": ".bubble-select-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, grey, lightblue, green)' \n    : 'linear-gradient(120deg, white,cyan, #9400D3, #800080)'} !important;\n}\n.bubble-select-card-container {\n  background: rgba(51,153,255,0.7) !important;\n  color: black !important;\n}\n.bubble-icon-container {\n  color: white !important;\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "state",
+                    "reverse": true
+                  },
+                  "show_empty": true,
+                  "grid_options": {
+                    "columns": 48,
+                    "rows": 1
+                  }
+                }
+              ],
+              "column_span": 4
+            }
+          ],
+          "max_columns": 4,
+          "title": "Controlls",
+          "cards": [],
+          "badges": [
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "primary",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/select"
+              },
+              "name": "Hauptmenü",
+              "icon": "mdi:cellphone-information",
+              "entity": "select.ogb_rooms"
+            },
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "green",
+              "state_content": "name",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/roomdetails"
+              },
+              "entity": "select.ogb_rooms",
+              "icon": "mdi:flower-tulip-outline",
+              "name": "To Room"
+            },
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "deep-orange",
+              "state_content": "name",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/devices"
+              },
+              "entity": "select.ogb_rooms",
+              "icon": "mdi:devices",
+              "name": "Devices"
+            }
+          ]
+        },
+        {
+          "type": "sections",
+          "max_columns": 4,
+          "title": "Devices",
+          "path": "devices",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Exhausts",
+                  "heading_style": "subtitle"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "domain": "fan",
+                        "state": "on",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "slider",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   orange, red, #ffbf80);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-range-fill {\n  background: linear-gradient(125deg,yellow,green);\n  opacity: 1 !important;\n  border-radius: 10px;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\nha-card.is-on .bubble-button-card-container {\n  background: linear-gradient(125deg, \n   white,grey);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\nha-card.is-on .bubble-icon-container {\n  background: black;\n  border: 0.12rem solid rgba(0, 0, 0, 0.7);\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "show_empty": true
+                },
+                {
+                  "type": "heading",
+                  "heading": "Vents",
+                  "heading_style": "subtitle"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "domain": "light",
+                        "state": "on",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "slider",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:fan",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   orange, red, #ffbf80);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-range-fill {\n  background: linear-gradient(125deg,yellow,green);\n  opacity: 1 !important;\n  border-radius: 10px;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\nha-card.is-on .bubble-button-card-container {\n  background: linear-gradient(125deg, \n   white,grey);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\nha-card.is-on .bubble-icon-container {\n  background: black;\n  border: 0.12rem solid rgba(0, 0, 0, 0.7);\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "show_empty": true
+                },
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "LightSwitches"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "area": "*",
+                        "domain": "switch",
+                        "name": "**",
+                        "entity_id": "*light*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:lightbulb-cfl",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, rgba(255,255,255,0.5), rgba(250,225,0,0.8)) !important;\n  color: black !important;\n  animation: gradientShift 5s ease infinite;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 1px 1px 5px #ffffff;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, grey, yellow, orange)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 255, 255, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n@keyframes gradientShift {\n  0% { background: rgba(255, 0, 0, 0.5); }\n  50% { background: rgba(0, 255, 0, 0.5); }\n  100% { background: rgba(0, 0, 255, 0.5); }\n}\n\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": [
+                      {
+                        "domain": "fan"
+                      },
+                      {
+                        "domain": "humdifier"
+                      },
+                      {
+                        "entity_id": "*vent*"
+                      },
+                      {
+                        "entity_id": "*ogb*"
+                      },
+                      {
+                        "entity_id": "sensor*"
+                      }
+                    ]
+                  },
+                  "show_empty": true
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "LightSetters"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "area": "*",
+                        "name": "**",
+                        "domain": "number",
+                        "entity_id": "*light*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "slider",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:select-color",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   orange, red, #ffbf80);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-range-fill {\n  background: linear-gradient(125deg,yellow,green);\n  opacity: 1 !important;\n  border-radius: 10px;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\nha-card.is-on .bubble-button-card-container {\n  background: linear-gradient(125deg, \n   white,grey);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\nha-card.is-on .bubble-icon-container {\n  background: black;\n  border: 0.12rem solid rgba(0, 0, 0, 0.7);\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": [
+                      {
+                        "domain": "fan"
+                      },
+                      {
+                        "domain": "humdifier"
+                      },
+                      {
+                        "entity_id": "*vent*"
+                      },
+                      {
+                        "entity_id": "*ogb*"
+                      },
+                      {
+                        "entity_id": "sensor*"
+                      }
+                    ]
+                  },
+                  "sort": null,
+                  "show_empty": true
+                },
+                {
+                  "type": "heading",
+                  "heading": "Climate",
+                  "heading_style": "subtitle"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "domain": "climate",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "climate",
+                          "show_attribute": true,
+                          "show_last_changed": true,
+                          "icon": "mdi:thermometer",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, #003366, #3399FF, #66CCFF);\n  background-size: 400% 400%;\n  animation: climateShift 4s ease infinite;\n  color: #FFFFFF !important;\n  border: 0.16rem solid rgba(51, 153, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 0 0 20px rgba(51, 153, 255, 0.9);\n}\n.bubble-icon-container {\n  color: #66CCFF !important;\n  border: 0.12rem solid rgba(51, 153, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 0 15px rgba(51, 153, 255, 0.9);\n  animation: iconCoolGlow 2s infinite alternate;\n}\nha-card.is-on .bubble-button-card-container {\n  background: linear-gradient(45deg, #3399FF, #003366, #66CCFF);\n  background-size: 400% 400%;\n  animation: climateShift 4s ease infinite;\n  color: #FFFFFF !important;\n  border: 0.16rem solid rgba(51, 153, 255, 0.9);\n  box-shadow: 0 0 25px rgba(51, 153, 255, 1);\n}\nha-card.is-on .bubble-icon-container {\n  background: #003366;\n  border: 0.12rem solid rgba(51, 153, 255, 0.8);\n  box-shadow: 0 0 20px rgba(51, 153, 255, 1);\n}\n@keyframes climateShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconCoolGlow {\n  0% { box-shadow: 0 0 10px rgba(51, 153, 255, 0.7); }\n  100% { box-shadow: 0 0 20px rgba(51, 153, 255, 1); }\n}\n",
+                          "sub_button": [
+                            {
+                              "name": "HVAC modes menu",
+                              "select_attribute": "hvac_modes",
+                              "show_arrow": false,
+                              "state_background": false
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "exclude": [
+                      {
+                        "entity_id": "*a012*"
+                      }
+                    ]
+                  },
+                  "show_empty": true
+                },
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Hum"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "domain": "switch",
+                        "entity_id": "*humidifier*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:air-humidifier",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   lightblue,cyan,violet);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, cyan, lightblue, blue)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      },
+                      {
+                        "domain": "switch",
+                        "entity_id": "*befeucht*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:air-humidifier",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   lightblue,cyan,violet);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, cyan, lightblue, blue)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      },
+                      {
+                        "domain": "humidifier",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:air-humidifier",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   lightblue,cyan,violet);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-range-fill { \n  background: rgba(255, 255, 255, 0.5) !important;\n  opacity: 1 !important;\n  border-radius: 10px;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, cyan, lightblue, blue)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\nha-card.is-on .bubble-button-card-container {\n  background: linear-gradient(45deg, \n   lightblue,cyan,violet);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\nha-card.is-on .bubble-icon-container {\n  color: cyan !important;\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      },
+                      {
+                        "domain": "select",
+                        "entity_id": "*humidifier*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "select",
+                          "button_type": "select",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:select-color",
+                          "show_state": true,
+                          "styles": ".bubble-select-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, grey, lightblue, green)' \n    : 'linear-gradient(120deg, white,cyan, #9400D3, #800080)'} !important;\n}\n.bubble-select-card-container {\n  background: rgba(51,153,255,0.7) !important;\n  color: black !important;\n}\n.bubble-icon-container {\n  color: white !important;\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": null
+                  },
+                  "show_empty": true
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "PumpSwitches"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "name": "*Pump*",
+                        "domain": "switch",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:water-pump",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   lightblue,cyan,violet);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, cyan, lightblue, blue)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-range-fill { \n  background: rgba(255, 255, 255, 0.5) !important;\n  opacity: 1 !important;\n  border-radius: 10px;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\nha-card.is-on .bubble-button-card-container {\n  background: linear-gradient(45deg, \n   lightblue,cyan,violet);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\nha-card.is-on .bubble-icon-container {\n  background: black;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "show_empty": true
+                },
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Pump Setters"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "name": "*Pump*",
+                        "domain": "number",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "slider",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "show_state": true,
+                          "icon": "mdi:select-color",
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   orange, red, #ffbf80);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-range-fill {\n  background: linear-gradient(125deg,cyan,blue);\n  opacity: 1 !important;\n  border-radius: 10px;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\nha-card.is-on .bubble-button-card-container {\n  background: linear-gradient(125deg, \n   white,grey);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\nha-card.is-on .bubble-icon-container {\n  background: black;\n  border: 0.12rem solid rgba(0, 0, 0, 0.7);\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": [
+                      {
+                        "entity_id": "*ogb*"
+                      }
+                    ]
+                  },
+                  "show_empty": true
+                },
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "DeHum"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "domain": "switch",
+                        "entity_id": "*dehumid*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:light-switch",
+                          "show_state": true,
+                          "styles": ".bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, #4B0082, #800080, #9400D3)' \n    : 'linear-gradient(45deg, gray, darkgray)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n"
+                        }
+                      },
+                      {
+                        "domain": "switch",
+                        "entity_id": "*entfeucht*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:light-switch",
+                          "show_state": true,
+                          "styles": ".bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, #4B0082, #800080, #9400D3)' \n    : 'linear-gradient(45deg, gray, darkgray)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "state",
+                    "reverse": true
+                  },
+                  "show_empty": true
+                },
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Cooler"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "domain": "switch",
+                        "entity_id": "*cool*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:light-switch",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   lightblue,cyan,violet);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, cyan, lightblue, blue)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      },
+                      {
+                        "domain": "switch",
+                        "entity_id": "*klima*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:light-switch",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   lightblue,cyan,violet);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, cyan, lightblue, blue)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "state",
+                    "reverse": true
+                  },
+                  "show_empty": true
+                },
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Heater"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "domain": "switch",
+                        "entity_id": "*heater*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:light-switch",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   lightblue,cyan,violet);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, #9400D3, #800080, #4B0082)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      },
+                      {
+                        "domain": "switch",
+                        "entity_id": "*heiz*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:light-switch",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, \n   lightblue,cyan,violet);\n  background-size: 400% 400%;\n  animation: gradientShift 5s ease infinite;\n  color: black !important;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 2px 2px 15px #ffffff;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, #4B0082, #800080, #9400D3)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 0, 0, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "state",
+                    "reverse": true
+                  },
+                  "show_empty": true
+                },
+                {
+                  "type": "heading",
+                  "heading": "CO2 Device",
+                  "heading_style": "subtitle"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "grid",
+                    "columns": 1,
+                    "square": false
+                  },
+                  "card_param": "cards",
+                  "filter": {
+                    "include": [
+                      {
+                        "domain": "switch",
+                        "entity_id": "*carbondiox*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:light-switch",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: rgba(0, 204, 204,0.8) !important;\n  color: black !important;\n}\n.bubble-icon-container {\n  color: white !important;\n}\n"
+                        }
+                      },
+                      {
+                        "domain": "switch",
+                        "entity_id": "*co2*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:light-switch",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: rgba(0, 204, 204,0.8) !important;\n}\n.bubble-icon-container {\n  color: white !important;\n}\n"
+                        }
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "state",
+                    "reverse": true
+                  },
+                  "show_empty": true
+                }
+              ]
+            }
+          ],
+          "badges": [
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "primary",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/select"
+              },
+              "name": "Hauptmenü",
+              "icon": "mdi:cellphone-information",
+              "entity": "select.ogb_rooms"
+            },
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "green",
+              "state_content": "name",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/roomdetails"
+              },
+              "entity": "select.ogb_rooms",
+              "icon": "mdi:flower-tulip-outline",
+              "name": "To Room"
+            },
+            {
+              "type": "entity",
+              "show_name": true,
+              "show_state": false,
+              "show_icon": true,
+              "color": "yellow",
+              "state_content": "name",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/dashboard-opengrowbox/Controlls"
+              },
+              "entity": "select.ogb_rooms",
+              "icon": "mdi:controller",
+              "name": "Controlls"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

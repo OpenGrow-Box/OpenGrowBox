@@ -103,34 +103,6 @@ views:
                 - state: NaN
                 - state: '0.0'
                 - state: '0'
-          - type: custom:tabbed-card
-            tabs:
-              - card:
-                  type: custom:config-template-card
-                  variables:
-                    ogb_room: states['select.ogb_rooms'].state
-                  entities:
-                    - select.ogb_rooms
-                  card:
-                    type: vertical-stack
-                    cards:
-                      - type: custom:auto-entities
-                        card:
-                          type: entities
-                          name: TargetVPD
-                          title: ''
-                        filter:
-                          include:
-                            - area: ${ogb_room}
-                              domain: number
-                          exclude:
-                            - name: '*Weight*'
-                attributes:
-                  label: CO2 Control
-                  icon: mdi:target
-            layout_options:
-              grid_columns: 4
-              grid_rows: auto
       - type: grid
         cards:
           - type: custom:tabbed-card
@@ -155,10 +127,13 @@ views:
                             - area: ${ogb_room}
                               domain: select
                           exclude:
-                            - name: '*Select*'
                             - name: '*Own*'
                             - name: '*GLS*'
-                            - name: '*Light*'
+                            - name: '*LightControl*'
+                            - name: '*CO2*'
+                            - name: '*Water*'
+                            - name: '*Drying*'
+                            - name: '*Humidi*'
                 attributes:
                   label: Modes
                   icon: mdi:auto-mode
@@ -184,14 +159,15 @@ views:
                         filter:
                           include:
                             - area: ${ogb_room}
+                              domain: select
+                              name: '*VPDLight*'
+                            - area: ${ogb_room}
                               domain: number
                           exclude:
                             - name: '*Weight*'
                             - name: '*CO2*'
                             - name: '*Water*'
                             - name: '*Pump*'
-                            - name: '*Light*'
-                            - name: '*light*'
                             - name: '*Output*'
                 attributes:
                   label: VPD Targets
@@ -241,6 +217,41 @@ views:
             layout_options:
               grid_columns: 4
               grid_rows: auto
+          - type: custom:tabbed-card
+            tabs:
+              - card:
+                  type: custom:config-template-card
+                  variables:
+                    ogb_room: states['select.ogb_rooms'].state
+                  entities:
+                    - select.ogb_rooms
+                  card:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:auto-entities
+                        card:
+                          type: entities
+                          name: TargetVPD
+                          title: ''
+                        filter:
+                          include:
+                            - area: ${ogb_room}
+                              domain: select
+                              name: '*CO2*'
+                            - area: ${ogb_room}
+                              domain: number
+                          exclude:
+                            - name: '*Weight*'
+                            - name: '*Output*'
+                            - entity_id: '*vpd*'
+                            - entity_id: '*leaf*'
+                            - entity_id: '*wat*'
+                attributes:
+                  label: CO2 Control
+                  icon: mdi:target
+            layout_options:
+              grid_columns: 4
+              grid_rows: auto
       - type: grid
         cards:
           - type: custom:tabbed-card
@@ -269,12 +280,8 @@ views:
                             - area: ${ogb_room}
                               domain: time
                               name: '*Sun*'
-                            - area: ${ogb_room}
-                              domain: select
-                              name: '*GLS*'
-                            - area: ${ogb_room}
-                              domain: time
-                              name: '*GLS*'
+                          exclude:
+                            - name: '*VPD*'
                 attributes:
                   label: Lichtzeiten
                   icon: mdi:lightbulb-alert
@@ -304,6 +311,35 @@ views:
                 attributes:
                   label: Gewichtungen
                   icon: mdi:weight-pound
+            layout_options:
+              grid_columns: 4
+              grid_rows: auto
+          - type: custom:tabbed-card
+            tabs:
+              - card:
+                  type: custom:config-template-card
+                  variables:
+                    ogb_room: states['select.ogb_rooms'].state
+                  entities:
+                    - select.ogb_rooms
+                  card:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:auto-entities
+                        card:
+                          type: entities
+                          title: ''
+                        filter:
+                          include:
+                            - area: ${ogb_room}
+                              domain: select
+                              name: '*GLS*'
+                            - area: ${ogb_room}
+                              domain: time
+                              name: '*GLS*'
+                attributes:
+                  label: Experimental
+                  icon: mdi:lightbulb-alert
             layout_options:
               grid_columns: 4
               grid_rows: auto
@@ -353,18 +389,13 @@ views:
         entity: select.ogb_rooms
         icon: mdi:flower-tulip-outline
         name: To Room
-      - type: entity
-        show_name: true
-        show_state: false
-        show_icon: true
-        color: deep-orange
-        state_content: name
+      - type: custom:mushroom-template-badge
+        content: NodeRed
+        icon: mdi:mushroom
+        color: red
         tap_action:
           action: navigate
-          navigation_path: /dashboard-opengrowbox/devices
-        entity: select.ogb_rooms
-        icon: mdi:devices
-        name: Devices
+          navigation_path: /a0d7b954_nodered
       - type: entity
         show_name: true
         show_state: false
@@ -377,13 +408,18 @@ views:
         entity: select.ogb_rooms
         icon: mdi:controller
         name: Controlls
-      - type: custom:mushroom-template-badge
-        content: NodeRed
-        icon: mdi:mushroom
-        color: red
+      - type: entity
+        show_name: true
+        show_state: false
+        show_icon: true
+        color: deep-orange
+        state_content: name
         tap_action:
           action: navigate
-          navigation_path: /a0d7b954_nodered
+          navigation_path: /dashboard-opengrowbox/devices
+        entity: select.ogb_rooms
+        icon: mdi:devices
+        name: Devices
   - title: Room
     path: roomdetails
     type: sections
@@ -459,7 +495,6 @@ views:
                         - name: '*Own*'
                         - name: '*Control*'
                         - domain: select
-                        - domain: number
                         - domain: sensor
                         - domain: time
                         - entity_id: '*wifi*'
@@ -878,7 +913,7 @@ views:
           - type: custom:auto-entities
             card:
               type: grid
-              columns: 4
+              columns: 2
               square: false
             card_param: cards
             filter:
@@ -895,12 +930,18 @@ views:
                     show_icon: false
                     show_state: true
                     styles: |
-                      .bubble-button-card-container {
-                        background: rgba(115, 102, 153,0.8) !important;
-                      }
-                      .bubble-range-fill { 
-                        background: rgba(153, 204, 255,0.5) !important;
+                      .bubble-select-background {
                         opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, grey, lightblue, green)' 
+                          : 'linear-gradient(120deg, white,cyan, #9400D3, #800080)'} !important;
+                      }
+                      .bubble-select-card-container {
+                        background: rgba(51,153,255,0.7) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
                       }
               exclude: []
             sort:
@@ -959,7 +1000,7 @@ views:
         cards:
           - type: heading
             heading: Exhausts
-            heading_style: title
+            heading_style: subtitle
           - type: custom:auto-entities
             card:
               type: grid
@@ -979,24 +1020,55 @@ views:
                     show_state: true
                     styles: |
                       .bubble-button-card-container {
-                        background: rgba(255, 128, 0,0.5) !important;
+                        background: linear-gradient(45deg, 
+                         orange, red, #ffbf80);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
                         color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
                       }
-                      .bubble-range-fill { 
-                        background: rgba(255, 128, 0,0.9) !important;
+                      .bubble-range-fill {
+                        background: linear-gradient(125deg,yellow,green);
                         opacity: 1 !important;
+                        border-radius: 10px;
                       }
                       .bubble-icon-container {
-                        color: white !important;
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      ha-card.is-on .bubble-button-card-container {
+                        background: linear-gradient(125deg, 
+                         white,grey);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      ha-card.is-on .bubble-icon-container {
+                        background: black;
+                        border: 0.12rem solid rgba(0, 0, 0, 0.7);
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
                       }
               exclude: []
-            sort:
-              method: state
-              reverse: true
             show_empty: true
           - type: heading
             heading: Vents
-            heading_style: title
+            heading_style: subtitle
           - type: custom:auto-entities
             card:
               type: grid
@@ -1017,282 +1089,52 @@ views:
                     show_state: true
                     styles: |
                       .bubble-button-card-container {
-                        background: rgba(255, 77, 77,0.5) !important;
+                        background: linear-gradient(45deg, 
+                         orange, red, #ffbf80);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
                         color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
                       }
-                      .bubble-range-fill { 
-                        background: rgba(255, 0, 0,0.9) !important;
+                      .bubble-range-fill {
+                        background: linear-gradient(125deg,yellow,green);
                         opacity: 1 !important;
+                        border-radius: 10px;
                       }
                       .bubble-icon-container {
-                        color: white !important;
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      ha-card.is-on .bubble-button-card-container {
+                        background: linear-gradient(125deg, 
+                         white,grey);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      ha-card.is-on .bubble-icon-container {
+                        background: black;
+                        border: 0.12rem solid rgba(0, 0, 0, 0.7);
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
                       }
               exclude: []
-            sort:
-              method: state
-              reverse: true
             show_empty: true
-          - type: heading
-            heading: Climate
-            heading_style: title
-          - type: custom:auto-entities
-            card:
-              type: grid
-              columns: 1
-              square: false
-            card_param: cards
-            filter:
-              include:
-                - domain: climate
-                  options:
-                    type: custom:bubble-card
-                    card_type: climate
-                    show_attribute: true
-                    show_last_changed: true
-                    icon: mdi:light-switch
-                    show_state: true
-                    styles: |
-                      .bubble-button-card-container {
-                        background: rgba(153, 153, 255,0.8) !important;
-                        color: black !important;
-                      }
-                      .bubble-icon-container {
-                        color: white !important;
-                      }
-                    sub_button:
-                      - name: HVAC modes menu
-                        select_attribute: hvac_modes
-                        show_arrow: false
-                        state_background: false
-              exclude: []
-            sort:
-              method: state
-              reverse: true
-            show_empty: true
-          - type: heading
-            heading_style: title
-            heading: Hum
-          - type: custom:auto-entities
-            card:
-              type: grid
-              columns: 1
-              square: false
-            card_param: cards
-            filter:
-              include:
-                - domain: select
-                  entity_id: '*humidifier*'
-                  options:
-                    type: custom:bubble-card
-                    card_type: select
-                    button_type: select
-                    show_attribute: false
-                    show_last_changed: true
-                    icon: mdi:select-color
-                    show_state: true
-                    styles: |
-                      .bubble-select-card-container {
-                        background: rgba(51,153,255,0.7) !important;
-                        color: black !important;
-                      }
-                      .bubble-icon-container {
-                        color: white !important;
-                      }
-                - domain: switch
-                  entity_id: '*humidifier*'
-                  options:
-                    type: custom:bubble-card
-                    card_type: button
-                    button_type: switch
-                    show_attribute: false
-                    show_last_changed: true
-                    icon: mdi:light-switch
-                    show_state: true
-                    styles: |
-                      .bubble-button-card-container {
-                        background: rgba(51, 187, 255,0.7) !important;
-                        color: black !important;
-                      }
-                      .bubble-icon-container {
-                        color: white !important;
-                      }
-                - domain: humidifier
-                  options:
-                    type: custom:bubble-card
-                    card_type: button
-                    button_type: switch
-                    show_attribute: false
-                    show_last_changed: true
-                    icon: mdi:light-switch
-                    show_state: true
-                    styles: |
-                      .bubble-button-card-container {
-                        background: rgba(51, 187, 255,0.7) !important;
-                        color: black !important;
-                      }
-                      .bubble-icon-container {
-                        color: white !important;
-                      }
-              exclude: null
-            sort:
-              method: state
-              reverse: true
-            show_empty: true
-          - type: heading
-            heading_style: title
-            heading: DeHum
-          - type: custom:auto-entities
-            card:
-              type: grid
-              columns: 1
-              square: false
-            card_param: cards
-            filter:
-              include:
-                - domain: switch
-                  entity_id: '*entfeucht*'
-                  options:
-                    type: custom:bubble-card
-                    card_type: button
-                    button_type: switch
-                    show_attribute: false
-                    show_last_changed: true
-                    icon: mdi:light-switch
-                    show_state: true
-                    styles: |
-                      .bubble-button-card-container {
-                        background: rgba(204, 0, 0,0.8) !important;
-                        color: black !important;
-                      }
-                      .bubble-icon-container {
-                        color: white !important;
-                      }
-                - domain: switch
-                  entity_id: '*dehumidi*'
-                  options:
-                    type: custom:bubble-card
-                    card_type: button
-                    button_type: switch
-                    show_attribute: false
-                    show_last_changed: true
-                    icon: mdi:light-switch
-                    show_state: true
-                    styles: |
-                      .bubble-button-card-container {
-                        background: rgba(204, 0, 0,0.8) !important;
-                      }
-              exclude: []
-            sort:
-              method: state
-              reverse: true
-            show_empty: true
-          - type: heading
-            heading_style: title
-            heading: Cooler
-          - type: custom:auto-entities
-            card:
-              type: grid
-              columns: 1
-              square: false
-            card_param: cards
-            filter:
-              include:
-                - domain: switch
-                  entity_id: '*cool*'
-                  options:
-                    type: custom:bubble-card
-                    card_type: button
-                    button_type: switch
-                    show_attribute: false
-                    show_last_changed: true
-                    icon: mdi:light-switch
-                    show_state: true
-                    styles: |
-                      .bubble-button-card-container {
-                        background: rgba(0, 204, 204,0.8) !important;
-                        color: black !important;
-                      }
-                      .bubble-icon-container {
-                        color: white !important;
-                      }
-                - domain: switch
-                  entity_id: '*klima*'
-                  options:
-                    type: custom:bubble-card
-                    card_type: button
-                    button_type: switch
-                    show_attribute: false
-                    show_last_changed: true
-                    icon: mdi:light-switch
-                    show_state: true
-                    styles: |
-                      .bubble-button-card-container {
-                        background: rgba(0, 204, 204,0.8) !important;
-                      }
-                      .bubble-icon-container {
-                        color: white !important;
-                      }
-              exclude: []
-            sort:
-              method: state
-              reverse: true
-            show_empty: true
-          - type: heading
-            heading_style: title
-            heading: Heater
-          - type: custom:auto-entities
-            card:
-              type: grid
-              columns: 1
-              square: false
-            card_param: cards
-            filter:
-              include:
-                - domain: switch
-                  entity_id: '*heater*'
-                  options:
-                    type: custom:bubble-card
-                    card_type: button
-                    button_type: switch
-                    show_attribute: false
-                    show_last_changed: true
-                    icon: mdi:light-switch
-                    show_state: true
-                    styles: |
-                      .bubble-button-card-container {
-                        background: rgba(255, 80, 80,0.8) !important;
-                        color: black !important;
-                      }
-                      .bubble-icon-container {
-                        color: white !important;
-                      }
-                - domain: switch
-                  entity_id: '*heiz*'
-                  options:
-                    type: custom:bubble-card
-                    card_type: button
-                    button_type: switch
-                    show_attribute: false
-                    show_last_changed: true
-                    icon: mdi:light-switch
-                    show_state: true
-                    styles: |
-                      .bubble-button-card-container {
-                        background: rgba(255, 80, 80,0.8) !important;
-                      }
-                      .bubble-icon-container {
-                        color: white !important;
-                      }
-              exclude: []
-            sort:
-              method: state
-              reverse: true
-            show_empty: true
-      - type: grid
-        cards:
-          - type: heading
-            heading_style: title
-            heading: Light
           - type: heading
             heading_style: subtitle
             heading: LightSwitches
@@ -1318,12 +1160,35 @@ views:
                     show_state: true
                     styles: |
                       .bubble-button-card-container {
-                        background: rgba(204, 51, 255,0.85) !important;
+                        background: linear-gradient(45deg, rgba(255,255,255,0.5), rgba(250,225,0,0.8)) !important;
                         color: black !important;
+                        animation: gradientShift 5s ease infinite;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 1px 1px 5px #ffffff;
                       }
-                      .bubble-range-fill { 
-                        background: rgba(204, 51, 255, 51) !important;
+                      .bubble-button-background {
                         opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, grey, yellow, orange)' 
+                          : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;
+                      }
+                      .bubble-icon-container {
+                        color: rgba(255, 255, 255, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      @keyframes gradientShift {
+                        0% { background: rgba(255, 0, 0, 0.5); }
+                        50% { background: rgba(0, 255, 0, 0.5); }
+                        100% { background: rgba(0, 0, 255, 0.5); }
+                      }
+
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
                       }
               exclude:
                 - domain: fan
@@ -1331,10 +1196,9 @@ views:
                 - entity_id: '*vent*'
                 - entity_id: '*ogb*'
                 - entity_id: sensor*
-            sort:
-              method: state
-              reverse: true
             show_empty: true
+      - type: grid
+        cards:
           - type: heading
             heading_style: subtitle
             heading: LightSetters
@@ -1360,15 +1224,49 @@ views:
                     show_state: true
                     styles: |
                       .bubble-button-card-container {
-                        background: rgba(204, 51, 255,0.5) !important;
+                        background: linear-gradient(45deg, 
+                         orange, red, #ffbf80);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
                         color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
                       }
-                      .bubble-range-fill { 
-                        background: rgba(255, 255, 255) !important;
+                      .bubble-range-fill {
+                        background: linear-gradient(125deg,yellow,green);
                         opacity: 1 !important;
+                        border-radius: 10px;
                       }
                       .bubble-icon-container {
-                        color: white !important;
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      ha-card.is-on .bubble-button-card-container {
+                        background: linear-gradient(125deg, 
+                         white,grey);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      ha-card.is-on .bubble-icon-container {
+                        background: black;
+                        border: 0.12rem solid rgba(0, 0, 0, 0.7);
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
                       }
               exclude:
                 - domain: fan
@@ -1376,15 +1274,259 @@ views:
                 - entity_id: '*vent*'
                 - entity_id: '*ogb*'
                 - entity_id: sensor*
-            sort:
-              method: state
-              reverse: true
+            sort: null
+            show_empty: true
+          - type: heading
+            heading: Climate
+            heading_style: subtitle
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: climate
+                  options:
+                    type: custom:bubble-card
+                    card_type: climate
+                    show_attribute: true
+                    show_last_changed: true
+                    icon: mdi:thermometer
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: linear-gradient(45deg, #003366, #3399FF, #66CCFF);
+                        background-size: 400% 400%;
+                        animation: climateShift 4s ease infinite;
+                        color: #FFFFFF !important;
+                        border: 0.16rem solid rgba(51, 153, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 0 0 20px rgba(51, 153, 255, 0.9);
+                      }
+                      .bubble-icon-container {
+                        color: #66CCFF !important;
+                        border: 0.12rem solid rgba(51, 153, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 0 15px rgba(51, 153, 255, 0.9);
+                        animation: iconCoolGlow 2s infinite alternate;
+                      }
+                      ha-card.is-on .bubble-button-card-container {
+                        background: linear-gradient(45deg, #3399FF, #003366, #66CCFF);
+                        background-size: 400% 400%;
+                        animation: climateShift 4s ease infinite;
+                        color: #FFFFFF !important;
+                        border: 0.16rem solid rgba(51, 153, 255, 0.9);
+                        box-shadow: 0 0 25px rgba(51, 153, 255, 1);
+                      }
+                      ha-card.is-on .bubble-icon-container {
+                        background: #003366;
+                        border: 0.12rem solid rgba(51, 153, 255, 0.8);
+                        box-shadow: 0 0 20px rgba(51, 153, 255, 1);
+                      }
+                      @keyframes climateShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconCoolGlow {
+                        0% { box-shadow: 0 0 10px rgba(51, 153, 255, 0.7); }
+                        100% { box-shadow: 0 0 20px rgba(51, 153, 255, 1); }
+                      }
+                    sub_button:
+                      - name: HVAC modes menu
+                        select_attribute: hvac_modes
+                        show_arrow: false
+                        state_background: false
+              exclude:
+                - entity_id: '*a012*'
+            show_empty: true
+          - type: heading
+            heading_style: subtitle
+            heading: Hum
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: switch
+                  entity_id: '*humidifier*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:air-humidifier
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: linear-gradient(45deg, 
+                         lightblue,cyan,violet);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, cyan, lightblue, blue)' 
+                          : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;
+                      }
+                      .bubble-icon-container {
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                      }
+                - domain: switch
+                  entity_id: '*befeucht*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:air-humidifier
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: linear-gradient(45deg, 
+                         lightblue,cyan,violet);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, cyan, lightblue, blue)' 
+                          : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;
+                      }
+                      .bubble-icon-container {
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                      }
+                - domain: humidifier
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:air-humidifier
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: linear-gradient(45deg, 
+                         lightblue,cyan,violet);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      .bubble-range-fill { 
+                        background: rgba(255, 255, 255, 0.5) !important;
+                        opacity: 1 !important;
+                        border-radius: 10px;
+                      }
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, cyan, lightblue, blue)' 
+                          : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;
+                      }
+                      .bubble-icon-container {
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      ha-card.is-on .bubble-button-card-container {
+                        background: linear-gradient(45deg, 
+                         lightblue,cyan,violet);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      ha-card.is-on .bubble-icon-container {
+                        color: cyan !important;
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                      }
+                - domain: select
+                  entity_id: '*humidifier*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: select
+                    button_type: select
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:select-color
+                    show_state: true
+                    styles: |
+                      .bubble-select-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, grey, lightblue, green)' 
+                          : 'linear-gradient(120deg, white,cyan, #9400D3, #800080)'} !important;
+                      }
+                      .bubble-select-card-container {
+                        background: rgba(51,153,255,0.7) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+              exclude: null
             show_empty: true
       - type: grid
         cards:
-          - type: heading
-            heading_style: title
-            heading: Pumps
           - type: heading
             heading_style: subtitle
             heading: PumpSwitches
@@ -1408,16 +1550,58 @@ views:
                     show_state: true
                     styles: |
                       .bubble-button-card-container {
-                        background: rgba(153, 230, 255,0.7) !important;
+                        background: linear-gradient(45deg, 
+                         lightblue,cyan,violet);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
                         color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, cyan, lightblue, blue)' 
+                          : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;
+                      }
+                      .bubble-range-fill { 
+                        background: rgba(255, 255, 255, 0.5) !important;
+                        opacity: 1 !important;
+                        border-radius: 10px;
                       }
                       .bubble-icon-container {
-                        color: white !important;
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      ha-card.is-on .bubble-button-card-container {
+                        background: linear-gradient(45deg, 
+                         lightblue,cyan,violet);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      ha-card.is-on .bubble-icon-container {
+                        background: black;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
                       }
               exclude: []
-            sort:
-              method: state
-              reverse: true
             show_empty: true
           - type: heading
             heading_style: subtitle
@@ -1442,21 +1626,372 @@ views:
                     icon: mdi:select-color
                     styles: |
                       .bubble-button-card-container {
-                        background: rgba(51,153,255,0.7) !important;
+                        background: linear-gradient(45deg, 
+                         orange, red, #ffbf80);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
                         color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      .bubble-range-fill {
+                        background: linear-gradient(125deg,cyan,blue);
+                        opacity: 1 !important;
+                        border-radius: 10px;
                       }
                       .bubble-icon-container {
-                        color: white !important;
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      ha-card.is-on .bubble-button-card-container {
+                        background: linear-gradient(125deg, 
+                         white,grey);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      ha-card.is-on .bubble-icon-container {
+                        background: black;
+                        border: 0.12rem solid rgba(0, 0, 0, 0.7);
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
                       }
               exclude:
                 - entity_id: '*ogb*'
+            show_empty: true
+          - type: heading
+            heading_style: subtitle
+            heading: DeHum
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: switch
+                  entity_id: '*dehumid*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, #4B0082, #800080, #9400D3)' 
+                          : 'linear-gradient(45deg, gray, darkgray)'} !important;
+                      }
+                      .bubble-icon-container {
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                - domain: switch
+                  entity_id: '*entfeucht*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, #4B0082, #800080, #9400D3)' 
+                          : 'linear-gradient(45deg, gray, darkgray)'} !important;
+                      }
+                      .bubble-icon-container {
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
+          - type: heading
+            heading_style: subtitle
+            heading: Cooler
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: switch
+                  entity_id: '*cool*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: linear-gradient(45deg, 
+                         lightblue,cyan,violet);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, cyan, lightblue, blue)' 
+                          : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;
+                      }
+                      .bubble-icon-container {
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                      }
+                - domain: switch
+                  entity_id: '*klima*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: linear-gradient(45deg, 
+                         lightblue,cyan,violet);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, cyan, lightblue, blue)' 
+                          : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;
+                      }
+                      .bubble-icon-container {
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                      }
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
+          - type: heading
+            heading_style: subtitle
+            heading: Heater
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: switch
+                  entity_id: '*heater*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: linear-gradient(45deg, 
+                         lightblue,cyan,violet);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, #9400D3, #800080, #4B0082)' 
+                          : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;
+                      }
+                      .bubble-icon-container {
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                      }
+                - domain: switch
+                  entity_id: '*heiz*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: linear-gradient(45deg, 
+                         lightblue,cyan,violet);
+                        background-size: 400% 400%;
+                        animation: gradientShift 5s ease infinite;
+                        color: black !important;
+                        border: 0.16rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 25px 25px 25px;
+                        box-shadow: 2px 2px 15px #ffffff;
+                      }
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background: ${state === 'on' 
+                          ? 'linear-gradient(45deg, #4B0082, #800080, #9400D3)' 
+                          : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;
+                      }
+                      .bubble-icon-container {
+                        color: rgba(255, 0, 0, 0.9) !important;
+                        border: 0.12rem solid rgba(255, 255, 255, 0.8);
+                        border-radius: 25px 0px 25px 25px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                        animation: iconPulse 3s infinite;
+                      }
+                      @keyframes gradientShift {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                      }
+                      @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                      }
+              exclude: []
             sort:
               method: state
               reverse: true
             show_empty: true
           - type: heading
             heading: CO2 Device
-            heading_style: title
+            heading_style: subtitle
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 1
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: switch
+                  entity_id: '*carbondiox*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(0, 204, 204,0.8) !important;
+                        color: black !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+                - domain: switch
+                  entity_id: '*co2*'
+                  options:
+                    type: custom:bubble-card
+                    card_type: button
+                    button_type: switch
+                    show_attribute: false
+                    show_last_changed: true
+                    icon: mdi:light-switch
+                    show_state: true
+                    styles: |
+                      .bubble-button-card-container {
+                        background: rgba(0, 204, 204,0.8) !important;
+                      }
+                      .bubble-icon-container {
+                        color: white !important;
+                      }
+              exclude: []
+            sort:
+              method: state
+              reverse: true
+            show_empty: true
     badges:
       - type: entity
         show_name: true
