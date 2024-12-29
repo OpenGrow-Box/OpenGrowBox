@@ -40,7 +40,7 @@ DASHBOARDVIEW="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/refs/h
 
 
 ## ADDONS 
-OGB="https://github.com/OpenGrow-Box/OpenGrowBox-HA/archive/refs/tags/v1.1.zip"
+OGB="https://github.com/OpenGrow-Box/OpenGrowBox-HA/archive/refs/tags/v1.1.1.zip"
 OGB_EXHAUST="https://github.com/OpenGrow-Box/OpenGrowBox-Exhaust/archive/refs/tags/main.zip"
 
 NRCOMPANION="https://github.com/zachowj/hass-node-red/archive/refs/heads/main.zip"
@@ -56,7 +56,9 @@ VPDCHART="https://raw.githubusercontent.com/OpenGrow-Box/vpdchart-card/master/vp
 VERTICALCARD="https://github.com/ofekashery/vertical-stack-in-card/releases/download/v1.0.1/vertical-stack-in-card.js"
 CUSTOMTEMPPLATE="https://github.com/iantrich/config-template-card/releases/download/1.3.6/config-template-card.js"
 TAPPEDCARD="https://github.com/kinghat/tabbed-card/releases/download/v0.3.2/tabbed-card.js"
-AUTOENTIES=""
+AUTOENTIES="https://raw.githubusercontent.com/thomasloven/lovelace-auto-entities/refs/heads/master/auto-entities.js"
+BUBBLECARD="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js"
+BUBBLEFIX="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-pop-up-fix.js"
 
 function systemPrep() {
     sudo apt update && sudo apt upgrade -y && sudo apt autoclean -y && sudo apt autoremove -y
@@ -65,7 +67,7 @@ function systemPrep() {
 }
 
 function HaRestart(){
-    sudo systemctl restart hassio-supervisor.service
+    //sudo systemctl restart hassio-supervisor.service
     sleep 30
 }
 
@@ -76,17 +78,19 @@ function OpenGrowBoxUpdate() {
     
     # OGB_HA SETUP
     echo "Instllation OGB HA-Integrations"
-    cd /usr/share/hassio/homeassistant/custom_components && sudo mkdir opengrowbox && cd opengrowbox
-    sudo wget "$OGB" -o ogb.zip
+    cd /usr/share/hassio/homeassistant/custom_components
+    sudo mkdir opengrowbox
+    cd opengrowbox
+    sudo wget $OGB -O ogb.zip
     sudo unzip ogb.zip
     sudo mv OpenGrowBox-HA-*/custom_components/opengrowbox/* .
-    sudo rm -rf  OpenGrowBox-HA-* ogb.zip
+    sudo rm -rf OpenGrowBox-HA-* ogb.zip
 
     # OGB_Exhaust HA SETUP
-    echo "Instllation OGB Exhausts HA-Integrations"
+    echo "Installation OGB Exhausts HA-Integrations"
     cd /usr/share/hassio/homeassistant/custom_components && sudo mkdir ogb_exhaust && cd ogb_exhaust
-    sudo wget "$OGB_EXHAUST" -o ogbexhaust.zip
-    sudo unzip ogb.zip
+    sudo wget "$OGB_EXHAUST" -O ogbexhaust.zip
+    sudo unzip ogbexhaust.zip
     sudo mv OpenGrowBox-Exhaust-main/custom_components/ogb_exhaust/* .
     sudo rm -rf OpenGrowBox-Exhaust-main ogbexhaust.zip
 
@@ -94,15 +98,28 @@ function OpenGrowBoxUpdate() {
     sudo mkdir -p /usr/share/hassio/homeassistant/www/
     cd /usr/share/hassio/homeassistant/www/
     sudo wget $MINIGRAPH
+    
     # Setup VPD-Chart
     sudo wget "$VPDCHART" -O "vpdchart-card.js" 
-    # Setup 
+    
+    # Setup Mushroom
     sudo wget $MUSHROOM
-    sudo wget $CUSTOMTEMPPLATE
-    sudo wget $VERTICALCARD
-    sudo wget $AUTOENTIES
-    sudo wget $TAPPEDCARD
+    
+    # Setup Custom Template Card
+    sudo wget "$CUSTOMTEMPPLATE" -O "config-template-card.js"
+    
+    # Setup Vertical Stack Card
+    sudo wget "$VERTICALCARD" -O "vertical-stack-in-card.js"
+    
+    # Setup Tabbed Card
+    sudo wget "$TAPPEDCARD" -O "tabbed-card.js"
 
+    # Setup Auto Entities
+    sudo wget "$AUTOENTIES" -O "auto-entities.js"
+
+    # Setup Bubble Card
+    sudo wget "$BUBBLECARD" -O "bubble-card.js"
+    sudo wget "$BUBBLEFIX" -O "bubble-pop-up-fix.js"
     # SETUP loveLace_Ressource
     cd /usr/share/hassio/homeassistant/.storage/ && sudo wget  "$LLRESSOURCE" -O lovelace_resources
 }

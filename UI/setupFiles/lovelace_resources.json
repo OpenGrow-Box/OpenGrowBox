@@ -5,53 +5,58 @@
   "data": {
     "items": [
       {
-        "url": "/hacsfiles/mini-graph-card/mini-graph-card-bundle.js?hacstag=1512800620121",
+        "url": "local/mini-graph-card-bundle.js",
         "type": "module",
         "id": "27f61bd506394879b33d9c4e6612cfeb"
       },
       {
         "id": "8cc58f09fda14f7eb8233dd69df7cc05",
-        "url": "/hacsfiles/Bubble-Card/bubble-card.js?hacstag=680112919232",
+        "url": "/local/bubble-card.js?v=1",
         "type": "module"
       },
       {
         "id": "5c692c780a8641d995fc794b99e2b0a9",
-        "url": "/hacsfiles/vertical-stack-in-card/vertical-stack-in-card.js?hacstag=142051833101",
+        "url": "local/vertical-stack-in-card.js",
         "type": "module"
       },
       {
         "id": "8c6599d973d740418e499b827eab38c5",
-        "url": "/hacsfiles/lovelace-mushroom/mushroom.js?hacstag=444350375421",
+        "url": "local/mushroom.js",
         "type": "module"
       },
       {
         "id": "5a7ee633e35d4782b363be9beb19fe34",
-        "url": "/hacsfiles/vpdchart-card/vpdchart-card.js?hacstag=540873855101",
+        "url": "local/vpdchart-card.js",
         "type": "module"
       },
       {
         "id": "91dfc30670714f2fa47bb8e2760d265a",
-        "url": "/hacsfiles/tabbed-card/tabbed-card.js?hacstag=452866308032",
-        "type": "module"
-      },
-      {
-        "id": "dc4faf5fef334ba2be93fd591ad8ea49",
-        "url": "/hacsfiles/lovelace-auto-entities/auto-entities.js?hacstag=1677445841130",
+        "url": "local/tabbed-card.js",
         "type": "module"
       },
       {
         "id": "a50ca0f2e1444ba78128cc7db1f81a05",
-        "url": "/hacsfiles/config-template-card/config-template-card.js?hacstag=172177543136",
+        "url": "local/config-template-card.js",
         "type": "module"
       },
       {
         "id": "f77a845694954f268244f3ee4e15afcd",
-        "url": "/hacsfiles/lovelace-layout-card/layout-card.js?hacstag=156434866245",
+        "url": "local/layout-card.js",
         "type": "module"
       },
       {
         "id": "1771297d520f48459b7b0e12891460b2",
-        "url": "/hacsfiles/lovelace-template-entity-row/template-entity-row.js?hacstag=231674882141",
+        "url": "local/template-entity-row.js",
+        "type": "module"
+      },
+      {
+        "id": "4848e03cf126437e9724f6d6c69309df",
+        "url": "local/bubble-pop-up-fix.js",
+        "type": "module"
+      },
+      {
+        "id": "1da8ae1efcdc4796b31018f5c8574e69",
+        "url": "/local/auto-entities.js",
         "type": "module"
       }
     ]
