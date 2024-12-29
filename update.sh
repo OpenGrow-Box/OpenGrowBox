@@ -69,7 +69,7 @@ function HaRestart(){
     sleep 30
 }
 
-function OpenGrowBoxSetup() {
+function OpenGrowBoxUpdate() {
     sudo wget -O /usr/share/hassio/addon_configs/a0d7b954_nodered/flows.json "$ALLFLOWS"
 
     #sudo wget -O /usr/share/hassio/homeassistant/airCtrlSensor.yaml  "$RUCKEHACCONF"
@@ -136,15 +136,13 @@ echo "One Control To Rule Them All!!!"
 sleep 3
 }
 
-function clearSetup(){
-    cd ~ && rm -rf ~/$SETUP_DIR/PWM-Fans/
-}
 
 function main() {
     Welcome
     systemPrep
     OpenGrowBoxUpdate
     HaRestart
+
 }
 
 main
