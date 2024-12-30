@@ -132,8 +132,9 @@ views:
                             - name: '*LightControl*'
                             - name: '*CO2*'
                             - name: '*Water*'
-                            - name: '*Drying*'
                             - name: '*Humidi*'
+                            - name: '*PID*'
+                            - name: OGB*Select*
                 attributes:
                   label: Modes
                   icon: mdi:auto-mode
@@ -169,6 +170,9 @@ views:
                             - name: '*Water*'
                             - name: '*Pump*'
                             - name: '*Output*'
+                            - name: '*Proportional*'
+                            - name: '*Integral*'
+                            - name: '*Derivativ*'
                 attributes:
                   label: VPD Targets
                   icon: mdi:target
@@ -328,6 +332,34 @@ views:
                       - type: custom:auto-entities
                         card:
                           type: entities
+                          name: Master
+                          title: ''
+                        filter:
+                          include:
+                            - area: ${ogb_room}
+                              name: '*PID*'
+                            - area: ${ogb_room}
+                              name: '*Faktor*'
+                attributes:
+                  label: P.I.D
+                  icon: mdi:weight-pound
+            layout_options:
+              grid_columns: 4
+              grid_rows: auto
+          - type: custom:tabbed-card
+            tabs:
+              - card:
+                  type: custom:config-template-card
+                  variables:
+                    ogb_room: states['select.ogb_rooms'].state
+                  entities:
+                    - select.ogb_rooms
+                  card:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:auto-entities
+                        card:
+                          type: entities
                           title: ''
                         filter:
                           include:
@@ -369,7 +401,7 @@ views:
                             - name: '*Plant*'
                             - name: '*Water*'
                             - name: '*Night*'
-                            - name: '*Weigth*'
+                            - name: '*Weight*'
                 attributes:
                   label: Device Configurator
                   icon: mdi:comment-flash
@@ -619,6 +651,7 @@ views:
                         - entity_id: '*wish*'
                         - entity_id: '*ambientvpd*'
                         - entity_id: '*holdvpd*'
+                        - entity_id: '*light*'
                         - state: unknown
                         - state: unavailable
                         - state: undefined
@@ -785,6 +818,7 @@ views:
                                 color: '#ff0000'
                       exclude:
                         - name: '*VPD*'
+                        - name: '*Control*'
                   show_empty: false
                 attributes:
                   label: null
