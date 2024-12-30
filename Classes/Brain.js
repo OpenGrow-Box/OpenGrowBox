@@ -2195,6 +2195,32 @@ class OpenGrowBox {
     }
 }
 
+class OGBPIDController {
+    constructor(Kp, Ki, Kd, setPoint) {
+        this.Kp = Kp; // Proportionaler Faktor
+        this.Ki = Ki; // Integraler Faktor
+        this.Kd = Kd; // Differenzialer Faktor
+        this.setPoint = setPoint; // Sollwert
+        this.integral = 0; // Summierter Fehler (für Ki)
+        this.prevError = 0; // Fehler aus der vorherigen Berechnung (für Kd)
+    }
+
+    compute(currentValue) {
+        const error = this.setPoint - currentValue; // Sollwert - Istwert
+        this.integral += error; // Fehler aufsummieren (Integral)
+        const derivative = error - this.prevError; // Änderungsrate des Fehlers (Differenzial)
+
+        // PID-Ausgabe berechnen
+        const output = (this.Kp * error) + (this.Ki * this.integral) + (this.Kd * derivative);
+
+        // Fehler für die nächste Iteration speichern
+        this.prevError = error;
+
+        return output;
+    }
+}
+
+
 class Device{
     constructor(deviceName, deviceType = "generic") {
         this.name = deviceName;

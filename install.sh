@@ -58,7 +58,7 @@ DASHBOARDVIEW="https://raw.githubusercontent.com/OpenGrow-Box/OpenGrowBox/main/U
 
 
 ## ADDONS 
-OGB="https://github.com/OpenGrow-Box/OpenGrowBox-HA/archive/refs/tags/v1.1.1.zip"
+OGB="https://github.com/OpenGrow-Box/OpenGrowBox-HA/archive/refs/tags/v1.1.3.zip"
 OGB_EXHAUST="https://github.com/OpenGrow-Box/OpenGrowBox-Exhaust/archive/refs/tags/main.zip"
 
 NRCOMPANION="https://github.com/zachowj/hass-node-red/archive/refs/heads/main.zip"
