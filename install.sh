@@ -77,6 +77,7 @@ TAPPEDCARD="https://github.com/kinghat/tabbed-card/releases/download/v0.3.2/tabb
 AUTOENTIES="https://github.com/thomasloven/lovelace-auto-entities/archive/refs/tags/v1.13.0.zip"
 BUBBLECARD="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js"
 BUBBLEFIX="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-pop-up-fix.js"
+LAYOUTCARD="https://github.com/thomasloven/lovelace-layout-card/archive/refs/tags/v2.4.5.zip"
 
 function systemPrep() {
     sudo apt update && sudo apt upgrade -y && sudo apt autoclean -y && sudo apt autoremove -y
@@ -211,7 +212,9 @@ function OpenGrowBoxSetup() {
     sudo wget "$TAPPEDCARD" -O "tabbed-card.js"
 
     # Setup Auto Entities
-    sudo wget "$AUTOENTIES" -O "auto-entities.zip" && sudo unzip auto-entities.zip && sudo rm auto-entities.zip  && cd lovelace-auto-entities-*
+    sudo wget "$AUTOENTIES" -O "auto-entities.zip" && sudo unzip auto-entities.zip && sudo rm auto-entities.zip 
+    # Setup LayoutCard
+    sudo wget "$LAYOUTCARD" -O "layout.zip" && sudo unzip layout.zip && sudo rm layout.zip
     # Setup Bubble Cardhist 
     sudo wget "$BUBBLECARD" -O "bubble-card.js"
     sudo wget "$BUBBLEFIX" -O "bubble-pop-up-fix.js"
