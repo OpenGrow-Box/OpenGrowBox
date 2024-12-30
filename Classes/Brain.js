@@ -2195,97 +2195,61 @@ class OpenGrowBox {
     }
 }
 
-class OGBPIDController {
-    constructor(Kp, Ki, Kd, setPoint) {
-        this.Kp = Kp; // Proportionaler Faktor
-        this.Ki = Ki; // Integraler Faktor
-        this.Kd = Kd; // Differenzialer Faktor
-        this.setPoint = setPoint; // Sollwert
-        this.integral = 0; // Summierter Fehler (für Ki)
-        this.prevError = 0; // Fehler aus der vorherigen Berechnung (für Kd)
-    }
-
-    compute(currentValue) {
-        const error = this.setPoint - currentValue; // Sollwert - Istwert
-        this.integral += error; // Fehler aufsummieren (Integral)
-        const derivative = error - this.prevError; // Änderungsrate des Fehlers (Differenzial)
-
-        // PID-Ausgabe berechnen
-        const output = (this.Kp * error) + (this.Ki * this.integral) + (this.Kd * derivative);
-
-        // Fehler für die nächste Iteration speichern
-        this.prevError = error;
-
-        return output;
-    }
-}
-
-
-class Device{
+class Device {
     constructor(deviceName, deviceType = "generic") {
         this.name = deviceName;
         this.deviceType = deviceType;
         this.isRunning = false;
-        this.isLocked = false
-        this.lockedFor = ""
-        this.needChange = false
-        this.inRoomName = ""
-        this.isfromAmbient = false
-        this.action = ""
+        this.isDimmable = false;
+        this.needChange = false;
+        this.action = "";
+        this.inRoomName = "";
+        this.isfromAmbient = false;
+        this.isLocked = false;
+        this.lockedFor = "";
+
         this.switches = [];
         this.sensors = [];
         this.data = {};
-
     }
 
     setData(data, context) {
-        this.setFromtent(context.tentName)
-        this.identifyIfFromAmbient()
-        //this.data = { ...this.data, ...data };
+        this.setFromtent(context.tentName);
+        this.identifyIfFromAmbient();
         this.updateChangedData(this.data, data);
 
         this.identifySwitchesAndSensors();
         this.updateIsRunningState();
+        this.checkIfDimmable();
     }
 
-    /**
-     * Aktualisiert nur die geänderten Daten in einem Objekt.
-     * @param {Object} currentData - Das aktuelle Datenobjekt.
-     * @param {Object} newData - Das neue Datenobjekt.
-     * @returns {Object} - Die geänderten Werte (Key-Value-Paare).
-     */
     updateChangedData(currentData, newData) {
         if (!newData || typeof newData !== "object") return {};
         if (!currentData || typeof currentData !== "object") currentData = {};
 
-        var changedData = {};
+        let changedData = {};
 
         Object.keys(newData).forEach(function (key) {
-            var newValue = newData[key];
-            var currentValue = currentData[key];
+            const newValue = newData[key];
+            const currentValue = currentData[key];
 
-            // Nur geänderte Werte in das Ergebnis aufnehmen
             if (currentValue !== newValue) {
                 changedData[key] = newValue;
-                currentData[key] = newValue; // Update den aktuellen Wert
+                currentData[key] = newValue;
             }
         });
         return changedData;
     }
 
     setFromtent(roomName) {
-        if (roomName != this.inRoomName) {
-            this.inRoomName = roomName
+        if (roomName !== this.inRoomName) {
+            this.inRoomName = roomName;
         }
     }
 
     identifyIfFromAmbient() {
-        if (typeof this.inRoomName === "string" &&
-            (this.inRoomName.toLowerCase().includes("ambient"))) {
-            this.isfromAmbient = true;
-        } else {
-            this.isfromAmbient = false;
-        }
+        this.isfromAmbient = typeof this.inRoomName === "string" &&
+            this.inRoomName.toLowerCase().includes("ambient");
     }
 
     identifySwitchesAndSensors() {
@@ -2301,271 +2265,84 @@ class Device{
     }
 
     updateIsRunningState() {
-        // Standardmäßig ist das Gerät nicht laufend
         this.isRunning = false;
 
         if (!this.data || typeof this.data !== "object") {
             return;
         }
 
-        // 1. Prüfen, ob ein Fan eingeschaltet ist
-        const fanKeys = Object.keys(this.data).filter((key) => key.startsWith("fan."));
-        if (fanKeys.some((key) => this.data[key] === "on")) {
-            this.isRunning = true;
+        const checkKeys = ["fan.", "light.", "climate.", "switch.", "humidifier."];
+        for (const prefix of checkKeys) {
+            const keys = Object.keys(this.data).filter((key) => key.startsWith(prefix));
+            if (keys.some((key) => this.data[key] === "on")) {
+                this.isRunning = true;
+                return;
+            }
+        }
+    }
+
+    checkIfDimmable() {
+        if (this.isDimmable) return;
+
+        if (!this.data || typeof this.data !== "object") {
             return;
-        } else {
-            this.isRunning = false;
         }
 
-        // 2. Prüfen, ob ein Light eingeschaltet ist
-        const lightKeys = Object.keys(this.data).filter((key) => key.startsWith("light."));
-        if (lightKeys.some((key) => this.data[key] === "on")) {
-            this.isRunning = true;
-            return;
-        } else {
-            this.isRunning = false;
-        }
-
-        // 3. Prüfen, ob eine Klimaanlage eingeschaltet ist
-        const climateKeys = Object.keys(this.data).filter((key) => key.startsWith("climate."));
-        if (climateKeys.some((key) => this.data[key] === "on")) {
-            this.isRunning = true;
-            return;
-        } else {
-            this.isRunning = false;
-        }
-
-        // 4. Prüfung Switches
-        const switchKeys = Object.keys(this.data).filter((key) => key.startsWith("switch."));
-        if (switchKeys.some((key) => this.data[key] === "on")) {
-            this.isRunning = true;
-            return;
-        } else {
-            this.isRunning = false;
-        }
-
-        // 5. Prüfung Humdifier
-        const humhKeys = Object.keys(this.data).filter((key) => key.startsWith("humidifier."));
-        if (humhKeys.some((key) => this.data[key] === "on")) {
-            this.isRunning = true;
-            return;
-        } else {
-            this.isRunning = false;
-        }
-
-        // 5. Prüfen, ob ein gültiger Duty-Cycle-Wert vorhanden ist
-        const dutyCycleKey = Object.keys(this.data).find((key) =>
-            key.toLowerCase().includes("duty_cycle") ||
-            key.toLowerCase().includes("dutycycle") ||
-            key.toLowerCase().includes("duty") ||
-            key.toLowerCase().includes("number.") ||
-            key.toLowerCase().includes("voltage")
+        const dimmableKeys = ["duty_cycle", "dutycycle", "duty", "number.", "voltage", "fan.", "light."];
+        this.isDimmable = Object.keys(this.data).some((key) =>
+            dimmableKeys.some((dimmableKey) => key.toLowerCase().includes(dimmableKey))
         );
-
-        if (dutyCycleKey) {
-            const dutyCycleValue = parseInt(this.data[dutyCycleKey], 10);
-            if (!isNaN(dutyCycleValue) && dutyCycleValue > 0) {
-                //this.isRunning = true;
-                return;
-            }
-        }
-
-        // 6. Prüfen, ob Sensor-Werte anzeigen, dass das Gerät läuft
-        if (Array.isArray(this.sensors) && this.sensors.length > 0) {
-            const sensorKey = this.sensors.find((key) =>
-                key.toLowerCase().includes("duty_cycle") || key.toLowerCase().includes("dutycycle") || key.toLowerCase().includes("duty")
-            );
-            if (sensorKey && parseInt(this.data[sensorKey], 10) > 0) {
-                //this.isRunning = true;
-                return;
-            }
-        }
     }
 
     prepareAction(finalActions) {
         if (finalActions.hasOwnProperty(this.deviceType)) {
             const actionValue = finalActions[this.deviceType];
 
-            // Spezielles Verhalten für "light"-Geräte
             if (this.deviceType === "light") {
-                if (actionValue !== "unchanged") {
-                    this.needChange = true;
-                    this.action = actionValue;
-                } else {
-                    this.needChange = false;
-                    this.action = actionValue;
-                }
-
-
-                // Sonderfall für "climate" Geräte
+                this.needChange = actionValue !== "unchanged";
+                this.action = actionValue;
             } else if (this.deviceType === "climate") {
-                //node.warn(`IN Climate Aciton Value: ${JSON.stringify(finalActions, actionValue)}`);
                 if (finalActions.climate && typeof finalActions.climate === "object") {
                     for (const [mode, action] of Object.entries(finalActions.climate)) {
                         if (action !== "unchanged") {
                             this.needChange = true;
-                            this.action = { mode, action }; // Speichere den gefundenen Modus und die Aktion
-                            break; // Beende die Schleife, sobald der erste gültige Wert gefunden wurde
+                            this.action = { mode, action };
+                            break;
                         }
                     }
                 } else {
-                    this.action = "unchanged"; // Standardwert, falls keine gültigen Climate-Aktionen vorhanden sind
+                    this.action = "unchanged";
                 }
             } else {
-                // Standard-Verhalten für andere Gerätetypen
-                if (actionValue === "unchanged") {
-                    this.needChange = false;
-                    this.action = actionValue;
-                } else if (
-                    ["maximum", "reduced", "increased", "minimum", "on", "off"].includes(actionValue)
-                ) {
-                    node.warn(`FoundAction: ${actionValue} for ${this.name} in ${this.inRoomName}`);
-                    this.needChange = true;
-                    this.action = actionValue;
-                }
+                this.needChange = actionValue !== "unchanged" && ["maximum", "reduced", "increased", "minimum", "on", "off"].includes(actionValue);
+                this.action = actionValue;
             }
         } else {
-            // Falls keine Aktion definiert ist, logge Warnung
-            node.warn(`No actions defined for device type: ${this.deviceType}`);
             this.needChange = false;
             this.action = "unchanged";
         }
-
-        // Debugging-Ausgabe zur Überprüfung der finalen Aktionen
-        //node.warn(`Prepared action for ${this.name}: ${JSON.stringify(this.action, null, 2)}, needChange: ${this.needChange}`);
 
         return this;
     }
 
     evalAction() {
-        // Generische Prüfungen für alle Geräte
-        if (this.action === "unchanged") {
-            return false; // Keine Aktion erforderlich
-        }
-
-        return true; // Standardmäßig erlauben
-    }
-
-    runAction() {
-        // Falls keine Änderung notwendig ist, abbrechen
-        if (this.needChange === false) return;
-        if (!this.evalAction()) {
-            return { Device: `${this.switches[0]}`, Action: "noChangesNeeded", State: "unchanged" };
-        }
-
-        //node.warn(`Running Action for ${this.name} in ${this.inRoomName} `);
-        //node.warn(`Action State:${this.action}`);
-
-
-        // Aktion: increased
-        if (this.action === "increased") {
-            if (!this.hasDuty) {
-                // Kein Duty-Modus: Schalte das Gerät ein, falls es nicht läuft
-                if (!this.isRunning) {
-                    node.warn(`${this.name} wurde eingeschaltet in ${this.inRoomName} .`);
-                    return this.turnON();
-                } else {
-                    return { entity_id: this.switches[0], action: "Allready ON" }
-                }
-            } else {
-                // Duty-Modus: Verwalte Duty-Cycle
-                if (!this.isRunning) {
-                    if (this.dutyCycle === 0) {
-                        this.setDutyCycle(50);
-                        node.warn(`${this.name} Duty-Cycle wurde auf 50% gesetzt und eingeschaltet in ${this.inRoomName} .`);
-                        return this.changeDuty(this.dutyCycle);
-                    }
-                } else {
-                    if (this.dutyCycle === 95) {
-                        node.warn(`${this.name} läuft bereits auf maximalem Duty-Cycle in ${this.inRoomName} .`);
-                        return { entity_id: this.switches[0], action: "Max Reached" }
-                    } else {
-                        node.warn(`${this.name} Duty-Cycle wurde auf ${this.dutyCycle + 5}% erhöht in ${this.inRoomName} .`);
-                        return this.changeDuty(this.dutyCycle + 5); // Beispiel: Erhöhe Duty-Cycle um 10%
-                    }
-                }
-
-            }
-
-            // Aktion: reduced
-        } else if (this.action === "reduced") {
-            if (!this.hasDuty) {
-                // Kein Duty-Modus: Schalte das Gerät aus, falls es läuft
-                if (this.isRunning) {
-                    node.warn(`${this.name} wurde ausgeschaltet in ${this.inRoomName} .`);
-                    return this.turnOFF();
-                } else {
-                    return { entity_id: this.switches[0], action: "Allready OFF" }
-                }
-            } else {
-                // Duty-Modus: Verwalte Duty-Cycle
-                if (this.dutyCycle === 5) {
-                    node.warn(`${this.name} ist auf Minimum gestellt in ${this.inRoomName} .`);
-                    node.warn(`${this.name} wurde ausgeschaltet in ${this.inRoomName} .`);
-                    return { entity_id: this.switches[0], action: "Minium Reached" }
-                } else {
-                    node.warn(`${this.name} Duty-Cycle wurde auf ${this.dutyCycle - 5}% reduziert in ${this.inRoomName} .`);
-                    return this.changeDuty(this.dutyCycle - 5); // Beispiel: Reduziere Duty-Cycle um 10%
-                }
-            }
-
-            // Aktion: unchanged
-        } else if (this.action === "maximum") {
-            if (!this.hasDuty) {
-                // Kein Duty-Modus: Schalte das Gerät ein, falls es nicht läuft
-                if (!this.isRunning) {
-                    node.warn(`${this.name} wurde eingeschaltet in ${this.inRoomName} .`);
-                    return this.turnON();
-                } else {
-                    return { entity_id: this.switches[0], action: "Allready ON" }
-                }
-            } else {
-                // Duty-Modus: Verwalte Duty-Cycle
-                if (!this.isRunning) {
-                    if (this.dutyCycle === 0) {
-                        this.setDutyCycle(100);
-                        node.warn(`${this.name} Duty-Cycle wurde auf MAX %gesetzt und eingeschaltet in ${this.inRoomName} .`);
-                        return this.changeDuty(this.dutyCycle);
-                    }
-                } else {
-                    if (this.dutyCycle === 95) {
-                        node.warn(`${this.name} läuft bereits auf maximalem Duty-Cycle in ${this.inRoomName} .`);
-                        return { entity_id: this.switches[0], action: "Max Reached" }
-                    } else {
-                        node.warn(`${this.name} Duty-Cycle wurde auf MAX % erhöht in ${this.inRoomName} .`);
-                        return this.changeDuty(100); // Beispiel: Erhöhe Duty-Cycle um 10%
-                    }
-                }
-
-            }
-        } else if (this.action === "minimum") {
-
-        } else if (this.action === "unchanged") {
-            //node.warn(`${this.name} bleibt unverändert.`);
-            return { entity_id: this.switches[0], action: "UNCHANGED" }
-            // Fehlerfall
-        } else {
-            node.warn(`Etwas Ungewöhnliches ist passiert: ${this.name} hat eine unbekannte Aktion. Bitte Support kontaktieren.`);
-
-        }
+        return this.action !== "unchanged";
     }
 
     turnOFF() {
-        let enitiy = this.switches[0]
-        if (this.isRunning === true) {
-            this.isRunning = false
-            return { "entity_id": enitiy, "action": "off" }
+        const entity = this.switches[0];
+        if (this.isRunning) {
+            this.isRunning = false;
+            return { entity_id: entity, action: "off" };
         }
-
     }
 
     turnON() {
-        let enitiy = this.switches[0]
-        if (this.isRunning == false) {
-            this.isRunning = true
-            return { "entity_id": enitiy, "action": "on" }
+        const entity = this.switches[0];
+        if (!this.isRunning) {
+            this.isRunning = true;
+            return { entity_id: entity, action: "on" };
         }
-
     }
 }
 

@@ -160,8 +160,6 @@ function OpenGrowBoxSetup() {
     sudo wget -O /usr/share/hassio/addons/data/a0d7b954_nodered/options.json "$NODEREDCONF"
     sudo wget -O /usr/share/hassio/addons/data/core_configurator/options.json "$EDITORCONF"
 
-    #sudo wget -O /usr/share/hassio/homeassistant/airCtrlSensor.yaml  "$RUCKEHACCONF"
-    sudo wget -O /usr/share/hassio/homeassistant/configuration.yaml "$MAINCONF"
     sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace.dashboard_opengrowbox "$DASHBOARDVIEW"
     sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace_dashboards "$OPG_DASHBOARD" 
     
