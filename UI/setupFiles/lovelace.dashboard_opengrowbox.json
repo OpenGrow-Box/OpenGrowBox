@@ -219,10 +219,13 @@
                                     "name": "*Water*"
                                   },
                                   {
-                                    "name": "*Drying*"
+                                    "name": "*Humidi*"
                                   },
                                   {
-                                    "name": "*Humidi*"
+                                    "name": "*PID*"
+                                  },
+                                  {
+                                    "name": "OGB*Select*"
                                   }
                                 ]
                               }
@@ -290,6 +293,15 @@
                                   },
                                   {
                                     "name": "*Output*"
+                                  },
+                                  {
+                                    "name": "*Proportional*"
+                                  },
+                                  {
+                                    "name": "*Integral*"
+                                  },
+                                  {
+                                    "name": "*Derivativ*"
                                   }
                                 ]
                               }
@@ -432,6 +444,15 @@
                                   },
                                   {
                                     "name": "*Output*"
+                                  },
+                                  {
+                                    "name": "*Faktor*"
+                                  },
+                                  {
+                                    "name": "*Pump*"
+                                  },
+                                  {
+                                    "name": "*Select*"
                                   },
                                   {
                                     "entity_id": "*vpd*"
@@ -588,19 +609,70 @@
                               "type": "custom:auto-entities",
                               "card": {
                                 "type": "entities",
-                                "title": ""
+                                "name": "Master"
                               },
                               "filter": {
                                 "include": [
                                   {
                                     "area": "${ogb_room}",
-                                    "domain": "select",
-                                    "name": "*GLS*"
-                                  },
+                                    "name": "*PID*"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "markdown",
+                              "content": "## VPD - P.I.D\n"
+                            },
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "name": "Andere Entitäten"
+                              },
+                              "filter": {
+                                "include": [
                                   {
                                     "area": "${ogb_room}",
-                                    "domain": "time",
-                                    "name": "*GLS*"
+                                    "name": "*VPDFaktor*"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "markdown",
+                              "content": "## Temp - P.I.D\n"
+                            },
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "name": "Andere Entitäten"
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "name": "*TempFaktor*"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "markdown",
+                              "content": "## Humidity - P.I.D\n"
+                            },
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "name": "Andere Entitäten"
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "name": "*HumFaktor*"
                                   }
                                 ]
                               }
@@ -609,8 +681,8 @@
                         }
                       },
                       "attributes": {
-                        "label": "Experimental",
-                        "icon": "mdi:lightbulb-alert"
+                        "label": "P.I.D",
+                        "icon": "mdi:weight-pound"
                       }
                     }
                   ],
@@ -665,7 +737,7 @@
                                     "name": "*Night*"
                                   },
                                   {
-                                    "name": "*Weigth*"
+                                    "name": "*Weight*"
                                   }
                                 ]
                               }
@@ -676,6 +748,56 @@
                       "attributes": {
                         "label": "Device Configurator",
                         "icon": "mdi:comment-flash"
+                      }
+                    }
+                  ],
+                  "layout_options": {
+                    "grid_columns": 4,
+                    "grid_rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:tabbed-card",
+                  "tabs": [
+                    {
+                      "card": {
+                        "type": "custom:config-template-card",
+                        "variables": {
+                          "ogb_room": "states['select.ogb_rooms'].state"
+                        },
+                        "entities": [
+                          "select.ogb_rooms"
+                        ],
+                        "card": {
+                          "type": "vertical-stack",
+                          "cards": [
+                            {
+                              "type": "custom:auto-entities",
+                              "card": {
+                                "type": "entities",
+                                "title": ""
+                              },
+                              "filter": {
+                                "include": [
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "select",
+                                    "name": "*GLS*"
+                                  },
+                                  {
+                                    "area": "${ogb_room}",
+                                    "domain": "time",
+                                    "name": "*GLS*"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "attributes": {
+                        "label": "Experimental",
+                        "icon": "mdi:lightbulb-alert"
                       }
                     }
                   ],
@@ -702,16 +824,6 @@
               "entity": "select.ogb_rooms",
               "icon": "mdi:flower-tulip-outline",
               "name": "To Room"
-            },
-            {
-              "type": "custom:mushroom-template-badge",
-              "content": "NodeRed",
-              "icon": "mdi:mushroom",
-              "color": "red",
-              "tap_action": {
-                "action": "navigate",
-                "navigation_path": "/a0d7b954_nodered"
-              }
             },
             {
               "type": "entity",
@@ -934,6 +1046,9 @@
                                 "entity_id": "*restart*"
                               },
                               {
+                                "entity_id": "*ogb_*"
+                              },
+                              {
                                 "state": "unknown"
                               },
                               {
@@ -1126,6 +1241,12 @@
                               },
                               {
                                 "entity_id": "*holdvpd*"
+                              },
+                              {
+                                "entity_id": "*light*"
+                              },
+                              {
+                                "name": "*Faktor*"
                               },
                               {
                                 "state": "unknown"
@@ -1414,6 +1535,9 @@
                             "exclude": [
                               {
                                 "name": "*VPD*"
+                              },
+                              {
+                                "name": "*Control*"
                               }
                             ]
                           }
@@ -1808,6 +1932,22 @@
                           "show_state": true,
                           "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, rgba(255,255,255,0.5), rgba(250,225,0,0.8)) !important;\n  color: black !important;\n  animation: gradientShift 5s ease infinite;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 1px 1px 5px #ffffff;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, grey, yellow, orange)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 255, 255, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n@keyframes gradientShift {\n  0% { background: rgba(255, 0, 0, 0.5); }\n  50% { background: rgba(0, 255, 0, 0.5); }\n  100% { background: rgba(0, 0, 255, 0.5); }\n}\n\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
                         }
+                      },
+                      {
+                        "area": "*",
+                        "domain": "light",
+                        "name": "**",
+                        "entity_id": "*light*",
+                        "options": {
+                          "type": "custom:bubble-card",
+                          "card_type": "button",
+                          "button_type": "switch",
+                          "show_attribute": false,
+                          "show_last_changed": true,
+                          "icon": "mdi:lightbulb-cfl",
+                          "show_state": true,
+                          "styles": ".bubble-button-card-container {\n  background: linear-gradient(45deg, rgba(255,255,255,0.5), rgba(250,225,0,0.8)) !important;\n  color: black !important;\n  animation: gradientShift 5s ease infinite;\n  border: 0.16rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 25px 25px 25px;\n  box-shadow: 1px 1px 5px #ffffff;\n}\n.bubble-button-background {\n  opacity: 1 !important;\n  background: ${state === 'on' \n    ? 'linear-gradient(45deg, grey, yellow, orange)' \n    : 'linear-gradient(45deg, orange, red, #ffbf80)'} !important;\n}\n.bubble-icon-container {\n  color: rgba(255, 255, 255, 0.9) !important;\n  border: 0.12rem solid rgba(255, 255, 255, 0.8);\n  border-radius: 25px 0px 25px 25px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\n  animation: iconPulse 3s infinite;\n}\n@keyframes gradientShift {\n  0% { background: rgba(255, 0, 0, 0.5); }\n  50% { background: rgba(0, 255, 0, 0.5); }\n  100% { background: rgba(0, 0, 255, 0.5); }\n}\n\n@keyframes iconPulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}\n"
+                        }
                       }
                     ],
                     "exclude": [
@@ -2003,7 +2143,14 @@
                         }
                       }
                     ],
-                    "exclude": null
+                    "exclude": [
+                      {
+                        "name": "*OGB_*"
+                      },
+                      {
+                        "state": "unknown"
+                      }
+                    ]
                   },
                   "show_empty": true
                 }
@@ -2128,7 +2275,11 @@
                         }
                       }
                     ],
-                    "exclude": []
+                    "exclude": [
+                      {
+                        "name": "*OGB_*"
+                      }
+                    ]
                   },
                   "sort": {
                     "method": "state",
@@ -2180,7 +2331,11 @@
                         }
                       }
                     ],
-                    "exclude": []
+                    "exclude": [
+                      {
+                        "name": "*OGB_*"
+                      }
+                    ]
                   },
                   "sort": {
                     "method": "state",
@@ -2232,7 +2387,11 @@
                         }
                       }
                     ],
-                    "exclude": []
+                    "exclude": [
+                      {
+                        "name": "*OGB_*"
+                      }
+                    ]
                   },
                   "sort": {
                     "method": "state",
@@ -2284,7 +2443,11 @@
                         }
                       }
                     ],
-                    "exclude": []
+                    "exclude": [
+                      {
+                        "name": "*OGB_*"
+                      }
+                    ]
                   },
                   "sort": {
                     "method": "state",

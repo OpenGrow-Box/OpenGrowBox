@@ -1447,7 +1447,6 @@ class OpenGrowBox {
         }
     }
 
-
     findDeviceByEntity(entity) {
         // Überprüfen, ob ownSetttetDevices existieren und ein Array sind
         if (!Array.isArray(this.devices)) {

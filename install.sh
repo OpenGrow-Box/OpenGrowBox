@@ -156,20 +156,23 @@ function OpenGrowBoxSetup() {
     ha addons start core_configurator
     sleep 5
     sudo wget -O /usr/share/hassio/addon_configs/a0d7b954_nodered/flows.json "$ALLFLOWS"
-
     sudo wget -O /usr/share/hassio/addons.json "$ADDONS"
-    sudo wget -O /usr/share/hassio/addons/data/a0d7b954_nodered/options.json "$NODEREDCONF"
+    sudo wget -O /usr/share/hassio/addons/data/a0d7b954_nodered/options.json "$NODEREDCONF" 
     sudo wget -O /usr/share/hassio/addons/data/core_configurator/options.json "$EDITORCONF"
 
-    sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace.dashboard_opengrowbox "$DASHBOARDVIEW"
-    sudo wget -O /usr/share/hassio/homeassistant/.storage/lovelace_dashboards "$OPG_DASHBOARD" 
-    
+
+
+    wget  -O lovelace_resources "$LLRESSOURCE" 
+
+    sudo wget -O  /usr/share/hassio/homeassistant/.storage/lovelace_dashboards "$OPG_DASHBOARD" 
+    sudo wget -O  /usr/share/hassio/homeassistant/.storage/lovelace.dashboard_opengrowbox "$DASHBOARDVIEW"
+
     # Node-Red-Companion-Setup
     echo "Setup Node-Red-Companion-Integration"
     cd /usr/share/hassio/homeassistant/custom_components
     sudo mkdir nodered 
     cd nodered
-    sudo wget "$NRCOMPANION" -O nodered.zip
+    sudo wget -O nodered.zip "$NRCOMPANION"
     sudo unzip nodered.zip
     sudo mv hass-node-red-main/custom_components/nodered/* .
     sudo rm -rf hass-node-red-main nodered.zip
@@ -179,7 +182,7 @@ function OpenGrowBoxSetup() {
     cd /usr/share/hassio/homeassistant/custom_components
     sudo mkdir opengrowbox
     cd opengrowbox
-    sudo wget "$OGB" -O ogb.zip
+    sudo wget -O ogb.zip "$OGB" 
     sudo unzip ogb.zip
     sudo mv OpenGrowBox-HA-*/custom_components/opengrowbox/* .
     sudo rm -rf OpenGrowBox-HA-* ogb.zip
@@ -187,7 +190,7 @@ function OpenGrowBoxSetup() {
     # OGB_Exhaust HA SETUP
     echo "Installation OGB Exhausts HA-Integrations"
     cd /usr/share/hassio/homeassistant/custom_components && sudo mkdir ogb_exhaust && cd ogb_exhaust
-    sudo wget "$OGB_EXHAUST" -O ogbexhaust.zip
+    sudo wget -O ogbexhaust.zip "$OGB_EXHAUST"
     sudo unzip ogbexhaust.zip
     sudo mv OpenGrowBox-Exhaust-main/custom_components/ogb_exhaust/* .
     sudo rm -rf OpenGrowBox-Exhaust-main ogbexhaust.zip
@@ -197,33 +200,33 @@ function OpenGrowBoxSetup() {
     cd /usr/share/hassio/homeassistant/www/
     sudo wget $MINIGRAPH
     # Setup VPD-Chart
-    sudo wget "$VPDCHART" -O "vpdchart-card.js" 
+    sudo wget -O "vpdchart-card.js"  "$VPDCHART" 
 
     # Setup Mushroom
     sudo wget $MUSHROOM
     
     # Setup Custom Template Card
-    sudo wget "$CUSTOMTEMPPLATE" -O "config-template-card.js"
+    sudo wget  -O "config-template-card.js" "$CUSTOMTEMPPLATE"
     
     # Setup Vertical Stack Card
-    sudo wget "$VERTICALCARD" -O "vertical-stack-in-card.js"
+    sudo wget -O "vertical-stack-in-card.js"  "$VERTICALCARD" 
     
     # Setup Tabbed Card
-    sudo wget "$TAPPEDCARD" -O "tabbed-card.js"
+    sudo wget  -O "tabbed-card.js" "$TAPPEDCARD"
 
     # Setup Auto Entities
-    sudo wget "$AUTOENTIES" -O "auto-entities.zip" && sudo unzip auto-entities.zip && sudo rm auto-entities.zip 
+    sudo wget  -O "auto-entities.zip" "$AUTOENTIES" && sudo unzip auto-entities.zip && sudo rm auto-entities.zip  
     # Setup LayoutCard
-    sudo wget "$LAYOUTCARD" -O "layout.zip" && sudo unzip layout.zip && sudo rm layout.zip
+    sudo wget  -O "layout.zip"  "$LAYOUTCARD" && sudo unzip layout.zip && sudo rm layout.zip
     # Setup Bubble Cardhist 
-    sudo wget "$BUBBLECARD" -O "bubble-card.js"
-    sudo wget "$BUBBLEFIX" -O "bubble-pop-up-fix.js"
+    sudo wget -O "bubble-card.js" "$BUBBLECARD" 
+    sudo wget  -O "bubble-pop-up-fix.js" "$BUBBLEFIX"
 
     # SETUP loveLace_Ressource
-    cd /usr/share/hassio/homeassistant/.storage/ && sudo wget  "$LLRESSOURCE" -O lovelace_resources
+    cd /usr/share/hassio/homeassistant/.storage/ && sudo wget  -O lovelace_resources "$LLRESSOURCE"
 
     # Setup Predefined Rooms and Integrations 
-    sudo wget -O /usr/share/hassio/homeassistant/.storage/core.area_registr "$ROOMS"
+    #sudo wget -O /usr/share/hassio/homeassistant/.storage/core.area_registr "$ROOMS"
 
 }
 
