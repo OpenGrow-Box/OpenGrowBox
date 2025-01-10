@@ -1404,23 +1404,6 @@ class OpenGrowBox {
         return false;
     }
     
-    // Add Own Devices von list ohne erkennung 
-    addOwnDevices(deviceName,deviceData,context){
-
-        const identifiedDevice = this.identifyDevice(deviceName, deviceData);
-        if (!identifiedDevice) {
-            node.error(`Failed to identify device: ${deviceName}`);
-            return;
-        }
-        // Daten initialisieren, falls nicht vorhanden
-        identifiedDevice.data = { ...deviceData };
-        identifiedDevice.setData(deviceData, context); // Gerätedaten setzen
-        this.devices.push(identifiedDevice); // Gerät zur Liste hinzufügen
-        this.registerDevices(identifiedDevice)
-        node.warn(`Added new device: ${deviceName}`);
-   
-    }
-
     getCurrentOwnDeviceList(deviceType) {
         // Filtere die Geräte basierend auf dem übergebenen `deviceType`
         let devicetypes = this.ownDeviceList.filter(device => device.deviceType === deviceType);
@@ -1446,6 +1429,7 @@ class OpenGrowBox {
             this.ownDeviceList.push(deviceObject);
         }
     }
+
 
     findDeviceByEntity(entity) {
         // Überprüfen, ob ownSetttetDevices existieren und ein Array sind
@@ -2254,12 +2238,12 @@ class OpenGrowBox {
             }
 
             // Vorzeitige Anpassungen
-            limitAdjustments = this.checkLimits();
+            //limitAdjustments = this.checkLimitsWithOutAmbient();
 
             // Kombiniere alle Aktionen
             finalActions = {
                 ...actionData.actions || null,
-                ...limitAdjustments || null,
+             //   ...limitAdjustments || null,
             };
 
             this.devices.forEach((device) => {
@@ -2527,7 +2511,7 @@ class OpenGrowBox {
         //};
 
         // **1. Hohe Temperatur + Hohe Feuchtigkeit**
-        if (tempDeviation > 0 && humDeviation > 0 && this.isPlantDay.lightOn) {
+        if (tempDeviation > 0 && humDeviation > 0) {
             adjustments.dehumidifier = "increased";
             adjustments.cooler = "increased";
             adjustments.exhaust = "increased";
@@ -2541,7 +2525,7 @@ class OpenGrowBox {
             node.warn(`${this.tentName} Fall: Hohe Temperatur + Hohe Feuchtigkeit`);
 
             // **2. Hohe Temperatur + Niedrige Feuchtigkeit**
-        } else if (tempDeviation > 0 && humDeviation < 0 && this.isPlantDay.lightOn) {
+        } else if (tempDeviation > 0 && humDeviation < 0) {
             adjustments.humidifier = "increased";
             adjustments.cooler = "increased";
             adjustments.exhaust = "increased";
@@ -2556,7 +2540,7 @@ class OpenGrowBox {
             node.warn(`${this.tentName} Fall: Hohe Temperatur + Niedrige Feuchtigkeit`);
 
             // **3. Niedrige Temperatur + Hohe Feuchtigkeit**
-        } else if (tempDeviation < 0 && humDeviation > 0 && this.isPlantDay.lightOn) {
+        } else if (tempDeviation < 0 && humDeviation > 0) {
             adjustments.dehumidifier = "increased";
             adjustments.heater = "increased";
             adjustments.exhaust = "increased";
@@ -2571,7 +2555,7 @@ class OpenGrowBox {
             node.warn(`${this.tentName} Fall: Niedrige Temperatur + Hohe Feuchtigkeit`);
 
             // **4. Niedrige Temperatur + Niedrige Feuchtigkeit**
-        } else if (tempDeviation < 0 && humDeviation < 0 && this.isPlantDay.lightOn) {
+        } else if (tempDeviation < 0 && humDeviation < 0) {
             adjustments.humidifier = "increased";
             adjustments.heater = "increased";
             adjustments.exhaust = "reduced";
@@ -2587,7 +2571,7 @@ class OpenGrowBox {
         }
 
         // **5. Notfallmaßnahmen bei extremer Übertemperatur**
-        if (this.tentData.temperature > this.tentData.maxTemp + 5 && this.isPlantDay.lightOn) {
+        if (this.tentData.temperature > this.tentData.maxTemp + 5) {
             adjustments.exhaust = "maximum";
             adjustments.ventilation = "increased";
             adjustments.cooler = "increased";
@@ -2602,7 +2586,7 @@ class OpenGrowBox {
         }
 
         // **6. Notfallmaßnahmen bei extremer Untertemperatur**
-        if (this.tentData.temperature < this.tentData.minTemp - 5 && this.isPlantDay.lightOn) {
+        if (this.tentData.temperature < this.tentData.minTemp - 5) {
             adjustments.heater = "increased";
             adjustments.exhaust = "reduced";
             adjustments.ventilation = "increased";
@@ -2618,7 +2602,7 @@ class OpenGrowBox {
         }
 
         // **7. Lichtsteuerung basierend auf Temperatur**
-        if (this.tentData.temperature > this.tentData.maxTemp && this.isPlantDay.lightOn) {
+        if (this.tentData.temperature > this.tentData.maxTemp) {
             adjustments.light = this.vpd.lightControl ? "reduced" : "unchanged"
             node.warn(`${this.tentName} Lichtleistung reduziert aufgrund hoher Temperatur`);
             
@@ -2628,13 +2612,13 @@ class OpenGrowBox {
         }
 
         // **8. CO₂-Management**
-        if (this.tentData.co2Level < 400 && this.isPlantDay.lightOn) {
+        if (this.tentData.co2Level < 400) {
             adjustments.light = this.vpd.lightControl ? "increased" : "unchanged"
             adjustments.co2 = "increased";
             adjustments.exhaust = "minimum";
             node.warn("CO₂-Level zu niedrig, CO₂-Zufuhr erhöht");
 
-        } else if (this.tentData.co2Level > 1200 && this.isPlantDay.lightOn) {
+        } else if (this.tentData.co2Level > 1200) {
             adjustments.light = this.vpd.lightControl ? "increased" : "unchanged"
             adjustments.co2 = "reduced";
             adjustments.exhaust = "increased";
@@ -2643,7 +2627,7 @@ class OpenGrowBox {
         }
 
         // **9. Taupunkt- und Kondensationsschutz**
-        if (this.tentData.dewpoint >= this.tentData.temperature - 1 && this.isPlantDay.lightOn) {
+        if (this.tentData.dewpoint >= this.tentData.temperature - 1) {
             adjustments.exhaust = "increased";
             adjustments.climate.dry = "increased";
             adjustments.ventilation = "increased";
@@ -2667,7 +2651,7 @@ class OpenGrowBox {
             const ambientInfluence = this.analyzeAmbientInfluence();
             adjustments = { ...adjustments, ...ambientInfluence };
 
-            node.warn(`${this.tentName} Nachtmodus aktiv: Licht aus, Abluft erhöht`);
+            node.warn(`${this.tentName} Nachtmodus aktiv: Licht aus`);
         }
 
         return adjustments;
@@ -2744,30 +2728,27 @@ class OpenGrowBox {
         } else if (tempDeviation < 0 && humDeviation > 0) {
             adjustments.dehumidifier = "increased";
             adjustments.heater = "increased";
+            adjustments.cooler = "reduced";
             adjustments.exhaust = "increased";
             adjustments.climate.dry = "increased";
             adjustments.ventilation = "increased";
-            if (this.isPlantDay.lightOn) {
-                adjustments.light = "increased"
-            }
             node.warn(`${this.tentName} Fall: Niedrige Temperatur + Hohe Feuchtigkeit`);
 
             // **4. Niedrige Temperatur + Niedrige Feuchtigkeit**
         } else if (tempDeviation < 0 && humDeviation < 0) {
             adjustments.humidifier = "increased";
+            adjustments.dehumidifier = "reduced";
             adjustments.heater = "increased";
+            adjustments.cooler = "reduced";
             adjustments.exhaust = "reduced";
             adjustments.climate.heat = "increased";
             adjustments.ventilation = "reduced";
-            if (this.isPlantDay.lightOn) {
-                adjustments.light = "increased"
-            }
             node.warn(`${this.tentName} Fall: Niedrige Temperatur + Niedrige Feuchtigkeit`);
         }
 
         // **5. Notfallmaßnahmen bei extremer Übertemperatur**
         if (this.tentData.temperature > this.tentData.maxTemp + 5) {
-            adjustments.exhaust = "maximum";
+            adjustments.exhaust = "increased";
             adjustments.ventilation = "increased";
             adjustments.cooler = "increased";
             adjustments.climate.cool = "increased";
@@ -2781,9 +2762,7 @@ class OpenGrowBox {
             adjustments.exhaust = "reduced";
             adjustments.ventilation = "increased";
             adjustments.climate.heat = "increased";
-            if (this.isPlantDay.lightOn) {
-                adjustments.light = "maximum"
-            }
+
             node.warn(`${this.tentName} Kritische Untertemperatur! Notfallmaßnahmen aktiviert.`);
         }
 
@@ -2798,7 +2777,7 @@ class OpenGrowBox {
             if (this.isPlantDay.lightOn) {
                 adjustments.light = "increased"
                 adjustments.co2 = "increased";
-                adjustments.exhaust = "minimum";
+                adjustments.exhaust = "reduced";
                 node.warn("CO₂-Level zu niedrig, CO₂-Zufuhr erhöht");
             }
 
@@ -2825,10 +2804,7 @@ class OpenGrowBox {
         // **10. Nachtmodus (Licht aus, maximale Abluft)**
         if (!this.isPlantDay.lightOn) {
             adjustments.light = "off";
-            adjustments.exhaust = "maximum";
-            adjustments.ventilation = "increased";
-            adjustments.co2 = "minimum";
-            node.warn(`${this.tentName} Nachtmodus aktiv: Licht aus, Abluft erhöht`);
+            node.warn(`${this.tentName} Nachtmodus aktiv: Licht aus`);
         }
 
         return adjustments;
@@ -2874,30 +2850,6 @@ class OpenGrowBox {
         return ambientAdjustments;
     }
 
-    // Experimentel ( use outsite and ambient data)
-    analyzeTrends() {
-        let trend = {
-            temperature: this.enviorment.outsiteTemp - this.enviorment.ambientTemp,
-            humidity: this.enviorment.outsiteHumidity - this.enviorment.ambientHumidity,
-        };
-
-        if (trend.temperature > 0) {
-            // Außentemperatur steigt -> Vorzeitig lüften
-            this.actionsIncreased.exhaust = "preemptively increased";
-        } else if (trend.temperature < 0) {
-            // Außentemperatur sinkt -> Lüftung reduzieren
-            this.actionsReduced.exhaust = "preemptively reduced";
-        }
-
-        if (trend.humidity > 0) {
-            // Außenfeuchtigkeit steigt -> Entfeuchter verstärken
-            this.actionsIncreased.dehumidifier = "preemptively increased";
-        } else if (trend.humidity < 0) {
-            // Außenfeuchtigkeit sinkt -> Befeuchter anpassen
-            this.actionsReduced.humidifier = "preemptively reduced";
-        }
-    }
-
     // DATA SETTER FAKE DB ******************************
     dataSetter(data) {
         const time = new Date().toISOString();
@@ -2908,17 +2860,6 @@ class OpenGrowBox {
         if (data.Action === "Unchanged" ||data.tentMode === "Unchanged" || this.tentMode === "Unchanged" || this.tentMode === "Disabled" || this.tentMode === "I DONT CARE MODE") {
             return;
         }
-
-        // Filter für aktive oder relevante Geräte
-        // Filter für aktive oder relevante Geräte
-        const relevantDevices = this.devices.filter(
-            (device) => (device.switches.length > 0) || device.isRunning
-        );
-
-        if (data.PIDAdjustments){
-
-        }
-
 
         // Erstelle das Datenobjekt
         const enrichedData = {
@@ -2952,9 +2893,6 @@ class OpenGrowBox {
                 outsiteDewpoint: this.enviorment.outsiteDewpoint,
             },
             actions: data.actions,
-            devices: relevantDevices.map((device) => ({
-                ...device
-            })),
             deviceActions: data.deviceActions
         };
 
@@ -2975,8 +2913,8 @@ class OpenGrowBox {
         }
 
         // Begrenze die Anzahl der gespeicherten Aktionen
-        if (this.previousActions.length > 250) {
-            this.previousActions = this.previousActions.slice(-250);
+        if (this.previousActions.length > 50) {
+            this.previousActions = this.previousActions.slice(-50);
         }
 
     }
@@ -2987,19 +2925,6 @@ class OpenGrowBox {
         const tempThreshold = 0.25;
         const humThreshold = 0.25;
 
-        if (
-            data.tentMode === "P.I.D-Unchanged" ||
-            this.tentMode === "Unchanged" ||
-            this.tentMode === "Disabled" ||
-            this.tentMode === "I DONT CARE MODE"
-        ) {
-            return;
-        }
-
-        // Filter für aktive oder relevante Geräte
-        const relevantDevices = this.devices.filter(
-            (device) => device.switches.length > 0 || device.isRunning
-        );
 
         // Erstelle das Datenobjekt
         const enrichedData = {
@@ -3034,9 +2959,6 @@ class OpenGrowBox {
                 outsiteDewpoint: this.enviorment.outsiteDewpoint,
             },
             actions: data.actions,
-            devices: relevantDevices.map((device) => ({
-                ...device
-            })),
             deviceActions: data.deviceActions
         };
 
@@ -3059,8 +2981,8 @@ class OpenGrowBox {
         }
 
         // Begrenze die Anzahl der gespeicherten Aktionen
-        if (this.previousPIDActions.length > 250) {
-            this.previousPIDActions = this.previousPIDActions.slice(-250);
+        if (this.previousPIDActions.length > 50) {
+            this.previousPIDActions = this.previousPIDActions.slice(-50);
         }
     }
 
@@ -3394,7 +3316,6 @@ class Device {
         );
     }
 
-
     updateIsRunningState() {
         this.isRunning = false;
 
@@ -3458,14 +3379,12 @@ class Device {
         }
     }
 
-
-
     prepareAction(finalActions) {
         if (finalActions.hasOwnProperty(this.deviceType)) {
             const actionValue = finalActions[this.deviceType];
 
             if (this.deviceType === "light") {
-                this.needChange = actionValue !== "unchanged";
+                this.needChange = actionValue;
                 this.action = actionValue;
             } else if (this.deviceType === "climate") {
                 if (finalActions.climate && typeof finalActions.climate === "object") {
@@ -4250,14 +4169,14 @@ class Exhaust extends Device {
                 }
             case "increased":
                 if (this.isDimmable) {
-                    const increasedDuty = Math.min(this.dutyCycle + 5, this.maxDuty);
+                    const increasedDuty = Math.min(this.dutyCycle + 1, this.maxDuty);
                     return this.changeDuty(increasedDuty);
                 } else {
                     return this.turnON(switchId);
                 }
             case "reduced":
                 if (this.isDimmable) {
-                    const reducedDuty = Math.max(this.dutyCycle - 5, this.minDuty);
+                    const reducedDuty = Math.max(this.dutyCycle - 1, this.minDuty);
                     return this.changeDuty(reducedDuty);
                 } else {
                     return this.turnOFF(switchId);
