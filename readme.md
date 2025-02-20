@@ -5,8 +5,6 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 ## Check the [WIKI](https://wiki.opengrowbox.net)
 
-# Integration 
-- https://github.com/OpenGrow-Box/OpenGrowBox-HA
 
 ### Control Panel 
 ![image](https://github.com/user-attachments/assets/6a996ac9-d7fa-44fd-b5f9-0840c984ab41)
