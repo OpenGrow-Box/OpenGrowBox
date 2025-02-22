@@ -6,6 +6,8 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 # Integration 
 - https://github.com/OpenGrow-Box/OpenGrowBox-HA
+# Frontend
+- https://github.com/OpenGrow-Box/OpenGrowBox-Frontend
 
 
 ## Check the [WIKI](https://wiki.opengrowbox.net)
