@@ -15,16 +15,16 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 
 ### Control Panel 
-![image](https://github.com/user-attachments/assets/6a996ac9-d7fa-44fd-b5f9-0840c984ab41)
+![image](https://github.com/user-attachments/assets/0106297d-5209-4568-92c7-8dbad7043a20)
 
 ### Dashboard
-![image](https://github.com/user-attachments/assets/1c6a08ca-fe2a-4840-b6c4-559f31f74c2c)
+![image](https://github.com/user-attachments/assets/88bb8fac-6699-4ca2-ba5b-3b8f2c18c55d)
 
 ### GrowBook
-![image](https://github.com/user-attachments/assets/9950fff0-4dda-4355-914c-4fa010e87ea6)
+![image](https://github.com/user-attachments/assets/d086e3e8-fd8a-4c54-a6ec-a7ef186cb4e6)
 
 ### Settings
-![image](https://github.com/user-attachments/assets/dcfeaade-fc02-4294-a7e1-4369720069ac)
+![image](https://github.com/user-attachments/assets/e14fc7c1-4a49-4405-b3d6-bf94ffb4946a)
 
 
 
@@ -32,13 +32,9 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 
 ## NEWS:
 
-### FULL Migration to HA-Integration
+### FULL Migration to HA-Integration !! IN WORK SOON DONE
 #### Autowatering is Completed
-
-### Next Step is LIGHT!!!
----
-## Base / Heart / Call it How You Like
-
+#### Full Device Support
 
 
 ### Raspberry Pi 4 Setup and Installation
@@ -51,9 +47,8 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
         - Install MQTT Broker.
         - Install the File Editor.
         - Install HACS (Home Assistant Community Store).
-    - Install Node-RED:
-        - [Node-RED Setup Guide](https://pimylifeup.com/install-node-red-home-assistant/)
-
+    - Install OpenGrowBox-HA
+      - [OpenGrowBox-HA](https://github.com/OpenGrow-Box/OpenGrowBox-HA)
 ---
 
 ## EC FAN Setup
