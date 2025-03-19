@@ -31,10 +31,14 @@ Transform your growing environment with the OpenGrowBox, an open-source project 
 ---
 
 ## NEWS:
-
-### FULL Migration to HA-Integration !! IN WORK SOON DONE
-#### Autowatering is Completed
+## New UserInterface
 #### Full Device Support
+#### Contorl Option 
+    - Home Assistant
+    - Node-RED
+    - N8N
+    - Self-Hosted-Control
+
 
 
 ### Raspberry Pi 4 Setup and Installation
