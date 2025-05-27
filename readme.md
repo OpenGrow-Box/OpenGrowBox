@@ -1,122 +1,107 @@
-# OpenGrowBox for Everyone!!!
+# 👋 Hi there – Welcome to OpenGrowBox!
 
-## Overview
-Transform your growing environment with the OpenGrowBox, an open-source project designed to automate and optimize your grow tents. This setup uses a Raspberry Pi 4 and a variety of sensors to monitor and control your growing conditions. as Example
-
-# YOU CAN USE ANY DEVICE AS SERVER
-- As long as it supports running Home Assitant on it
-
-
-# WIKI
-- https://github.com/OpenGrow-Box/OpenGrowBox/wiki
-# Integration 
-- https://github.com/OpenGrow-Box/OpenGrowBox-HA
-# Frontend
-- https://github.com/OpenGrow-Box/OpenGrowBox-Frontend
-
-
-
-
-
-### Control Panel 
-![image](https://github.com/user-attachments/assets/0106297d-5209-4568-92c7-8dbad7043a20)
-
-### Dashboard
-![image](https://github.com/user-attachments/assets/88bb8fac-6699-4ca2-ba5b-3b8f2c18c55d)
-
-### GrowBook
-![image](https://github.com/user-attachments/assets/d086e3e8-fd8a-4c54-a6ec-a7ef186cb4e6)
-
-### Settings
-![image](https://github.com/user-attachments/assets/e14fc7c1-4a49-4405-b3d6-bf94ffb4946a)
-
-
+Transform your growing environment with **OpenGrowBox** – an open-source system designed to automate and optimize your grow tents and rooms.  
+Compatible with any hardware that supports **Home Assistant**, it brings powerful control, monitoring, and customization to your fingertips.
 
 ---
 
-## NEWS:
-## New UserInterface
-#### Full Device Support
-#### Contorl Option 
-    - Home Assistant
-    - Node-RED
-    - N8N
-    - Self-Hosted-Control
+## 🌱 ONE Control To Rule Them ALL
 
-
-
-### Raspberry Pi 4 Setup and Installation
-1. Set up Raspberry Pi 4 with an external SSD (search online for guides).
-2. Install Mosquitto MQTT on your Raspberry Pi 4.
-3. Install Home Assistant Supervised:
-    - [Home Assistant Supervised Installation Guide](https://github.com/home-assistant/supervised-installer)
-    - Set up Home Assistant:
-        - Install MQTT and start the server.
-        - Install MQTT Broker.
-        - Install the File Editor.
-        - Install HACS (Home Assistant Community Store).
-    - Install OpenGrowBox-HA
-      - [OpenGrowBox-HA](https://github.com/OpenGrow-Box/OpenGrowBox-HA)
----
-
-## EC FAN Setup
-For detailed instructions on setting up the EC fan, visit the [Ruck_EC_API repository](https://github.com/OpenGrow-Box/PWM-Fans.git).
+OpenGrowBox intelligently connects sensors, actuators, and grow logic to give you a seamless and automated growing experience – from hobbyist to pro-level setups.
 
 ---
 
-## Sensors
-### Operating System
-- Tasmota: [Getting Started with Tasmota](https://tasmota.github.io/docs/Getting-Started/)
+## 📚 Project Structure
 
-### Sensor Types
-- **Light:** TSL259 Light Sensor
-- **Temperature:** 
-    - SHT31
-    - DHT 11 / DHT 22
-    - MLX90640 (Infrared temperature sensor that can be pointed to plant leaves)
-- **Humidity:** SHT31, DHT 11, DHT 22
-- **CO2:** MH-Z19B
-- **Air Pressure**
-- **VPD (Vapor Pressure Deficit):** Created with a Node-RED function
-- **Xiaomi Plant Sensor:**
-    - Electrical Conductivity (EC)
-    - Light Intensity (LX, converted with a light conversion rate of 0.0185 for Sanlight)
-    - Temperature
+### 🧭 Wiki  
+Your starting point for docs, guides & architecture  
+➡️ [OpenGrowBox Wiki](https://github.com/OpenGrow-Box/OpenGrowBox/wiki)
+
+### 🧩 Home Assistant Integration  
+Core logic and device control  
+➡️ [OpenGrowBox-HA](https://github.com/OpenGrow-Box/OpenGrowBox-HA)
+
+### 🎨 Frontend Interface  
+A beautiful interface for managing your grow setup  
+➡️ [OpenGrowBox-Frontend](https://github.com/OpenGrow-Box/OpenGrowBox-Frontend)
 
 ---
 
-## Ventilation Setup with PC Fans
-### Required Devices
-- **NodeMCUv3 (ESP 8266):**
-    - Flash it with the latest Tasmota version.
-    - Set the module type to Generic 18.
-    - Use the connection part below.
-    - Set the inputs on the pins in Tasmota.
-    - Add MQTT server and credentials.
-- **Base Board for NodeMCU V1**
-- **Power Supply:** Based on the NodeMCU Base Board requirements
-- **Arctic P12/P14 PWM Fan:**
-    - **Pinout:**
-        - 1: Ground
-        - 2: VCC (5-12V)
-        - 3: Signal
-        - 4: PWM
-    - **Connection on ESP:**
-        - FAN Pin 1 to Ground Pin on ESP
-        - FAN Pin 2 to 5-12V input Pin
-        - FAN Pin 3: Can be ignored or read data from it
-        - FAN Pin 4: Set it to a D3/D0/D2 Pin on ESP
-- **Optional Sensors:** SHT31, DHT11, etc.
+## ✨ What’s New
 
-## Sponsors
+### ✅ CresControl is Now Compatible  
+Elevate your automation game with **CresControl** support!
 
-- [Chili Welten](https://chiliwelten.de)
-- [cre.sience](https://cre.science/)
----
+### 🔌 Plug-and-Play Solution – It’s Here!
+Effortless setup with preconfigured modules  
+- Setup Process: ✅  
+- Device Integration: ✅
 
-FREE - Public Version for Cannabis Social Clubs and industrial/medical production is available soon. 
-       But you can use this as well. 
+### 🌿 Cannabis Social Club Ready  
+Perfect for shared or community grow setups  
+- Fully dynamic integration: ✅  
+- Unlimited room configurations: ✅
 
 ---
 
-Feel free to customize the setup and add additional sensors as per your requirements. You can scale this in big ranges. If you need help, just don't hesitate to contact me. Enjoy automating your grow tents with OpenGrowBox!
+## 🌍 OpenGrowBox for Everyone
+
+#### 🛠 Control Panel  
+![Control Panel](![image](https://github.com/user-attachments/assets/ea7cc87d-6b29-4aca-95ad-3c567ff4fcde)
+
+
+#### 📊 Dashboard  
+![Dashboard](![image](https://github.com/user-attachments/assets/b58f5ea4-83a4-4142-b371-fe0b22c6d243)
+)
+
+#### 📖 GrowBook  
+![GrowBook](![image](https://github.com/user-attachments/assets/1124766a-3a92-4d81-9b72-1d83a0564ba2)
+)
+
+#### ⚙️ Settings  
+![Settings](![image](https://github.com/user-attachments/assets/cfabab03-4b3e-40ef-aba4-6878ec0c6c65)
+)
+
+---
+
+## 💡 About Us
+
+We’re a community of passionate plant lovers and technologists building tools to make **indoor growing smarter, easier, and more accessible**.
+
+OpenGrowBox is a project **by growers, for growers** – developed openly, improved together.
+
+---
+
+## 🤝 Contributing
+
+Want to get involved? Awesome!
+
+- 💻 Fork the repo  
+- 🌿 Create a new branch  
+- 🚀 Submit a pull request
+
+All contributions (code, feedback, ideas) are welcome!
+
+---
+
+## 🌟 Fun Facts
+
+- 💥 Broke a plant stem? A little tape can work wonders.
+- 📈 Smart automation can improve yields by **up to 30%**.
+
+---
+
+## ❤️ Sponsors
+
+Special thanks to our incredible supporters:
+
+- [🌶 Chili Welten](https://chiliwelten.de)  
+- [💡 cre.science](https://cre.science/)
+
+Want to sponsor OpenGrowBox or collaborate with us?  
+**[Get in touch](mailto:team@opengrowbox.com)** and let’s grow together!
+
+---
+
+Thank you for being part of the **OpenGrowBox journey**.  
+Let’s grow smarter, together! 🌱
