@@ -47,20 +47,20 @@ Perfect for shared or community grow setups
 ## 🌍 OpenGrowBox for Everyone
 
 #### 🛠 Control Panel  
-![Control Panel](![image](https://github.com/user-attachments/assets/ea7cc87d-6b29-4aca-95ad-3c567ff4fcde)
+![Control Panel](https://github.com/user-attachments/assets/ea7cc87d-6b29-4aca-95ad-3c567ff4fcde)
 
 
 #### 📊 Dashboard  
-![Dashboard](![image](https://github.com/user-attachments/assets/b58f5ea4-83a4-4142-b371-fe0b22c6d243)
-)
+![Dashboard](https://github.com/user-attachments/assets/b58f5ea4-83a4-4142-b371-fe0b22c6d243)
+
 
 #### 📖 GrowBook  
-![GrowBook](![image](https://github.com/user-attachments/assets/1124766a-3a92-4d81-9b72-1d83a0564ba2)
-)
+![GrowBook](https://github.com/user-attachments/assets/1124766a-3a92-4d81-9b72-1d83a0564ba2)
+
 
 #### ⚙️ Settings  
-![Settings](![image](https://github.com/user-attachments/assets/cfabab03-4b3e-40ef-aba4-6878ec0c6c65)
-)
+![Settings](https://github.com/user-attachments/assets/cfabab03-4b3e-40ef-aba4-6878ec0c6c65)
+
 
 ---
 
