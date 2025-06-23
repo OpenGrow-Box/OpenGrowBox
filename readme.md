@@ -105,3 +105,8 @@ Want to sponsor OpenGrowBox or collaborate with us?
 
 Thank you for being part of the **OpenGrowBox journey**.  
 Let’s grow smarter, together! 🌱
+
+## 📝 License
+
+This project is licensed under the [OGBCL license](LICENSE).
+Additional premium features are only provided to paying customers and are not part of this project. They are subject to a separate proprietary license.
