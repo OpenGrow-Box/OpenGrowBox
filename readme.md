@@ -43,23 +43,20 @@ Perfect for shared or community grow setups
 - Unlimited room configurations: ✅
 
 ---
-
 ## 🌍 OpenGrowBox for Everyone
 
 #### 🛠 Control Panel  
-![Control Panel](https://github.com/user-attachments/assets/ea7cc87d-6b29-4aca-95ad-3c567ff4fcde)
-
+![Control Panel](https://github.com/user-attachments/assets/b6e11899-8626-4c74-8566-f51ed5c3f671)
 
 #### 📊 Dashboard  
-![Dashboard](https://github.com/user-attachments/assets/b58f5ea4-83a4-4142-b371-fe0b22c6d243)
-
+![Dashboard](https://github.com/user-attachments/assets/0bbbca2c-2e85-4727-943e-ff35ddab930b)
 
 #### 📖 GrowBook  
-![GrowBook](https://github.com/user-attachments/assets/1124766a-3a92-4d81-9b72-1d83a0564ba2)
-
+![GrowBook](https://github.com/user-attachments/assets/16ef5467-f916-444e-9332-48b6635f7e13)
 
 #### ⚙️ Settings  
-![Settings](https://github.com/user-attachments/assets/cfabab03-4b3e-40ef-aba4-6878ec0c6c65)
+![Settings](https://github.com/user-attachments/assets/b75692f1-ec53-4357-9064-fb098fe9ba4f)
+
 
 
 ---
