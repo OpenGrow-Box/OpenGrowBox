@@ -96,7 +96,7 @@ Special thanks to our incredible supporters:
 - [💡 cre.science](https://cre.science/)
 
 Want to sponsor OpenGrowBox or collaborate with us?  
-**[Get in touch](mailto:team@opengrowbox.com)** and let’s grow together!
+**[Get in touch](mailto:info@opengrowbox.com)** and let’s grow together!
 
 ---
 
